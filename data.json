@@ -1,0 +1,410 @@
+{
+    "events": [
+        {
+            "id": "evt_001",
+            "title": "Mount Etna Strombolian Activity",
+            "description": "Moderate strombolian activity observed at the Southeast Crater with lava fountains reaching 150-200m height. Volcanic tremor amplitude increased significantly. Wind direction NE, ash plume extending towards Catania.",
+            "author": "Dr. Maria Rossi",
+            "startTime": "2024-01-15T14:30:00Z",
+            "endTime": "2024-01-15T18:45:00Z",
+            "coordinates": {
+                "latitude": 37.7510,
+                "longitude": 14.9934,
+                "elevation": 3329
+            },
+            "eventType": "volcanic_eruption",
+            "fileAttachments": [
+                {
+                    "filename": "etna_thermal_20240115.jpg",
+                    "type": "thermal_image",
+                    "size": 2048576,
+                    "url": "/attachments/etna_thermal_20240115.jpg"
+                },
+                {
+                    "filename": "seismic_data_etna.csv",
+                    "type": "seismic_data",
+                    "size": 512000,
+                    "url": "/attachments/seismic_data_etna.csv"
+                }
+            ],
+            "tags": [
+                "etna",
+                "strombolian",
+                "lava_fountain",
+                "ash_plume",
+                "high_priority"
+            ],
+            "intensity": 3,
+            "vei": 1
+        },
+        {
+            "id": "evt_002",
+            "title": "L'Aquila Earthquake Sequence",
+            "description": "Magnitude 4.2 earthquake followed by series of aftershocks. Epicenter located 8km NE of L'Aquila. Maximum intensity IV-V on Mercalli scale. No significant damage reported but felt widely across central Italy.",
+            "author": "Prof. Giuseppe Bianchi",
+            "startTime": "2024-01-18T03:22:15Z",
+            "endTime": null,
+            "coordinates": {
+                "latitude": 42.3598,
+                "longitude": 13.3963,
+                "elevation": 0,
+                "depth": 12.5
+            },
+            "eventType": "earthquake",
+            "fileAttachments": [
+                {
+                    "filename": "waveform_laquila_20240118.mseed",
+                    "type": "seismic_waveform",
+                    "size": 1024000,
+                    "url": "/attachments/waveform_laquila_20240118.mseed"
+                },
+                {
+                    "filename": "intensity_map.pdf",
+                    "type": "intensity_map",
+                    "size": 768000,
+                    "url": "/attachments/intensity_map.pdf"
+                }
+            ],
+            "tags": [
+                "earthquake",
+                "aftershocks",
+                "central_italy",
+                "moderate_magnitude"
+            ],
+            "magnitude": 4.2,
+            "depth_km": 12.5,
+            "mercalli_intensity": "IV-V"
+        },
+        {
+            "id": "evt_003",
+            "title": "Stromboli Gas Emission Anomaly",
+            "description": "Significant increase in SO2 flux detected by FLAME network. Gas emission rate peaked at 1200 tons/day, well above background levels. Concurrent increase in thermal anomalies at crater terrace.",
+            "author": "Dr. Alessandro Verdi",
+            "startTime": "2024-01-20T09:15:00Z",
+            "endTime": "2024-01-22T16:30:00Z",
+            "coordinates": {
+                "latitude": 38.7890,
+                "longitude": 15.2130,
+                "elevation": 924
+            },
+            "eventType": "gas_emission",
+            "fileAttachments": [
+                {
+                    "filename": "so2_flux_stromboli.xlsx",
+                    "type": "gas_data",
+                    "size": 256000,
+                    "url": "/attachments/so2_flux_stromboli.xlsx"
+                },
+                {
+                    "filename": "thermal_camera_sequence.mp4",
+                    "type": "thermal_video",
+                    "size": 15728640,
+                    "url": "/attachments/thermal_camera_sequence.mp4"
+                }
+            ],
+            "tags": [
+                "stromboli",
+                "gas_emission",
+                "so2",
+                "thermal_anomaly",
+                "monitoring"
+            ],
+            "so2_flux_tons_per_day": 1200,
+            "background_level": 150
+        },
+        {
+            "id": "evt_004",
+            "title": "Vesuvius Seismic Swarm",
+            "description": "Low-magnitude earthquake swarm detected beneath Vesuvius crater. 47 events recorded over 6 hours, magnitudes ranging from 0.8 to 2.1. Hypocenters clustered at 2-4km depth. No surface deformation detected.",
+            "author": "Dr. Francesca Nero",
+            "startTime": "2024-01-25T11:45:00Z",
+            "endTime": "2024-01-25T17:30:00Z",
+            "coordinates": {
+                "latitude": 40.8210,
+                "longitude": 14.4260,
+                "elevation": 1281
+            },
+            "eventType": "seismic_swarm",
+            "fileAttachments": [
+                {
+                    "filename": "vesuvius_swarm_catalog.txt",
+                    "type": "earthquake_catalog",
+                    "size": 128000,
+                    "url": "/attachments/vesuvius_swarm_catalog.txt"
+                },
+                {
+                    "filename": "hypocenter_plot.png",
+                    "type": "analysis_plot",
+                    "size": 512000,
+                    "url": "/attachments/hypocenter_plot.png"
+                }
+            ],
+            "tags": [
+                "vesuvius",
+                "seismic_swarm",
+                "low_magnitude",
+                "deep_source"
+            ],
+            "event_count": 47,
+            "magnitude_range": "0.8-2.1",
+            "depth_range_km": "2-4"
+        },
+        {
+            "id": "evt_005",
+            "title": "Campi Flegrei Ground Uplift",
+            "description": "InSAR analysis reveals continued ground uplift in Campi Flegrei caldera. Maximum displacement of 2.3cm detected near Pozzuoli port over the past month. Uplift rate has accelerated compared to previous period.",
+            "author": "Dr. Marco Giallo",
+            "startTime": "2024-02-01T00:00:00Z",
+            "endTime": "2024-02-28T23:59:59Z",
+            "coordinates": {
+                "latitude": 40.8270,
+                "longitude": 14.1390,
+                "elevation": 458
+            },
+            "eventType": "ground_deformation",
+            "fileAttachments": [
+                {
+                    "filename": "insar_displacement_map.tif",
+                    "type": "insar_data",
+                    "size": 4194304,
+                    "url": "/attachments/insar_displacement_map.tif"
+                },
+                {
+                    "filename": "uplift_timeseries.csv",
+                    "type": "deformation_data",
+                    "size": 64000,
+                    "url": "/attachments/uplift_timeseries.csv"
+                },
+                {
+                    "filename": "analysis_report.pdf",
+                    "type": "technical_report",
+                    "size": 1536000,
+                    "url": "/attachments/analysis_report.pdf"
+                }
+            ],
+            "tags": [
+                "campi_flegrei",
+                "ground_uplift",
+                "insar",
+                "deformation",
+                "pozzuoli"
+            ],
+            "max_displacement_cm": 2.3,
+            "measurement_period_days": 28
+        },
+        {
+            "id": "evt_006",
+            "title": "Vulcano Fumarole Temperature Spike",
+            "description": "Significant temperature increase recorded at La Fossa crater fumaroles. Maximum temperature reached 680°C, representing a 45°C increase from baseline. Accompanied by changes in gas composition with increased H2S/CO2 ratio.",
+            "author": "Dr. Lucia Blu",
+            "startTime": "2024-02-05T08:20:00Z",
+            "endTime": "2024-02-07T14:15:00Z",
+            "coordinates": {
+                "latitude": 38.4040,
+                "longitude": 14.9620,
+                "elevation": 391
+            },
+            "eventType": "thermal_anomaly",
+            "fileAttachments": [
+                {
+                    "filename": "fumarole_temp_data.csv",
+                    "type": "temperature_data",
+                    "size": 192000,
+                    "url": "/attachments/fumarole_temp_data.csv"
+                },
+                {
+                    "filename": "gas_composition_analysis.xlsx",
+                    "type": "gas_analysis",
+                    "size": 384000,
+                    "url": "/attachments/gas_composition_analysis.xlsx"
+                }
+            ],
+            "tags": [
+                "vulcano",
+                "fumarole",
+                "temperature_spike",
+                "gas_composition",
+                "la_fossa"
+            ],
+            "max_temperature_celsius": 680,
+            "baseline_temperature_celsius": 635,
+            "h2s_co2_ratio": 0.23
+        },
+        {
+            "id": "evt_007",
+            "title": "Ischia Microearthquake Activity",
+            "description": "Increased microseismic activity detected on Ischia island. 23 events with magnitudes between 0.5-1.8 recorded over 48 hours. Activity concentrated in the Casamicciola area, consistent with local fault system.",
+            "author": "Dr. Roberto Verde",
+            "startTime": "2024-02-10T16:30:00Z",
+            "endTime": "2024-02-12T16:30:00Z",
+            "coordinates": {
+                "latitude": 40.7320,
+                "longitude": 13.9070,
+                "elevation": 0
+            },
+            "eventType": "microseismic_activity",
+            "fileAttachments": [
+                {
+                    "filename": "ischia_microseismic_catalog.csv",
+                    "type": "seismic_catalog",
+                    "size": 96000,
+                    "url": "/attachments/ischia_microseismic_catalog.csv"
+                },
+                {
+                    "filename": "fault_map_overlay.kmz",
+                    "type": "gis_data",
+                    "size": 256000,
+                    "url": "/attachments/fault_map_overlay.kmz"
+                }
+            ],
+            "tags": [
+                "ischia",
+                "microearthquakes",
+                "casamicciola",
+                "fault_system",
+                "monitoring"
+            ],
+            "event_count": 23,
+            "magnitude_range": "0.5-1.8",
+            "duration_hours": 48
+        },
+        {
+            "id": "evt_008",
+            "title": "Etna Lava Flow Advance",
+            "description": "New lava flow from Southeast Crater advancing towards Valle del Bove. Flow front moving at 2-3 m/hour. Thermal satellite imagery shows active flow length of approximately 1.2km. No immediate threat to infrastructure.",
+            "author": "Dr. Carla Rosso",
+            "startTime": "2024-02-14T22:15:00Z",
+            "endTime": null,
+            "coordinates": {
+                "latitude": 37.7450,
+                "longitude": 15.0020,
+                "elevation": 2800
+            },
+            "eventType": "lava_flow",
+            "fileAttachments": [
+                {
+                    "filename": "lava_flow_thermal_sat.jpg",
+                    "type": "satellite_image",
+                    "size": 3145728,
+                    "url": "/attachments/lava_flow_thermal_sat.jpg"
+                },
+                {
+                    "filename": "flow_advance_measurements.csv",
+                    "type": "field_data",
+                    "size": 48000,
+                    "url": "/attachments/flow_advance_measurements.csv"
+                },
+                {
+                    "filename": "hazard_assessment.pdf",
+                    "type": "hazard_report",
+                    "size": 1024000,
+                    "url": "/attachments/hazard_assessment.pdf"
+                }
+            ],
+            "tags": [
+                "etna",
+                "lava_flow",
+                "valle_del_bove",
+                "thermal_satellite",
+                "ongoing"
+            ],
+            "flow_rate_m_per_hour": 2.5,
+            "flow_length_km": 1.2,
+            "threat_level": "low"
+        },
+        {
+            "id": "evt_009",
+            "title": "Pantelleria Earthquake",
+            "description": "Magnitude 3.8 earthquake offshore Pantelleria island. Event occurred at 15km depth in the Sicily Channel rift system. Felt on the island with intensity III. Part of ongoing tectonic activity in the region.",
+            "author": "Dr. Stefano Azzurro",
+            "startTime": "2024-02-18T05:47:32Z",
+            "endTime": null,
+            "coordinates": {
+                "latitude": 36.7830,
+                "longitude": 11.9690,
+                "elevation": 0,
+                "depth": 15.2
+            },
+            "eventType": "earthquake",
+            "fileAttachments": [
+                {
+                    "filename": "pantelleria_waveforms.mseed",
+                    "type": "seismic_waveform",
+                    "size": 768000,
+                    "url": "/attachments/pantelleria_waveforms.mseed"
+                },
+                {
+                    "filename": "tectonic_context_map.pdf",
+                    "type": "geological_map",
+                    "size": 2048000,
+                    "url": "/attachments/tectonic_context_map.pdf"
+                }
+            ],
+            "tags": [
+                "pantelleria",
+                "offshore_earthquake",
+                "sicily_channel",
+                "tectonic",
+                "moderate"
+            ],
+            "magnitude": 3.8,
+            "depth_km": 15.2,
+            "mercalli_intensity": "III"
+        },
+        {
+            "id": "evt_010",
+            "title": "Lipari Hydrothermal Activity",
+            "description": "Increased hydrothermal activity observed at underwater vents near Lipari. Water temperature anomalies detected by ROV survey. Bubble plumes visible on sonar. Possible connection to regional volcanic unrest.",
+            "author": "Dr. Marina Celeste",
+            "startTime": "2024-02-22T10:00:00Z",
+            "endTime": "2024-02-22T18:30:00Z",
+            "coordinates": {
+                "latitude": 38.4690,
+                "longitude": 14.9560,
+                "elevation": -45
+            },
+            "eventType": "hydrothermal_activity",
+            "fileAttachments": [
+                {
+                    "filename": "rov_survey_video.mp4",
+                    "type": "underwater_video",
+                    "size": 52428800,
+                    "url": "/attachments/rov_survey_video.mp4"
+                },
+                {
+                    "filename": "water_temp_measurements.csv",
+                    "type": "temperature_data",
+                    "size": 128000,
+                    "url": "/attachments/water_temp_measurements.csv"
+                },
+                {
+                    "filename": "sonar_bubble_detection.png",
+                    "type": "sonar_image",
+                    "size": 1024000,
+                    "url": "/attachments/sonar_bubble_detection.png"
+                }
+            ],
+            "tags": [
+                "lipari",
+                "hydrothermal",
+                "underwater",
+                "rov_survey",
+                "temperature_anomaly"
+            ],
+            "water_depth_m": 45,
+            "max_temp_celsius": 28.5,
+            "background_temp_celsius": 16.2
+        }
+    ],
+    "event_types": [
+        "volcanic_eruption",
+        "earthquake",
+        "gas_emission",
+        "seismic_swarm",
+        "ground_deformation",
+        "thermal_anomaly",
+        "microseismic_activity",
+        "lava_flow",
+        "hydrothermal_activity"
+    ]
+}
