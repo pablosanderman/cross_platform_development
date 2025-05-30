@@ -13,30 +13,64 @@ class TimelineView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    context.read<TimelineCubit>().loadTimeline();
     return Scaffold(
-      body: Center(
-        child: BlocBuilder<TimelineCubit, int>(
-          builder: (context, state) {
-            return Text('$state', style: textTheme.displayMedium);
-          },
-        ),
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          FloatingActionButton(
-            key: const Key('counterView_increment_floatingActionButton'),
-            child: const Icon(Icons.add),
-            onPressed: () => context.read<TimelineCubit>().increment(),
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton(
-            key: const Key('counterView_decrement_floatingActionButton'),
-            child: const Icon(Icons.remove),
-            onPressed: () => context.read<TimelineCubit>().decrement(),
-          ),
-        ],
+      appBar: AppBar(title: const Text('Timeline Rows')),
+      body: BlocBuilder<TimelineCubit, TimelineState>(
+        builder: (context, state) {
+          if (state.rows.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return ListView.builder(
+            itemCount: state.rows.length,
+            itemBuilder: (context, index) {
+              final row = state.rows[index];
+              return Card(
+                margin: const EdgeInsets.all(8),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Row ${row.index} (${row.events.length} events)',
+                        style: textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      ...row.events.map(
+                        (event) => Padding(
+                          padding: const EdgeInsets.only(left: 16, bottom: 4),
+                          child: Row(
+                            children: [
+                              Icon(
+                                event.endTime == null
+                                    ? Icons.circle
+                                    : Icons.rectangle,
+                                size: 12,
+                                color: event.endTime == null
+                                    ? Colors.blue
+                                    : Colors.green,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text(event.title)),
+                              Text(
+                                event.endTime == null
+                                    ? 'Point'
+                                    : '${event.endTime!.difference(event.startTime).inMinutes}min',
+                                style: textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
