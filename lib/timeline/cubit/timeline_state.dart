@@ -6,8 +6,6 @@ class TimelineState extends Equatable {
     this.events = const [],
     required this.visibleStart,
     required this.visibleEnd,
-    this.zoomLevel = 100.0, // Default: 100 pixels per hour
-    this.panOffset = 0.0,
     this.isLoading = false,
     this.error,
     this.rows = const [],
@@ -16,8 +14,6 @@ class TimelineState extends Equatable {
   final List<Event> events;
   final DateTime visibleStart;
   final DateTime visibleEnd;
-  final double zoomLevel; // pixels per hour
-  final double panOffset; // horizontal offset in pixels
   final bool isLoading;
   final String? error;
   final List<TimelineRow> rows;
@@ -26,8 +22,6 @@ class TimelineState extends Equatable {
     List<Event>? events,
     DateTime? visibleStart,
     DateTime? visibleEnd,
-    double? zoomLevel,
-    double? panOffset,
     bool? isLoading,
     String? error,
     List<TimelineRow>? rows,
@@ -36,8 +30,6 @@ class TimelineState extends Equatable {
       events: events ?? this.events,
       visibleStart: visibleStart ?? this.visibleStart,
       visibleEnd: visibleEnd ?? this.visibleEnd,
-      zoomLevel: zoomLevel ?? this.zoomLevel,
-      panOffset: panOffset ?? this.panOffset,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       rows: rows ?? this.rows,
@@ -46,15 +38,11 @@ class TimelineState extends Equatable {
 
   Duration get visibleDuration => visibleEnd.difference(visibleStart);
 
-  double get totalWidth => visibleDuration.inHours * zoomLevel;
-
   @override
   List<Object?> get props => [
     events,
     visibleStart,
     visibleEnd,
-    zoomLevel,
-    panOffset,
     isLoading,
     error,
     rows,

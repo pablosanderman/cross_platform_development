@@ -36,6 +36,18 @@ class TimelineCubit extends Cubit<TimelineState> {
     List<Event> events = state.events;
     events.sort((a, b) => a.startTime.compareTo(b.startTime));
 
+    // Adjust visible window to center around events
+    if (events.isNotEmpty) {
+      final firstEvent = events.first;
+      final lastEvent = events.last;
+      final startTime = firstEvent.startTime.subtract(const Duration(hours: 1));
+      final endTime = (lastEvent.endTime ?? lastEvent.startTime).add(
+        const Duration(hours: 1),
+      );
+
+      emit(state.copyWith(visibleStart: startTime, visibleEnd: endTime));
+    }
+
     List<TimelineRow> rows = [];
 
     for (Event event in events) {
