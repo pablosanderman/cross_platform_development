@@ -3,36 +3,36 @@ import 'package:cross_platform_development/timeline/models/models.dart';
 
 class TimelineState extends Equatable {
   const TimelineState({
-    this.events = const [],
     required this.visibleStart,
     required this.visibleEnd,
+    this.events = const [],
+    this.rows = const [],
     this.isLoading = false,
     this.error,
-    this.rows = const [],
   });
 
-  final List<Event> events;
   final DateTime visibleStart;
   final DateTime visibleEnd;
+  final List<Event> events;
+  final List<TimelineRow> rows;
   final bool isLoading;
   final String? error;
-  final List<TimelineRow> rows;
 
   TimelineState copyWith({
-    List<Event>? events,
     DateTime? visibleStart,
     DateTime? visibleEnd,
+    List<Event>? events,
+    List<TimelineRow>? rows,
     bool? isLoading,
     String? error,
-    List<TimelineRow>? rows,
   }) {
     return TimelineState(
-      events: events ?? this.events,
       visibleStart: visibleStart ?? this.visibleStart,
       visibleEnd: visibleEnd ?? this.visibleEnd,
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      events: events ?? this.events,
       rows: rows ?? this.rows,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
     );
   }
 
@@ -40,12 +40,12 @@ class TimelineState extends Equatable {
 
   @override
   List<Object?> get props => [
-    events,
     visibleStart,
     visibleEnd,
+    events,
+    rows,
     isLoading,
     error,
-    rows,
   ];
 }
 

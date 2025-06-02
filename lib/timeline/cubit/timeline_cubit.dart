@@ -48,6 +48,7 @@ class TimelineCubit extends Cubit<TimelineState> {
       emit(state.copyWith(visibleStart: startTime, visibleEnd: endTime));
     }
 
+    // Create rows for events
     List<TimelineRow> rows = [];
 
     for (Event event in events) {
@@ -99,42 +100,25 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   /// Calculates the effective end time including text space
   DateTime _getEffectiveEndTime(Event event) {
-    DateTime actualEnd;
+    const defaultDuration = Duration(minutes: 180);
 
     if (_isPointEvent(event)) {
-      // Point events have no duration, but we need space for the circle
-      actualEnd = event.startTime.add(const Duration(minutes: 5));
+      // Point events have no duration, so they get the full 180 minutes
+      return event.startTime.add(defaultDuration);
     } else {
-      actualEnd = event.endTime!;
-    }
+      // Period events get at least 180 minutes, or their actual duration if longer
+      final actualDuration = event.endTime!.difference(event.startTime);
 
-    // If text goes to the right, add extra time for text space
-    if (_hasTextToRight(event)) {
-      // Estimate text width based on title length (rough approximation)
-      // Assume ~8 characters per 30 minutes at normal zoom
-      final textMinutes = (event.title.length / 8 * 30).ceil();
-      actualEnd = actualEnd.add(Duration(minutes: textMinutes.clamp(15, 120)));
+      if (actualDuration.inMinutes < defaultDuration.inMinutes) {
+        return event.startTime.add(defaultDuration);
+      } else {
+        return event.endTime!;
+      }
     }
-
-    return actualEnd;
   }
 
   /// Determines if an event is a single point event (no end time)
   bool _isPointEvent(Event event) {
     return event.endTime == null;
-  }
-
-  /// Determines if a period event is too short and needs text to the right
-  bool _isShortPeriodEvent(Event event) {
-    if (_isPointEvent(event)) return false;
-
-    // Consider event "short" if less than 30 minutes
-    final duration = event.endTime!.difference(event.startTime);
-    return duration.inMinutes < 30;
-  }
-
-  /// Determines if event text should be displayed to the right
-  bool _hasTextToRight(Event event) {
-    return _isPointEvent(event) || _isShortPeriodEvent(event);
   }
 }

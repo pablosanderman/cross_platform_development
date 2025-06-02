@@ -6,5 +6,6 @@ import 'package:cross_platform_development/timeline/timeline.dart';
 /// {@endtemplate}
 class TimelineApp extends MaterialApp {
   /// {@macro timeline_app}
-  const TimelineApp({super.key}) : super(home: const TimelinePage());
+  const TimelineApp({super.key})
+    : super(home: const TimelinePage(), debugShowCheckedModeBanner: false);
 }
