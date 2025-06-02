@@ -36,14 +36,21 @@ class TimelineCubit extends Cubit<TimelineState> {
     List<Event> events = state.events;
     events.sort((a, b) => a.startTime.compareTo(b.startTime));
 
-    // Adjust visible window to center around events
+    // Adjust visible window to center around ALL events including their effective end times
     if (events.isNotEmpty) {
       final firstEvent = events.first;
-      final lastEvent = events.last;
+
+      // Find the actual latest end time considering effective end times for all events
+      DateTime latestEndTime = events.first.startTime;
+      for (Event event in events) {
+        final effectiveEndTime = _getEffectiveEndTime(event);
+        if (effectiveEndTime.isAfter(latestEndTime)) {
+          latestEndTime = effectiveEndTime;
+        }
+      }
+
       final startTime = firstEvent.startTime.subtract(const Duration(hours: 1));
-      final endTime = (lastEvent.endTime ?? lastEvent.startTime).add(
-        const Duration(hours: 1),
-      );
+      final endTime = latestEndTime.add(const Duration(hours: 1));
 
       emit(state.copyWith(visibleStart: startTime, visibleEnd: endTime));
     }

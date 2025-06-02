@@ -7,9 +7,23 @@ import 'package:cross_platform_development/timeline/models/models.dart';
 /// A [StatelessWidget] which reacts to the provided
 /// [TimelineCubit] state and notifies it in response to user input.
 /// {@endtemplate}
-class TimelineView extends StatelessWidget {
+class TimelineView extends StatefulWidget {
   /// {@macro timeline_view}
   const TimelineView({super.key});
+
+  @override
+  State<TimelineView> createState() => _TimelineViewState();
+}
+
+class _TimelineViewState extends State<TimelineView> {
+  final TransformationController _transformationController =
+      TransformationController();
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,282 +35,258 @@ class TimelineView extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final availableWidth = constraints.maxWidth;
+          final timelineWidth = _calculateTimelineWidth(state);
+          final timelineHeight = _calculateTimelineHeight(state);
 
-              return Column(
-                children: [
-                  // Month ruler header
-                  Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey[300]!),
-                      ),
+          return Column(
+            children: [
+              // Sticky ruler header
+              Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+                ),
+                child: _buildStickyRuler(state, timelineWidth),
+              ),
+              // Timeline content with InteractiveViewer
+              Expanded(
+                child: InteractiveViewer(
+                  transformationController: _transformationController,
+                  minScale: 0.3,
+                  maxScale: 3.0,
+                  constrained: false,
+                  child: SizedBox(
+                    width: timelineWidth,
+                    height: timelineHeight,
+                    child: Column(
+                      children: _buildTimelineRows(state, timelineWidth),
                     ),
-                    child: Row(children: _buildDynamicHeaders(state)),
                   ),
-                  // Timeline grid
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Column(
-                        children: _buildTimelineRows(state, availableWidth),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
+                ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 
-  List<Widget> _buildDynamicHeaders(TimelineState state) {
+  double _calculateTimelineWidth(TimelineState state) {
     final duration = state.visibleDuration;
-    final start = state.visibleStart;
-    final end = state.visibleEnd;
 
-    // Determine ruler type based on duration
+    // Debug information
+    print(
+      'Timeline duration: ${duration.inHours} hours (${duration.inDays} days)',
+    );
+    print('Visible start: ${state.visibleStart}');
+    print('Visible end: ${state.visibleEnd}');
+
+    // Calculate width based on duration and desired pixels per hour
     if (duration.inDays < 2) {
-      return _buildHourRuler(start, end, duration);
+      // For hour ruler: 120 pixels per hour for good spacing
+      final width = duration.inHours * 120.0;
+      print('Calculated timeline width: ${width}px');
+      return width;
     } else if (duration.inDays < 14) {
-      return _buildDayRuler(start, end, duration);
+      // For day ruler: 150 pixels per day
+      final width = duration.inDays * 150.0;
+      print('Calculated timeline width: ${width}px');
+      return width;
     } else if (duration.inDays < 90) {
-      return _buildWeekRuler(start, end, duration);
+      // For week ruler: 200 pixels per week
+      final width = (duration.inDays / 7) * 200.0;
+      print('Calculated timeline width: ${width}px');
+      return width;
     } else if (duration.inDays < 730) {
-      return _buildMonthRuler(start, end, duration);
-    } else if (duration.inDays < 2920) {
-      return _buildQuarterRuler(start, end, duration);
+      // For month ruler: 250 pixels per month
+      final months =
+          ((state.visibleEnd.year - state.visibleStart.year) * 12 +
+          state.visibleEnd.month -
+          state.visibleStart.month);
+      final width = months * 250.0;
+      print('Calculated timeline width: ${width}px');
+      return width;
     } else {
-      return _buildYearRuler(start, end, duration);
+      // For year ruler: 300 pixels per year
+      final years = state.visibleEnd.year - state.visibleStart.year + 1;
+      final width = years * 300.0;
+      print('Calculated timeline width: ${width}px');
+      return width;
     }
   }
 
-  List<Widget> _buildHourRuler(
-    DateTime start,
-    DateTime end,
-    Duration duration,
-  ) {
-    final hours = duration.inHours;
+  double _calculateTimelineHeight(TimelineState state) {
+    return state.rows.length * 80.0; // 80px per row
+  }
 
-    // Always use 1-hour segments
-    const hourStep = 1;
-    final divisions = hours.clamp(
-      2,
-      24,
-    ); // Show all hours, max 24 for readability
+  Widget _buildStickyRuler(TimelineState state, double timelineWidth) {
+    return ClipRect(
+      child: AnimatedBuilder(
+        animation: _transformationController,
+        builder: (context, child) {
+          // Get both translation and scale from the transformation matrix
+          final matrix = _transformationController.value;
+          final translation = matrix.getTranslation();
+          final scale = matrix.getMaxScaleOnAxis();
+
+          return SizedBox(
+            height: 60,
+            child: Stack(
+              children: [
+                // Scaled ruler structure (borders and segments)
+                Transform(
+                  transform: Matrix4.identity()
+                    ..translate(translation.x, 0.0)
+                    ..scale(scale, 1.0),
+                  child: OverflowBox(
+                    alignment: Alignment.centerLeft,
+                    minWidth: 0,
+                    maxWidth: double.infinity,
+                    child: SizedBox(
+                      width: timelineWidth,
+                      height: 60,
+                      child: Row(
+                        children: _buildRulerStructure(state, timelineWidth),
+                      ),
+                    ),
+                  ),
+                ),
+                // Non-scaled text overlay
+                Transform(
+                  transform: Matrix4.identity()..translate(translation.x, 0.0),
+                  child: OverflowBox(
+                    alignment: Alignment.centerLeft,
+                    minWidth: 0,
+                    maxWidth: double.infinity,
+                    child: SizedBox(
+                      width: timelineWidth * scale,
+                      height: 60,
+                      child: Row(
+                        children: _buildRulerLabels(
+                          state,
+                          timelineWidth,
+                          scale,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  List<Widget> _buildRulerStructure(TimelineState state, double timelineWidth) {
+    final duration = state.visibleDuration;
+    int divisions;
+
+    if (duration.inDays < 2) {
+      divisions = duration.inHours;
+    } else if (duration.inDays < 14) {
+      divisions = duration.inDays;
+    } else if (duration.inDays < 90) {
+      divisions = (duration.inDays / 7).ceil();
+    } else if (duration.inDays < 730) {
+      divisions =
+          ((state.visibleEnd.year - state.visibleStart.year) * 12 +
+          state.visibleEnd.month -
+          state.visibleStart.month);
+    } else {
+      divisions = state.visibleEnd.year - state.visibleStart.year + 1;
+    }
+
+    final segmentWidth = timelineWidth / divisions;
 
     return List.generate(divisions, (index) {
-      final segmentStart = start.add(Duration(hours: hourStep * index));
-      final hourLabel = '${segmentStart.hour.toString().padLeft(2, '0')}:00';
-
-      return Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              right: index < divisions - 1
-                  ? BorderSide(color: Colors.grey[300]!)
-                  : BorderSide.none,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              hourLabel,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
+      return Container(
+        width: segmentWidth,
+        decoration: BoxDecoration(
+          border: Border(
+            right: index < divisions - 1
+                ? BorderSide(color: Colors.grey[300]!)
+                : BorderSide.none,
           ),
         ),
       );
     });
   }
 
-  List<Widget> _buildDayRuler(DateTime start, DateTime end, Duration duration) {
-    final days = duration.inDays;
-    final divisions = (days / 1).clamp(2, 7); // 1-day segments, max 7 divisions
-
-    return List.generate(divisions.toInt(), (index) {
-      final segmentStart = start.add(
-        Duration(days: (days * index / divisions).round()),
-      );
-      final dayLabel = '${segmentStart.day}/${segmentStart.month}';
-
-      return Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              right: index < divisions - 1
-                  ? BorderSide(color: Colors.grey[300]!)
-                  : BorderSide.none,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              dayLabel,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  List<Widget> _buildWeekRuler(
-    DateTime start,
-    DateTime end,
-    Duration duration,
+  List<Widget> _buildRulerLabels(
+    TimelineState state,
+    double timelineWidth,
+    double scale,
   ) {
-    final weeks = (duration.inDays / 7).ceil();
-    final divisions = (weeks / 1).clamp(
-      2,
-      6,
-    ); // 1-week segments, max 6 divisions
+    final duration = state.visibleDuration;
+    final start = state.visibleStart;
+    final end = state.visibleEnd;
+    int divisions;
 
-    return List.generate(divisions.toInt(), (index) {
-      final segmentStart = start.add(
-        Duration(days: (duration.inDays * index / divisions).round()),
-      );
-      final weekLabel = 'W${_getWeekOfYear(segmentStart)}';
+    if (duration.inDays < 2) {
+      divisions = duration.inHours;
+    } else if (duration.inDays < 14) {
+      divisions = duration.inDays;
+    } else if (duration.inDays < 90) {
+      divisions = (duration.inDays / 7).ceil();
+    } else if (duration.inDays < 730) {
+      divisions = ((end.year - start.year) * 12 + end.month - start.month);
+    } else {
+      divisions = end.year - start.year + 1;
+    }
 
-      return Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              right: index < divisions - 1
-                  ? BorderSide(color: Colors.grey[300]!)
-                  : BorderSide.none,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              weekLabel,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  List<Widget> _buildMonthRuler(
-    DateTime start,
-    DateTime end,
-    Duration duration,
-  ) {
-    final months = ((end.year - start.year) * 12 + end.month - start.month)
-        .clamp(2, 12);
-    final divisions = (months / 1).clamp(
-      2,
-      6,
-    ); // 1-month segments, max 6 divisions
-
-    final monthNames = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    return List.generate(divisions.toInt(), (index) {
-      final monthsOffset = (months * index / divisions).round();
-      final segmentDate = DateTime(start.year, start.month + monthsOffset);
-      final monthLabel = monthNames[segmentDate.month - 1];
-
-      return Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              right: index < divisions - 1
-                  ? BorderSide(color: Colors.grey[300]!)
-                  : BorderSide.none,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              monthLabel,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  List<Widget> _buildQuarterRuler(
-    DateTime start,
-    DateTime end,
-    Duration duration,
-  ) {
-    final years = (end.year - start.year + 1);
-    final divisions = (years / 1).clamp(
-      2,
-      4,
-    ); // 1-year segments, max 4 divisions
-
-    return List.generate(divisions.toInt(), (index) {
-      final yearOffset = (years * index / divisions).round();
-      final segmentYear = start.year + yearOffset;
-      final yearLabel = segmentYear.toString();
-
-      return Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              right: index < divisions - 1
-                  ? BorderSide(color: Colors.grey[300]!)
-                  : BorderSide.none,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              yearLabel,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  List<Widget> _buildYearRuler(
-    DateTime start,
-    DateTime end,
-    Duration duration,
-  ) {
-    final years = (end.year - start.year + 1);
-    final yearStep = (years / 5).ceil(); // Group years for readability
-    final divisions = (years / yearStep).ceil().clamp(2, 6);
+    final segmentWidth = timelineWidth * scale / divisions;
 
     return List.generate(divisions, (index) {
-      final yearOffset = yearStep * index;
-      final segmentYear = start.year + yearOffset;
-      final yearLabel = segmentYear.toString();
+      String label;
 
-      return Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              right: index < divisions - 1
-                  ? BorderSide(color: Colors.grey[300]!)
-                  : BorderSide.none,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              yearLabel,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      if (duration.inDays < 2) {
+        // Hour labels
+        final segmentStart = start.add(Duration(hours: index));
+        label =
+            '${segmentStart.day}/${segmentStart.month} ${segmentStart.hour.toString().padLeft(2, '0')}:00';
+      } else if (duration.inDays < 14) {
+        // Day labels
+        final segmentStart = start.add(Duration(days: index));
+        label = '${segmentStart.day}/${segmentStart.month}';
+      } else if (duration.inDays < 90) {
+        // Week labels
+        final segmentStart = start.add(Duration(days: index * 7));
+        label = 'W${_getWeekOfYear(segmentStart)}';
+      } else if (duration.inDays < 730) {
+        // Month labels
+        final segmentDate = DateTime(start.year, start.month + index);
+        final monthNames = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
+        label = monthNames[segmentDate.month - 1];
+      } else {
+        // Year labels
+        final segmentYear = start.year + index;
+        label = segmentYear.toString();
+      }
+
+      return Container(
+        width: segmentWidth,
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: duration.inDays < 2 ? 12 : 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -310,9 +300,7 @@ class TimelineView extends StatelessWidget {
     return ((daysDifference + firstDayOfYear.weekday - 1) / 7).ceil();
   }
 
-  List<Widget> _buildTimelineRows(TimelineState state, double availableWidth) {
-    final headerDivisions = _getHeaderDivisions(state);
-
+  List<Widget> _buildTimelineRows(TimelineState state, double timelineWidth) {
     return state.rows.map((row) {
       return Container(
         height: 80,
@@ -321,25 +309,11 @@ class TimelineView extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Vertical grid lines behind events - matching header divisions
-            Row(
-              children: List.generate(headerDivisions, (columnIndex) {
-                return Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        right: columnIndex < headerDivisions - 1
-                            ? BorderSide(color: Colors.grey[300]!)
-                            : BorderSide.none,
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
+            // Vertical grid lines behind events
+            _buildGridLines(state, timelineWidth),
             // Events on top of grid lines
             ...row.events.map((event) {
-              return _buildEventWidget(event, state, availableWidth);
+              return _buildEventWidget(event, state, timelineWidth);
             }),
           ],
         ),
@@ -347,44 +321,45 @@ class TimelineView extends StatelessWidget {
     }).toList();
   }
 
-  int _getHeaderDivisions(TimelineState state) {
+  Widget _buildGridLines(TimelineState state, double timelineWidth) {
     final duration = state.visibleDuration;
+    int divisions;
 
-    // Return the same number of divisions as the header
     if (duration.inDays < 2) {
-      final hours = duration.inHours;
-      // Always use 1-hour segments to match _buildHourRuler
-      return hours.clamp(2, 24);
+      divisions = duration.inHours;
     } else if (duration.inDays < 14) {
-      final days = duration.inDays;
-      return (days / 1).clamp(2, 7).toInt();
+      divisions = duration.inDays;
     } else if (duration.inDays < 90) {
-      final weeks = (duration.inDays / 7).ceil();
-      return (weeks / 1).clamp(2, 6).toInt();
+      divisions = (duration.inDays / 7).ceil();
     } else if (duration.inDays < 730) {
-      final start = state.visibleStart;
-      final end = state.visibleEnd;
-      final months = ((end.year - start.year) * 12 + end.month - start.month)
-          .clamp(2, 12);
-      return (months / 1).clamp(2, 6).toInt();
-    } else if (duration.inDays < 2920) {
-      final start = state.visibleStart;
-      final end = state.visibleEnd;
-      final years = (end.year - start.year + 1);
-      return (years / 1).clamp(2, 4).toInt();
+      divisions =
+          ((state.visibleEnd.year - state.visibleStart.year) * 12 +
+          state.visibleEnd.month -
+          state.visibleStart.month);
     } else {
-      final start = state.visibleStart;
-      final end = state.visibleEnd;
-      final years = (end.year - start.year + 1);
-      final yearStep = (years / 5).ceil();
-      return (years / yearStep).ceil().clamp(2, 6);
+      divisions = state.visibleEnd.year - state.visibleStart.year + 1;
     }
+
+    return Row(
+      children: List.generate(divisions, (columnIndex) {
+        return Container(
+          width: timelineWidth / divisions,
+          decoration: BoxDecoration(
+            border: Border(
+              right: columnIndex < divisions - 1
+                  ? BorderSide(color: Colors.grey[300]!)
+                  : BorderSide.none,
+            ),
+          ),
+        );
+      }),
+    );
   }
 
   Widget _buildEventWidget(
     Event event,
     TimelineState state,
-    double availableWidth,
+    double timelineWidth,
   ) {
     final colors = [
       Colors.blue.shade300,
@@ -401,21 +376,16 @@ class TimelineView extends StatelessWidget {
     final isPoint = event.endTime == null;
 
     // Calculate position based on actual time
-    final leftOffset = _getEventPosition(
-      event.startTime,
-      state,
-      availableWidth,
-    );
-    final width = _getEventWidth(event, state, availableWidth);
-    final textWidth = _getEventTextWidth(event, state, availableWidth);
+    final leftOffset = _getEventPosition(event.startTime, state, timelineWidth);
+    final width = _getEventWidth(event, state, timelineWidth);
+    final textWidth = _getEventTextWidth(event, state, timelineWidth);
 
     // Calculate vertical center position dynamically
     const rowHeight = 80.0;
     const eventHeight = 50.0;
     const opacity = 0.97;
     const fontSize = 14.0;
-    final verticalCenter =
-        (rowHeight - eventHeight) / 2; // This gives us 25px for 80px row
+    final verticalCenter = (rowHeight - eventHeight) / 2;
 
     if (isPoint) {
       // Draw as circle for point events with text extending into the allocated space
@@ -440,7 +410,7 @@ class TimelineView extends StatelessWidget {
               Expanded(
                 child: Text(
                   event.title,
-                  style: TextStyle(fontSize: fontSize),
+                  style: const TextStyle(fontSize: fontSize),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -454,7 +424,7 @@ class TimelineView extends StatelessWidget {
         left: leftOffset,
         top: verticalCenter,
         child: SizedBox(
-          width: textWidth, // Use text width for the container
+          width: textWidth,
           height: eventHeight,
           child: Stack(
             children: [
@@ -499,24 +469,22 @@ class TimelineView extends StatelessWidget {
   double _getEventPosition(
     DateTime eventTime,
     TimelineState state,
-    double availableWidth,
+    double timelineWidth,
   ) {
     // Calculate position based on time relative to visible timeline
     final totalDuration = state.visibleEnd.difference(state.visibleStart);
     final eventOffset = eventTime.difference(state.visibleStart);
 
-    // Calculate position as a ratio of the timeline, then scale to available width
+    // Calculate position as a ratio of the timeline, then scale to timeline width
     final positionRatio =
         eventOffset.inMilliseconds / totalDuration.inMilliseconds;
-
-    // Assume a fixed timeline width of 800 pixels for consistent positioning
-    return positionRatio * availableWidth;
+    return positionRatio * timelineWidth;
   }
 
   double _getEventWidth(
     Event event,
     TimelineState state,
-    double availableWidth,
+    double timelineWidth,
   ) {
     const defaultDuration = Duration(minutes: 180);
     final totalDuration = state.visibleEnd.difference(state.visibleStart);
@@ -526,20 +494,20 @@ class TimelineView extends StatelessWidget {
       final effectiveDuration = defaultDuration;
       final widthRatio =
           effectiveDuration.inMilliseconds / totalDuration.inMilliseconds;
-      return widthRatio * availableWidth;
+      return widthRatio * timelineWidth;
     } else {
       // Period events: show their actual duration as rectangle
       final actualDuration = event.endTime!.difference(event.startTime);
       final widthRatio =
           actualDuration.inMilliseconds / totalDuration.inMilliseconds;
-      return widthRatio * availableWidth;
+      return widthRatio * timelineWidth;
     }
   }
 
   double _getEventTextWidth(
     Event event,
     TimelineState state,
-    double availableWidth,
+    double timelineWidth,
   ) {
     const defaultDuration = Duration(minutes: 180);
     final totalDuration = state.visibleEnd.difference(state.visibleStart);
@@ -549,7 +517,7 @@ class TimelineView extends StatelessWidget {
       final effectiveDuration = defaultDuration;
       final widthRatio =
           effectiveDuration.inMilliseconds / totalDuration.inMilliseconds;
-      return widthRatio * availableWidth;
+      return widthRatio * timelineWidth;
     } else {
       // Period events: text can overflow up to 180 minutes total
       final actualDuration = event.endTime!.difference(event.startTime);
@@ -560,7 +528,7 @@ class TimelineView extends StatelessWidget {
 
       final widthRatio =
           maxTextDuration.inMilliseconds / totalDuration.inMilliseconds;
-      return widthRatio * availableWidth;
+      return widthRatio * timelineWidth;
     }
   }
 }
