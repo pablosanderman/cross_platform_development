@@ -5,5 +5,5 @@ import 'package:cross_platform_development/timeline_observer.dart';
 
 void main() {
   Bloc.observer = const TimelineObserver();
-  runApp(const TimelineApp());
+  runApp(TimelineApp());
 }

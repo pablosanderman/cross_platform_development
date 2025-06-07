@@ -63,3 +63,33 @@ class TimelineRow extends Equatable {
   @override
   List<Object?> get props => [index, events, height];
 }
+
+/// Abstract interface for timeline data providers
+/// This allows the UI to work with any implementation (Cubit, ChangeNotifier, etc.)
+abstract class TimelineProvider {
+  /// Current timeline state
+  TimelineState get state;
+
+  /// Stream of state changes
+  Stream<TimelineState> get stream;
+
+  /// Load timeline data
+  Future<void> loadTimeline();
+
+  /// Update timeline with new events
+  void updateTimeline(List<Event> events);
+
+  /// Relayout existing rows
+  void relayoutRows();
+
+  /// Parse events from data source
+  Future<List<Event>> parseEvents();
+
+  /// Calculate visible window for events
+  ({DateTime visibleStart, DateTime visibleEnd}) calculateVisibleWindow(
+    List<Event> events,
+  );
+
+  /// Layout events into rows
+  List<TimelineRow> layoutRows(List<Event> events);
+}
