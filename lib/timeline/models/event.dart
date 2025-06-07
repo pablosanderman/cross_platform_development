@@ -1,138 +1,129 @@
 import 'package:equatable/equatable.dart';
 
+enum EventType { point, period, grouped }
+
+/// Helper function for parsing nullable DateTime from JSON
+DateTime? _parseNullableDate(dynamic value) =>
+    value == null ? null : DateTime.parse(value as String);
+
 class Event extends Equatable {
   final String id;
+  final EventType type;
   final String title;
-  final String description;
-  final String author;
-  final DateTime startTime;
+  final DateTime? startTime;
   final DateTime? endTime;
-  final Coordinates coordinates;
-  final String eventType;
-  final List<FileAttachment> fileAttachments;
-  final List<String> tags;
-  final Map<String, dynamic> additionalData;
+  final List<GroupMember>? members;
+  final DateTime? computedStart;
+  final DateTime? computedEnd;
+  final Map<String, dynamic>? properties;
+  final Map<String, dynamic>? aggregateData;
 
   const Event({
     required this.id,
+    required this.type,
     required this.title,
-    required this.description,
-    required this.author,
-    required this.startTime,
+    this.startTime,
     this.endTime,
-    required this.coordinates,
-    required this.eventType,
-    required this.fileAttachments,
-    required this.tags,
-    required this.additionalData,
+    this.members,
+    this.computedStart,
+    this.computedEnd,
+    this.properties,
+    this.aggregateData,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
+    final typeString = json['type'] as String;
+    final type = EventType.values.firstWhere(
+      (e) => e.name.toUpperCase() == typeString.toUpperCase(),
+    );
+
     return Event(
       id: json['id'],
+      type: type,
       title: json['title'],
-      description: json['description'],
-      author: json['author'],
-      startTime: DateTime.parse(json['startTime']),
-      endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
-      coordinates: Coordinates.fromJson(json['coordinates']),
-      eventType: json['eventType'],
-      fileAttachments: (json['fileAttachments'] as List)
-          .map((attachment) => FileAttachment.fromJson(attachment))
+      startTime: _parseNullableDate(json['startTime']),
+      endTime: _parseNullableDate(json['endTime']),
+      members: (json['members'] as List<dynamic>?)
+          ?.map((m) => GroupMember.fromJson(m as Map<String, dynamic>))
           .toList(),
-      tags: List<String>.from(json['tags']),
-      additionalData: Map<String, dynamic>.from(json)
-        ..removeWhere(
-          (key, value) => [
-            'id',
-            'title',
-            'description',
-            'author',
-            'startTime',
-            'endTime',
-            'coordinates',
-            'eventType',
-            'fileAttachments',
-            'tags',
-          ].contains(key),
-        ),
+      computedStart: _parseNullableDate(json['computedStart']),
+      computedEnd: _parseNullableDate(json['computedEnd']),
+      properties: json['properties'] as Map<String, dynamic>?,
+      aggregateData: json['aggregateData'] as Map<String, dynamic>?,
     );
   }
 
-  Duration get duration {
-    if (endTime == null) {
-      // For ongoing events, show a default duration of 1 hour
-      return const Duration(hours: 1);
+  /// Get the effective start time for timeline positioning
+  DateTime get effectiveStartTime {
+    switch (type) {
+      case EventType.point:
+        return startTime!;
+      case EventType.period:
+        return startTime!;
+      case EventType.grouped:
+        return computedStart!;
     }
-    return endTime!.difference(startTime);
   }
 
-  bool get isOngoing => endTime == null;
+  /// Get the effective end time for timeline positioning
+  DateTime? get effectiveEndTime {
+    switch (type) {
+      case EventType.point:
+        return null; // Point events have no duration
+      case EventType.period:
+        return endTime;
+      case EventType.grouped:
+        return computedEnd;
+    }
+  }
+
+  /// Check if this event has a duration
+  bool get hasDuration {
+    return effectiveEndTime != null;
+  }
+
+  /// Get the duration of the event (null for point events)
+  Duration? get duration {
+    final end = effectiveEndTime;
+    if (end == null) return null;
+    return end.difference(effectiveStartTime);
+  }
 
   @override
   List<Object?> get props => [
     id,
+    type,
     title,
-    description,
-    author,
     startTime,
     endTime,
-    coordinates,
-    eventType,
-    fileAttachments,
-    tags,
-    additionalData,
+    members,
+    computedStart,
+    computedEnd,
+    properties,
+    aggregateData,
   ];
 }
 
-class Coordinates extends Equatable {
-  final double latitude;
-  final double longitude;
-  final double elevation;
-  final double? depth;
+class GroupMember extends Equatable {
+  final String id;
+  final DateTime timestamp;
+  final Map<String, dynamic> data;
 
-  const Coordinates({
-    required this.latitude,
-    required this.longitude,
-    required this.elevation,
-    this.depth,
+  const GroupMember({
+    required this.id,
+    required this.timestamp,
+    required this.data,
   });
 
-  factory Coordinates.fromJson(Map<String, dynamic> json) {
-    return Coordinates(
-      latitude: json['latitude'].toDouble(),
-      longitude: json['longitude'].toDouble(),
-      elevation: json['elevation'].toDouble(),
-      depth: json['depth']?.toDouble(),
-    );
+  factory GroupMember.fromJson(Map<String, dynamic> json) {
+    // Extract id and timestamp, put everything else in data
+    final data = Map<String, dynamic>.from(json);
+    final id = data.remove('id') as String;
+    final timestamp = DateTime.parse(data.remove('timestamp') as String);
+
+    return GroupMember(id: id, timestamp: timestamp, data: data);
   }
 
   @override
-  List<Object?> get props => [latitude, longitude, elevation, depth];
-}
-
-class FileAttachment extends Equatable {
-  final String filename;
-  final String type;
-  final int size;
-  final String url;
-
-  const FileAttachment({
-    required this.filename,
-    required this.type,
-    required this.size,
-    required this.url,
-  });
-
-  factory FileAttachment.fromJson(Map<String, dynamic> json) {
-    return FileAttachment(
-      filename: json['filename'],
-      type: json['type'],
-      size: json['size'],
-      url: json['url'],
-    );
-  }
-
-  @override
-  List<Object?> get props => [filename, type, size, url];
+  List<Object?> get props => [id, timestamp, data];
 }

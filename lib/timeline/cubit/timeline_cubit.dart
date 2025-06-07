@@ -4,6 +4,20 @@ import 'package:flutter/services.dart';
 import 'package:cross_platform_development/timeline/models/models.dart';
 import 'timeline_state.dart';
 
+/// Extension to add layout-specific properties to Event
+extension EventLayout on Event {
+  /// The effective end time for layout purposes, ensuring a minimum duration
+  /// for visual spacing and text display
+  DateTime get layoutEndTime {
+    const minSpan = Duration(minutes: 180);
+    if (!hasDuration) return effectiveStartTime.add(minSpan);
+    final actualSpan = duration!;
+    return actualSpan < minSpan
+        ? effectiveStartTime.add(minSpan)
+        : effectiveEndTime!;
+  }
+}
+
 /// {@template timeline_cubit}
 /// A [Cubit] which manages a [TimelineState] as its state.
 /// {@endtemplate}
@@ -18,44 +32,52 @@ class TimelineCubit extends Cubit<TimelineState> {
       );
 
   Future<void> loadTimeline() async {
-    await _loadEvents();
-    _loadRows();
-  }
-
-  Future<void> _loadEvents() async {
-    final response = await rootBundle.loadString('data.json');
-    final data = jsonDecode(response);
-    final events = data['events']
-        .map((event) => Event.fromJson(event))
+    final raw = await rootBundle.loadString('data.json');
+    final data = jsonDecode(raw) as Map<String, dynamic>;
+    final events = (data['events'] as List)
+        .map((e) => Event.fromJson(e))
         .toList()
         .cast<Event>();
-    emit(state.copyWith(events: events));
-  }
+    events.sort((a, b) => a.effectiveStartTime.compareTo(b.effectiveStartTime));
 
-  void _loadRows() {
-    List<Event> events = state.events;
-    events.sort((a, b) => a.startTime.compareTo(b.startTime));
+    // Calculate visible window based on events
+    DateTime visibleStart;
+    DateTime visibleEnd;
 
-    // Adjust visible window to center around ALL events including their effective end times
-    if (events.isNotEmpty) {
+    if (events.isEmpty) {
+      visibleStart = DateTime.now().subtract(const Duration(hours: 2));
+      visibleEnd = DateTime.now().add(const Duration(hours: 6));
+    } else {
       final firstEvent = events.first;
 
-      // Find the actual latest end time considering effective end times for all events
-      DateTime latestEndTime = events.first.startTime;
+      // Find the actual latest end time considering layout end times for all events
+      DateTime latestEndTime = firstEvent.effectiveStartTime;
       for (Event event in events) {
-        final effectiveEndTime = _getEffectiveEndTime(event);
-        if (effectiveEndTime.isAfter(latestEndTime)) {
-          latestEndTime = effectiveEndTime;
+        if (event.layoutEndTime.isAfter(latestEndTime)) {
+          latestEndTime = event.layoutEndTime;
         }
       }
 
-      final startTime = firstEvent.startTime.subtract(const Duration(hours: 1));
-      final endTime = latestEndTime.add(const Duration(hours: 1));
-
-      emit(state.copyWith(visibleStart: startTime, visibleEnd: endTime));
+      visibleStart = firstEvent.effectiveStartTime.subtract(
+        const Duration(hours: 1),
+      );
+      visibleEnd = latestEndTime.add(const Duration(hours: 1));
     }
 
-    // Create rows for events
+    // Build rows with non-overlapping event placement
+    final rows = _buildRows(events);
+
+    emit(
+      state.copyWith(
+        events: events,
+        visibleStart: visibleStart,
+        visibleEnd: visibleEnd,
+        rows: rows,
+      ),
+    );
+  }
+
+  List<TimelineRow> _buildRows(List<Event> events) {
     List<TimelineRow> rows = [];
 
     for (Event event in events) {
@@ -63,24 +85,12 @@ class TimelineCubit extends Cubit<TimelineState> {
 
       // Try to place event in existing rows
       for (int i = 0; i < rows.length; i++) {
-        TimelineRow row = rows[i];
-        bool canFitInRow = true;
-
-        // Check if event overlaps with any event in this row
-        for (Event rowEvent in row.events) {
-          if (_eventsOverlap(event, rowEvent)) {
-            canFitInRow = false;
-            break;
-          }
-        }
-
-        // If no overlap, add to this row
-        if (canFitInRow) {
-          List<Event> updatedEvents = [...row.events, event];
+        if (_canPlaceEventInRow(event, rows[i])) {
+          List<Event> updatedEvents = [...rows[i].events, event];
           rows[i] = TimelineRow(
-            index: row.index,
+            index: rows[i].index,
             events: updatedEvents,
-            height: row.height,
+            height: rows[i].height,
           );
           placed = true;
           break;
@@ -93,39 +103,21 @@ class TimelineCubit extends Cubit<TimelineState> {
       }
     }
 
-    // Update state with the new rows
-    emit(state.copyWith(rows: rows));
+    return rows;
   }
 
-  bool _eventsOverlap(Event event1, Event event2) {
-    DateTime event1EffectiveEnd = _getEffectiveEndTime(event1);
-    DateTime event2EffectiveEnd = _getEffectiveEndTime(event2);
-
-    return event1.startTime.isBefore(event2EffectiveEnd) &&
-        event1EffectiveEnd.isAfter(event2.startTime);
-  }
-
-  /// Calculates the effective end time including text space
-  DateTime _getEffectiveEndTime(Event event) {
-    const defaultDuration = Duration(minutes: 180);
-
-    if (_isPointEvent(event)) {
-      // Point events have no duration, so they get the full 180 minutes
-      return event.startTime.add(defaultDuration);
-    } else {
-      // Period events get at least 180 minutes, or their actual duration if longer
-      final actualDuration = event.endTime!.difference(event.startTime);
-
-      if (actualDuration.inMinutes < defaultDuration.inMinutes) {
-        return event.startTime.add(defaultDuration);
-      } else {
-        return event.endTime!;
+  bool _canPlaceEventInRow(Event event, TimelineRow row) {
+    // Check if event overlaps with any event in this row
+    for (Event rowEvent in row.events) {
+      if (_eventsOverlap(event, rowEvent)) {
+        return false;
       }
     }
+    return true;
   }
 
-  /// Determines if an event is a single point event (no end time)
-  bool _isPointEvent(Event event) {
-    return event.endTime == null;
+  bool _eventsOverlap(Event a, Event b) {
+    return a.effectiveStartTime.isBefore(b.layoutEndTime) &&
+        a.layoutEndTime.isAfter(b.effectiveStartTime);
   }
 }

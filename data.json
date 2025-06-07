@@ -1,1059 +1,687 @@
 {
     "events": [
         {
-            "id": "evt_001",
-            "title": "Mount Etna Strombolian Activity",
-            "description": "Moderate strombolian activity observed at the Southeast Crater with lava fountains reaching 150-200m height. Volcanic tremor amplitude increased significantly. Wind direction NE, ash plume extending towards Catania.",
-            "author": "Dr. Maria Rossi",
-            "startTime": "2024-01-15T12:00:00Z",
-            "endTime": null,
-            "coordinates": {
-                "latitude": 37.7510,
-                "longitude": 14.9934,
-                "elevation": 3329
-            },
-            "eventType": "volcanic_eruption",
-            "fileAttachments": [
+            "id": "evt-1234",
+            "type": "POINT",
+            "title": "M 4.2 earthquake near Etna",
+            "startTime": "2025-01-15T21:45:00Z",
+            "properties": {
+                "magnitude": 4.2,
+                "depthKm": 10.5,
+                "region": "Etna",
+                "location": "Sicily, Italy"
+            }
+        },
+        {
+            "id": "evt-5678",
+            "type": "PERIOD",
+            "title": "Stromboli eruption phase",
+            "startTime": "2025-01-15T00:00:00Z",
+            "endTime": "2025-01-15T23:59:59Z",
+            "properties": {
+                "eruptionType": "Strombolian",
+                "maxAlertLevel": 3,
+                "vei": 2,
+                "description": "Extended strombolian activity with lava fountains"
+            }
+        },
+        {
+            "id": "evt-5678",
+            "type": "PERIOD",
+            "title": "Stromboli eruption phase",
+            "startTime": "2025-01-15T00:00:00Z",
+            "endTime": "2025-01-15T23:59:59Z",
+            "properties": {
+                "eruptionType": "Strombolian",
+                "maxAlertLevel": 3,
+                "vei": 2,
+                "description": "Extended strombolian activity with lava fountains"
+            }
+        },
+        {
+            "id": "evt-point-2",
+            "type": "POINT",
+            "title": "Gas emission spike at Vulcano",
+            "startTime": "2025-01-15T08:30:00Z",
+            "properties": {
+                "so2FluxTonsPerDay": 850,
+                "backgroundLevel": 120,
+                "increasePercent": 600,
+                "location": "La Fossa crater"
+            }
+        },
+        {
+            "id": "evt-period-2",
+            "type": "PERIOD",
+            "title": "Campi Flegrei ground uplift",
+            "startTime": "2025-01-15T00:00:00Z",
+            "endTime": "2025-01-15T23:59:59Z",
+            "properties": {
+                "maxDisplacementCm": 3.2,
+                "measurementMethod": "InSAR",
+                "alertLevel": "yellow",
+                "description": "Continued caldera-wide uplift detected"
+            }
+        },
+        {
+            "id": "evt-group-9001",
+            "type": "GROUPED",
+            "title": "Etna microearthquake swarm",
+            "members": [
                 {
-                    "filename": "etna_thermal_20240115.jpg",
-                    "type": "thermal_image",
-                    "size": 2048576,
-                    "url": "/attachments/etna_thermal_20240115.jpg"
+                    "id": "evt-9001-1",
+                    "timestamp": "2025-01-15T00:15:00Z",
+                    "magnitude": 1.9,
+                    "depth": 8.2
                 },
                 {
-                    "filename": "seismic_data_etna.csv",
-                    "type": "seismic_data",
-                    "size": 512000,
-                    "url": "/attachments/seismic_data_etna.csv"
-                }
-            ],
-            "tags": [
-                "etna",
-                "strombolian",
-                "lava_fountain",
-                "ash_plume",
-                "high_priority"
-            ],
-            "intensity": 3,
-            "vei": 1
-        },
-        {
-            "id": "evt_002",
-            "title": "L'Aquila Earthquake Sequence",
-            "description": "Magnitude 4.2 earthquake followed by series of aftershocks. Epicenter located 8km NE of L'Aquila. Maximum intensity IV-V on Mercalli scale. No significant damage reported but felt widely across central Italy.",
-            "author": "Prof. Giuseppe Bianchi",
-            "startTime": "2024-01-15T12:00:00Z",
-            "endTime": "2024-01-15T20:00:00Z",
-            "coordinates": {
-                "latitude": 42.3598,
-                "longitude": 13.3963,
-                "elevation": 0,
-                "depth": 12.5
-            },
-            "eventType": "earthquake",
-            "fileAttachments": [
-                {
-                    "filename": "waveform_laquila_20240118.mseed",
-                    "type": "seismic_waveform",
-                    "size": 1024000,
-                    "url": "/attachments/waveform_laquila_20240118.mseed"
+                    "id": "evt-9001-2",
+                    "timestamp": "2025-01-15T01:43:00Z",
+                    "magnitude": 2.3,
+                    "depth": 9.1
                 },
                 {
-                    "filename": "intensity_map.pdf",
-                    "type": "intensity_map",
-                    "size": 768000,
-                    "url": "/attachments/intensity_map.pdf"
-                }
-            ],
-            "tags": [
-                "earthquake",
-                "aftershocks",
-                "central_italy",
-                "moderate_magnitude"
-            ],
-            "magnitude": 4.2,
-            "depth_km": 12.5,
-            "mercalli_intensity": "IV-V"
-        },
-        {
-            "id": "evt_003",
-            "title": "Stromboli Gas Emission Anomaly",
-            "description": "Significant increase in SO2 flux detected by FLAME network. Gas emission rate peaked at 1200 tons/day, well above background levels. Concurrent increase in thermal anomalies at crater terrace.",
-            "author": "Dr. Alessandro Verdi",
-            "startTime": "2024-01-15T12:00:00Z",
-            "endTime": null,
-            "coordinates": {
-                "latitude": 38.7890,
-                "longitude": 15.2130,
-                "elevation": 924
-            },
-            "eventType": "gas_emission",
-            "fileAttachments": [
-                {
-                    "filename": "so2_flux_stromboli.xlsx",
-                    "type": "gas_data",
-                    "size": 256000,
-                    "url": "/attachments/so2_flux_stromboli.xlsx"
+                    "id": "evt-9001-3",
+                    "timestamp": "2025-01-15T02:00:00Z",
+                    "magnitude": 2.7,
+                    "depth": 7.8
                 },
                 {
-                    "filename": "thermal_camera_sequence.mp4",
-                    "type": "thermal_video",
-                    "size": 15728640,
-                    "url": "/attachments/thermal_camera_sequence.mp4"
-                }
-            ],
-            "tags": [
-                "stromboli",
-                "gas_emission",
-                "so2",
-                "thermal_anomaly",
-                "monitoring"
-            ],
-            "so2_flux_tons_per_day": 1200,
-            "background_level": 150
-        },
-        {
-            "id": "evt_004",
-            "title": "Vesuvius Seismic Swarm",
-            "description": "Low-magnitude earthquake swarm detected beneath Vesuvius crater. 47 events recorded over 6 hours, magnitudes ranging from 0.8 to 2.1. Hypocenters clustered at 2-4km depth. No surface deformation detected.",
-            "author": "Dr. Francesca Nero",
-            "startTime": "2024-01-15T13:00:00Z",
-            "endTime": "2024-01-15T15:00:00Z",
-            "coordinates": {
-                "latitude": 40.8210,
-                "longitude": 14.4260,
-                "elevation": 1281
-            },
-            "eventType": "seismic_swarm",
-            "fileAttachments": [
-                {
-                    "filename": "vesuvius_swarm_catalog.txt",
-                    "type": "earthquake_catalog",
-                    "size": 128000,
-                    "url": "/attachments/vesuvius_swarm_catalog.txt"
+                    "id": "evt-9001-4",
+                    "timestamp": "2025-01-15T03:22:00Z",
+                    "magnitude": 2.1,
+                    "depth": 8.9
                 },
                 {
-                    "filename": "hypocenter_plot.png",
-                    "type": "analysis_plot",
-                    "size": 512000,
-                    "url": "/attachments/hypocenter_plot.png"
+                    "id": "evt-9001-5",
+                    "timestamp": "2025-01-15T04:15:00Z",
+                    "magnitude": 1.8,
+                    "depth": 9.3
                 }
             ],
-            "tags": [
-                "vesuvius",
-                "seismic_swarm",
-                "low_magnitude",
-                "deep_source"
-            ],
-            "event_count": 47,
-            "magnitude_range": "0.8-2.1",
-            "depth_range_km": "2-4"
+            "computedStart": "2025-01-15T00:15:00Z",
+            "computedEnd": "2025-01-15T06:00:00Z",
+            "properties": {
+                "location": "Mount Etna, Southeast crater",
+                "swarmType": "pre-eruptive",
+                "region": "Sicily"
+            },
+            "aggregateData": {
+                "count": 5,
+                "minMagnitude": 1.8,
+                "maxMagnitude": 2.7,
+                "averageMagnitude": 2.16,
+                "minDepth": 7.8,
+                "maxDepth": 9.3,
+                "averageDepth": 8.66,
+                "duration": "5h 45m"
+            }
         },
         {
-            "id": "evt_005",
-            "title": "Campi Flegrei Ground Uplift",
-            "description": "InSAR analysis reveals continued ground uplift in Campi Flegrei caldera. Maximum displacement of 2.3cm detected near Pozzuoli port over the past month. Uplift rate has accelerated compared to previous period.",
-            "author": "Dr. Marco Giallo",
-            "startTime": "2024-01-15T14:00:00Z",
-            "endTime": "2024-01-15T16:00:00Z",
-            "coordinates": {
-                "latitude": 40.8270,
-                "longitude": 14.1390,
-                "elevation": 458
-            },
-            "eventType": "ground_deformation",
-            "fileAttachments": [
+            "id": "evt-group-thermal",
+            "type": "GROUPED",
+            "title": "Aeolian Islands thermal anomalies",
+            "members": [
                 {
-                    "filename": "insar_displacement_map.tif",
-                    "type": "insar_data",
-                    "size": 4194304,
-                    "url": "/attachments/insar_displacement_map.tif"
+                    "id": "thermal-1",
+                    "timestamp": "2025-01-15T10:00:00Z",
+                    "location": "Stromboli",
+                    "temperature": 680,
+                    "type": "fumarole"
                 },
                 {
-                    "filename": "uplift_timeseries.csv",
-                    "type": "deformation_data",
-                    "size": 64000,
-                    "url": "/attachments/uplift_timeseries.csv"
+                    "id": "thermal-2",
+                    "timestamp": "2025-01-15T14:30:00Z",
+                    "location": "Vulcano",
+                    "temperature": 720,
+                    "type": "fumarole"
                 },
                 {
-                    "filename": "analysis_report.pdf",
-                    "type": "technical_report",
-                    "size": 1536000,
-                    "url": "/attachments/analysis_report.pdf"
+                    "id": "thermal-3",
+                    "timestamp": "2025-01-15T18:45:00Z",
+                    "location": "Lipari",
+                    "temperature": 45,
+                    "type": "hydrothermal"
                 }
             ],
-            "tags": [
-                "campi_flegrei",
-                "ground_uplift",
-                "insar",
-                "deformation",
-                "pozzuoli"
-            ],
-            "max_displacement_cm": 2.3,
-            "measurement_period_days": 28
+            "computedStart": "2025-01-15T10:00:00Z",
+            "computedEnd": "2025-01-15T20:00:00Z",
+            "properties": {
+                "region": "Aeolian Islands",
+                "phenomenon": "regional_thermal_increase",
+                "significance": "coordinated_activity"
+            },
+            "aggregateData": {
+                "count": 3,
+                "maxTemperature": 720,
+                "minTemperature": 45,
+                "averageTemperature": 481.67,
+                "islandsAffected": 3,
+                "duration": "10h"
+            }
         },
         {
-            "id": "evt_006",
-            "title": "Vulcano Fumarole Temperature Spike",
-            "description": "Significant temperature increase recorded at La Fossa crater fumaroles. Maximum temperature reached 680°C, representing a 45°C increase from baseline. Accompanied by changes in gas composition with increased H2S/CO2 ratio.",
-            "author": "Dr. Lucia Blu",
-            "startTime": "2024-01-15T15:00:00Z",
-            "endTime": "2024-01-16T15:00:00Z",
-            "coordinates": {
-                "latitude": 38.4040,
-                "longitude": 14.9620,
-                "elevation": 391
-            },
-            "eventType": "thermal_anomaly",
-            "fileAttachments": [
+            "id": "evt-9002",
+            "type": "POINT",
+            "title": "M 3.8 earthquake at Vesuvius",
+            "startTime": "2025-01-14T05:22:00Z",
+            "properties": {
+                "magnitude": 3.8,
+                "depthKm": 6.2,
+                "region": "Vesuvius",
+                "location": "Naples, Italy",
+                "tectonic": false
+            }
+        },
+        {
+            "id": "evt-9003",
+            "type": "PERIOD",
+            "title": "Ischia geothermal anomaly",
+            "startTime": "2025-01-14T00:00:00Z",
+            "endTime": "2025-01-14T18:00:00Z",
+            "properties": {
+                "maxTemperatureC": 95,
+                "fumaroleCount": 12,
+                "alertLevel": "green",
+                "description": "Increased fumarolic activity in thermal zone"
+            }
+        },
+        {
+            "id": "evt-9004",
+            "type": "POINT",
+            "title": "Ash emission at Etna",
+            "startTime": "2025-01-14T12:15:00Z",
+            "properties": {
+                "ashHeightKm": 2.8,
+                "windDirection": "southeast",
+                "vei": 1,
+                "crater": "Southeast Crater",
+                "duration": "45 minutes"
+            }
+        },
+        {
+            "id": "evt-9005",
+            "type": "PERIOD",
+            "title": "Vulcano SO2 flux increase",
+            "startTime": "2025-01-14T06:00:00Z",
+            "endTime": "2025-01-14T20:00:00Z",
+            "properties": {
+                "so2FluxTonsPerDay": 1200,
+                "backgroundLevel": 150,
+                "increasePercent": 700,
+                "location": "La Fossa crater",
+                "weatherConditions": "stable"
+            }
+        },
+        {
+            "id": "evt-9006",
+            "type": "POINT",
+            "title": "Phreatic explosion at Solfatara",
+            "startTime": "2025-01-14T14:30:00Z",
+            "properties": {
+                "explosionType": "phreatic",
+                "craterDiameterM": 3.5,
+                "debrisRadius": 25,
+                "temperature": 110,
+                "location": "Campi Flegrei"
+            }
+        },
+        {
+            "id": "evt-group-9007",
+            "type": "GROUPED",
+            "title": "Lipari microseismic sequence",
+            "members": [
                 {
-                    "filename": "fumarole_temp_data.csv",
-                    "type": "temperature_data",
-                    "size": 192000,
-                    "url": "/attachments/fumarole_temp_data.csv"
+                    "id": "evt-9007-1",
+                    "timestamp": "2025-01-14T08:00:00Z",
+                    "magnitude": 1.2,
+                    "depth": 4.1
                 },
                 {
-                    "filename": "gas_composition_analysis.xlsx",
-                    "type": "gas_analysis",
-                    "size": 384000,
-                    "url": "/attachments/gas_composition_analysis.xlsx"
-                }
-            ],
-            "tags": [
-                "vulcano",
-                "fumarole",
-                "temperature_spike",
-                "gas_composition",
-                "la_fossa"
-            ],
-            "max_temperature_celsius": 680,
-            "baseline_temperature_celsius": 635,
-            "h2s_co2_ratio": 0.23
-        },
-        {
-            "id": "evt_007",
-            "title": "Ischia Microearthquake Activity",
-            "description": "Increased microseismic activity detected on Ischia island. 23 events with magnitudes between 0.5-1.8 recorded over 48 hours. Activity concentrated in the Casamicciola area, consistent with local fault system.",
-            "author": "Dr. Roberto Verde",
-            "startTime": "2024-01-15T16:00:00Z",
-            "endTime": "2024-01-15T20:00:00Z",
-            "coordinates": {
-                "latitude": 40.7320,
-                "longitude": 13.9070,
-                "elevation": 0
-            },
-            "eventType": "microseismic_activity",
-            "fileAttachments": [
-                {
-                    "filename": "ischia_microseismic_catalog.csv",
-                    "type": "seismic_catalog",
-                    "size": 96000,
-                    "url": "/attachments/ischia_microseismic_catalog.csv"
+                    "id": "evt-9007-2",
+                    "timestamp": "2025-01-14T09:15:00Z",
+                    "magnitude": 1.5,
+                    "depth": 3.8
                 },
                 {
-                    "filename": "fault_map_overlay.kmz",
-                    "type": "gis_data",
-                    "size": 256000,
-                    "url": "/attachments/fault_map_overlay.kmz"
+                    "id": "evt-9007-3",
+                    "timestamp": "2025-01-14T10:30:00Z",
+                    "magnitude": 1.8,
+                    "depth": 4.3
                 }
             ],
-            "tags": [
-                "ischia",
-                "microearthquakes",
-                "casamicciola",
-                "fault_system",
-                "monitoring"
-            ],
-            "event_count": 23,
-            "magnitude_range": "0.5-1.8",
-            "duration_hours": 48
+            "computedStart": "2025-01-14T08:00:00Z",
+            "computedEnd": "2025-01-14T12:00:00Z",
+            "properties": {
+                "location": "Lipari Island",
+                "swarmType": "hydrothermal",
+                "region": "Aeolian Islands"
+            },
+            "aggregateData": {
+                "count": 3,
+                "minMagnitude": 1.2,
+                "maxMagnitude": 1.8,
+                "averageMagnitude": 1.5,
+                "minDepth": 3.8,
+                "maxDepth": 4.3,
+                "averageDepth": 4.07,
+                "duration": "4h"
+            }
         },
         {
-            "id": "evt_008",
-            "title": "Etna Lava Flow Advance",
-            "description": "New lava flow from Southeast Crater advancing towards Valle del Bove. Flow front moving at 2-3 m/hour. Thermal satellite imagery shows active flow length of approximately 1.2km. No immediate threat to infrastructure.",
-            "author": "Dr. Carla Rosso",
-            "startTime": "2024-01-15T17:00:00Z",
-            "endTime": null,
-            "coordinates": {
-                "latitude": 37.7450,
-                "longitude": 15.0020,
-                "elevation": 2800
-            },
-            "eventType": "lava_flow",
-            "fileAttachments": [
+            "id": "evt-9008",
+            "type": "POINT",
+            "title": "Lava flow initiation at Stromboli",
+            "startTime": "2025-01-14T16:45:00Z",
+            "properties": {
+                "flowLength": 150,
+                "temperatureC": 1050,
+                "effusionRate": 2.5,
+                "direction": "Sciara del Fuoco",
+                "hazardLevel": 2
+            }
+        },
+        {
+            "id": "evt-9009",
+            "type": "PERIOD",
+            "title": "Panarea hydrothermal field activation",
+            "startTime": "2025-01-14T18:00:00Z",
+            "endTime": "2025-01-15T06:00:00Z",
+            "properties": {
+                "bubbleRate": "high",
+                "waterTemperatureC": 85,
+                "areaKm2": 0.3,
+                "gasComposition": "CO2-dominant",
+                "location": "offshore east"
+            }
+        },
+        {
+            "id": "evt-9010",
+            "type": "POINT",
+            "title": "Rockfall event at Etna",
+            "startTime": "2025-01-15T07:30:00Z",
+            "properties": {
+                "volumeM3": 450,
+                "triggerMechanism": "thermal expansion",
+                "location": "Northeast Crater rim",
+                "hazardZone": "excluded",
+                "seismicSignature": true
+            }
+        },
+        {
+            "id": "evt-9011",
+            "type": "POINT",
+            "title": "M 2.9 earthquake at Campi Flegrei",
+            "startTime": "2025-01-15T11:00:00Z",
+            "properties": {
+                "magnitude": 2.9,
+                "depthKm": 2.1,
+                "region": "Campi Flegrei",
+                "location": "Pozzuoli, Italy",
+                "upliftRelated": true
+            }
+        },
+        {
+            "id": "evt-9012",
+            "type": "PERIOD",
+            "title": "Alicudi thermal spring temperature rise",
+            "startTime": "2025-01-15T09:00:00Z",
+            "endTime": "2025-01-15T21:00:00Z",
+            "properties": {
+                "baselineTemperatureC": 42,
+                "peakTemperatureC": 67,
+                "increasePercent": 59,
+                "springCount": 5,
+                "location": "southeast coast"
+            }
+        },
+        {
+            "id": "evt-group-9013",
+            "type": "GROUPED",
+            "title": "Vesuvius fumarole temperature monitoring",
+            "members": [
                 {
-                    "filename": "lava_flow_thermal_sat.jpg",
-                    "type": "satellite_image",
-                    "size": 3145728,
-                    "url": "/attachments/lava_flow_thermal_sat.jpg"
+                    "id": "temp-9013-1",
+                    "timestamp": "2025-01-15T06:00:00Z",
+                    "location": "Gran Cono",
+                    "temperature": 280,
+                    "type": "fumarole"
                 },
                 {
-                    "filename": "flow_advance_measurements.csv",
-                    "type": "field_data",
-                    "size": 48000,
-                    "url": "/attachments/flow_advance_measurements.csv"
+                    "id": "temp-9013-2",
+                    "timestamp": "2025-01-15T12:00:00Z",
+                    "location": "Atrio di Cavallo",
+                    "temperature": 95,
+                    "type": "soil_gas"
                 },
                 {
-                    "filename": "hazard_assessment.pdf",
-                    "type": "hazard_report",
-                    "size": 1024000,
-                    "url": "/attachments/hazard_assessment.pdf"
+                    "id": "temp-9013-3",
+                    "timestamp": "2025-01-15T18:00:00Z",
+                    "location": "Gran Cono",
+                    "temperature": 320,
+                    "type": "fumarole"
                 }
             ],
-            "tags": [
-                "etna",
-                "lava_flow",
-                "valle_del_bove",
-                "thermal_satellite",
-                "ongoing"
-            ],
-            "flow_rate_m_per_hour": 2.5,
-            "flow_length_km": 1.2,
-            "threat_level": "low"
+            "computedStart": "2025-01-15T06:00:00Z",
+            "computedEnd": "2025-01-15T20:00:00Z",
+            "properties": {
+                "region": "Vesuvius",
+                "phenomenon": "thermal_increase",
+                "significance": "baseline_monitoring"
+            },
+            "aggregateData": {
+                "count": 3,
+                "maxTemperature": 320,
+                "minTemperature": 95,
+                "averageTemperature": 231.67,
+                "locationsAffected": 2,
+                "duration": "14h"
+            }
         },
         {
-            "id": "evt_009",
-            "title": "Pantelleria Earthquake",
-            "description": "Magnitude 3.8 earthquake offshore Pantelleria island. Event occurred at 15km depth in the Sicily Channel rift system. Felt on the island with intensity III. Part of ongoing tectonic activity in the region.",
-            "author": "Dr. Stefano Azzurro",
-            "startTime": "2024-01-15T18:00:00Z",
-            "endTime": "2024-01-15T19:00:00Z",
-            "coordinates": {
-                "latitude": 36.7830,
-                "longitude": 11.9690,
-                "elevation": 0,
-                "depth": 15.2
-            },
-            "eventType": "earthquake",
-            "fileAttachments": [
+            "id": "evt-9014",
+            "type": "POINT",
+            "title": "Bradyseism measurement at Pozzuoli",
+            "startTime": "2025-01-15T15:00:00Z",
+            "properties": {
+                "verticalDisplacementMm": 15,
+                "horizontalDisplacementMm": 8,
+                "measurementMethod": "GPS",
+                "cumulativeUpliftCm": 85,
+                "location": "Rione Terra"
+            }
+        },
+        {
+            "id": "evt-9015",
+            "type": "PERIOD",
+            "title": "Filicudi submarine degassing",
+            "startTime": "2025-01-15T02:00:00Z",
+            "endTime": "2025-01-15T14:00:00Z",
+            "properties": {
+                "bubbleIntensity": "moderate",
+                "depthM": 45,
+                "gasType": "CO2-H2S",
+                "areaM2": 120,
+                "location": "northwest coast"
+            }
+        },
+        {
+            "id": "evt-9016",
+            "type": "POINT",
+            "title": "Pyroclastic bomb ejection at Stromboli",
+            "startTime": "2025-01-15T10:15:00Z",
+            "properties": {
+                "bombCount": 23,
+                "maxDistanceM": 180,
+                "craterType": "central",
+                "ejectaTemperatureC": 900,
+                "explosionIntensity": 3
+            }
+        },
+        {
+            "id": "evt-9017",
+            "type": "POINT",
+            "title": "M 3.1 deep earthquake near Etna",
+            "startTime": "2025-01-15T13:45:00Z",
+            "properties": {
+                "magnitude": 3.1,
+                "depthKm": 25.8,
+                "region": "Etna",
+                "location": "Catania, Sicily",
+                "tectonic": true,
+                "faultSystem": "Timpe"
+            }
+        },
+        {
+            "id": "evt-9018",
+            "type": "PERIOD",
+            "title": "Colli Albani radon emission spike",
+            "startTime": "2025-01-14T08:00:00Z",
+            "endTime": "2025-01-14T22:00:00Z",
+            "properties": {
+                "radonBqM3": 2800,
+                "backgroundLevel": 450,
+                "increasePercent": 520,
+                "location": "Lago Albano rim",
+                "weatherCorrected": true
+            }
+        },
+        {
+            "id": "evt-9019",
+            "type": "POINT",
+            "title": "Mud pot formation at Vulcano",
+            "startTime": "2025-01-14T16:20:00Z",
+            "properties": {
+                "potDiameterM": 1.8,
+                "temperatureC": 78,
+                "bubbleRate": "high",
+                "location": "Fanghi di Vulcano",
+                "newFormation": true
+            }
+        },
+        {
+            "id": "evt-group-9020",
+            "type": "GROUPED",
+            "title": "Salina Island seismic cluster",
+            "members": [
                 {
-                    "filename": "pantelleria_waveforms.mseed",
-                    "type": "seismic_waveform",
-                    "size": 768000,
-                    "url": "/attachments/pantelleria_waveforms.mseed"
+                    "id": "evt-9020-1",
+                    "timestamp": "2025-01-14T22:30:00Z",
+                    "magnitude": 1.4,
+                    "depth": 7.2
                 },
                 {
-                    "filename": "tectonic_context_map.pdf",
-                    "type": "geological_map",
-                    "size": 2048000,
-                    "url": "/attachments/tectonic_context_map.pdf"
-                }
-            ],
-            "tags": [
-                "pantelleria",
-                "offshore_earthquake",
-                "sicily_channel",
-                "tectonic",
-                "moderate"
-            ],
-            "magnitude": 3.8,
-            "depth_km": 15.2,
-            "mercalli_intensity": "III"
-        },
-        {
-            "id": "evt_010",
-            "title": "Lipari Hydrothermal Activity",
-            "description": "Increased hydrothermal activity observed at underwater vents near Lipari. Water temperature anomalies detected by ROV survey. Bubble plumes visible on sonar. Possible connection to regional volcanic unrest.",
-            "author": "Dr. Marina Celeste",
-            "startTime": "2024-01-15T19:00:00Z",
-            "endTime": "2024-01-15T23:00:00Z",
-            "coordinates": {
-                "latitude": 38.4690,
-                "longitude": 14.9560,
-                "elevation": -45
-            },
-            "eventType": "hydrothermal_activity",
-            "fileAttachments": [
-                {
-                    "filename": "rov_survey_video.mp4",
-                    "type": "underwater_video",
-                    "size": 52428800,
-                    "url": "/attachments/rov_survey_video.mp4"
+                    "id": "evt-9020-2",
+                    "timestamp": "2025-01-15T00:15:00Z",
+                    "magnitude": 1.7,
+                    "depth": 6.8
                 },
                 {
-                    "filename": "water_temp_measurements.csv",
-                    "type": "temperature_data",
-                    "size": 128000,
-                    "url": "/attachments/water_temp_measurements.csv"
+                    "id": "evt-9020-3",
+                    "timestamp": "2025-01-15T02:00:00Z",
+                    "magnitude": 2.0,
+                    "depth": 7.5
                 },
                 {
-                    "filename": "sonar_bubble_detection.png",
-                    "type": "sonar_image",
-                    "size": 1024000,
-                    "url": "/attachments/sonar_bubble_detection.png"
+                    "id": "evt-9020-4",
+                    "timestamp": "2025-01-15T03:45:00Z",
+                    "magnitude": 1.6,
+                    "depth": 7.0
                 }
             ],
-            "tags": [
-                "lipari",
-                "hydrothermal",
-                "underwater",
-                "rov_survey",
-                "temperature_anomaly"
-            ],
-            "water_depth_m": 45,
-            "max_temp_celsius": 28.5,
-            "background_temp_celsius": 16.2
+            "computedStart": "2025-01-14T22:30:00Z",
+            "computedEnd": "2025-01-15T06:00:00Z",
+            "properties": {
+                "location": "Salina Island",
+                "swarmType": "structural",
+                "region": "Aeolian Islands"
+            },
+            "aggregateData": {
+                "count": 4,
+                "minMagnitude": 1.4,
+                "maxMagnitude": 2.0,
+                "averageMagnitude": 1.68,
+                "minDepth": 6.8,
+                "maxDepth": 7.5,
+                "averageDepth": 7.13,
+                "duration": "7h 30m"
+            }
         },
         {
-            "id": "evt_011",
-            "title": "Campi Flegrei Secondary Uplift",
-            "description": "Second phase of ground uplift detected in Campi Flegrei caldera. GPS stations show additional 1.8cm displacement. Overlapping with ongoing InSAR monitoring period.",
-            "author": "Dr. Marco Giallo",
-            "startTime": "2024-01-15T15:30:00Z",
-            "endTime": "2024-01-15T18:30:00Z",
-            "coordinates": {
-                "latitude": 40.8280,
-                "longitude": 14.1410,
-                "elevation": 462
-            },
-            "eventType": "ground_deformation",
-            "fileAttachments": [
-                {
-                    "filename": "gps_displacement_campi.csv",
-                    "type": "gps_data",
-                    "size": 256000,
-                    "url": "/attachments/gps_displacement_campi.csv"
-                }
-            ],
-            "tags": [
-                "campi_flegrei",
-                "secondary_uplift",
-                "gps",
-                "deformation"
-            ],
-            "max_displacement_cm": 1.8,
-            "measurement_method": "GPS"
+            "id": "evt-9021",
+            "type": "POINT",
+            "title": "Lava fountain at Etna Southeast Crater",
+            "startTime": "2025-01-15T19:30:00Z",
+            "properties": {
+                "fountainHeightM": 350,
+                "durationMinutes": 25,
+                "lavaFlowLength": 800,
+                "temperatureC": 1100,
+                "vei": 2
+            }
         },
         {
-            "id": "evt_012",
-            "title": "Etna Ash Emission",
-            "description": "Ash emission event from Northeast Crater coinciding with ongoing Strombolian activity. Ash column reached 4km height, dispersing southeast towards Calabria.",
-            "author": "Dr. Maria Rossi",
-            "startTime": "2024-01-15T14:30:00Z",
-            "endTime": null,
-            "coordinates": {
-                "latitude": 37.7520,
-                "longitude": 14.9945,
-                "elevation": 3340
-            },
-            "eventType": "volcanic_eruption",
-            "fileAttachments": [
-                {
-                    "filename": "ash_column_radar.dat",
-                    "type": "radar_data",
-                    "size": 1024000,
-                    "url": "/attachments/ash_column_radar.dat"
-                }
-            ],
-            "tags": [
-                "etna",
-                "ash_emission",
-                "northeast_crater",
-                "concurrent"
-            ],
-            "ash_column_height_km": 4.0,
-            "vei": 2
+            "id": "evt-9022",
+            "type": "PERIOD",
+            "title": "Ustica underwater thermal field",
+            "startTime": "2025-01-15T12:00:00Z",
+            "endTime": "2025-01-15T23:00:00Z",
+            "properties": {
+                "waterTemperatureC": 35,
+                "backgroundTemperatureC": 18,
+                "thermalAnomalyKm2": 0.08,
+                "depthM": 15,
+                "location": "southeast underwater"
+            }
         },
         {
-            "id": "evt_013",
-            "title": "Stromboli Explosive Event",
-            "description": "Major explosive event at Stromboli with incandescent bombs thrown up to 300m from crater. Event overlaps with ongoing gas emission anomaly.",
-            "author": "Dr. Alessandro Verdi",
-            "startTime": "2024-01-15T13:45:00Z",
-            "endTime": "2024-01-15T14:15:00Z",
-            "coordinates": {
-                "latitude": 38.7900,
-                "longitude": 15.2140,
-                "elevation": 924
-            },
-            "eventType": "volcanic_eruption",
-            "fileAttachments": [
+            "id": "evt-9023",
+            "type": "POINT",
+            "title": "CO2 flux measurement at Solfatara",
+            "startTime": "2025-01-14T09:00:00Z",
+            "properties": {
+                "co2FluxKgDay": 180,
+                "backgroundFlux": 45,
+                "increasePercent": 300,
+                "soilTemperatureC": 65,
+                "location": "Bocca Grande"
+            }
+        },
+        {
+            "id": "evt-9024",
+            "type": "POINT",
+            "title": "Ground tilt measurement at Stromboli",
+            "startTime": "2025-01-14T14:15:00Z",
+            "properties": {
+                "tiltMicroradians": 25,
+                "direction": "northeast",
+                "instrumentType": "tiltmeter",
+                "baseline": 5,
+                "significance": "pre-eruptive"
+            }
+        },
+        {
+            "id": "evt-9025",
+            "type": "PERIOD",
+            "title": "Marsili seamount hydrothermal activity",
+            "startTime": "2025-01-14T10:00:00Z",
+            "endTime": "2025-01-14T22:00:00Z",
+            "properties": {
+                "depthM": 450,
+                "temperatureC": 380,
+                "ventCount": 8,
+                "mineralDeposition": true,
+                "location": "Tyrrhenian Sea"
+            }
+        },
+        {
+            "id": "evt-9026",
+            "type": "POINT",
+            "title": "Phlegmonic field gas emission at Nisyros",
+            "startTime": "2025-01-14T08:45:00Z",
+            "properties": {
+                "h2sConcentration": 450,
+                "co2Concentration": 8500,
+                "temperatureC": 95,
+                "location": "Stefanos crater",
+                "windSpeed": 12
+            }
+        },
+        {
+            "id": "evt-group-9027",
+            "type": "GROUPED",
+            "title": "Pantelleria thermal monitoring",
+            "members": [
                 {
-                    "filename": "explosion_seismic.mseed",
-                    "type": "seismic_waveform",
-                    "size": 512000,
-                    "url": "/attachments/explosion_seismic.mseed"
+                    "id": "thermal-9027-1",
+                    "timestamp": "2025-01-14T06:00:00Z",
+                    "location": "Favara Grande",
+                    "temperature": 85,
+                    "type": "hot_spring"
                 },
                 {
-                    "filename": "thermal_explosion.mp4",
-                    "type": "thermal_video",
-                    "size": 8388608,
-                    "url": "/attachments/thermal_explosion.mp4"
-                }
-            ],
-            "tags": [
-                "stromboli",
-                "explosive",
-                "incandescent_bombs",
-                "major_event"
-            ],
-            "bomb_range_m": 300,
-            "vei": 1
-        },
-        {
-            "id": "evt_014",
-            "title": "Vesuvius Deep Tremor",
-            "description": "Deep volcanic tremor detected beneath Vesuvius during seismic swarm. Tremor amplitude suggests possible magma movement at 8-12km depth.",
-            "author": "Dr. Francesca Nero",
-            "startTime": "2024-01-15T14:00:00Z",
-            "endTime": "2024-01-15T16:30:00Z",
-            "coordinates": {
-                "latitude": 40.8200,
-                "longitude": 14.4250,
-                "elevation": 1281,
-                "depth": 10.0
-            },
-            "eventType": "seismic_swarm",
-            "fileAttachments": [
-                {
-                    "filename": "deep_tremor_analysis.pdf",
-                    "type": "analysis_report",
-                    "size": 1536000,
-                    "url": "/attachments/deep_tremor_analysis.pdf"
-                }
-            ],
-            "tags": [
-                "vesuvius",
-                "deep_tremor",
-                "magma_movement",
-                "volcanic_unrest"
-            ],
-            "tremor_depth_km": 10.0,
-            "tremor_amplitude": "moderate"
-        },
-        {
-            "id": "evt_015",
-            "title": "Mount Marsili Seismic Activity",
-            "description": "Unusual seismic activity detected at underwater Mount Marsili volcano. Event partially overlaps with Lipari hydrothermal observations.",
-            "author": "Dr. Marina Celeste",
-            "startTime": "2024-01-15T20:30:00Z",
-            "endTime": "2024-01-16T02:30:00Z",
-            "coordinates": {
-                "latitude": 39.2500,
-                "longitude": 14.4000,
-                "elevation": -450,
-                "depth": 5.0
-            },
-            "eventType": "microseismic_activity",
-            "fileAttachments": [
-                {
-                    "filename": "marsili_hydrophones.wav",
-                    "type": "hydrophone_data",
-                    "size": 4194304,
-                    "url": "/attachments/marsili_hydrophones.wav"
-                }
-            ],
-            "tags": [
-                "marsili",
-                "underwater_volcano",
-                "unusual_activity",
-                "hydrophone"
-            ],
-            "event_count": 15,
-            "depth_range_km": "3-7"
-        },
-        {
-            "id": "evt_016",
-            "title": "Vulcano Gas Composition Change",
-            "description": "Rapid change in fumarole gas composition at La Fossa crater during temperature spike event. CO2/SO2 ratio decreased significantly.",
-            "author": "Dr. Lucia Blu",
-            "startTime": "2024-01-15T17:30:00Z",
-            "endTime": "2024-01-15T21:30:00Z",
-            "coordinates": {
-                "latitude": 38.4045,
-                "longitude": 14.9625,
-                "elevation": 391
-            },
-            "eventType": "gas_emission",
-            "fileAttachments": [
-                {
-                    "filename": "gas_ratio_change.xlsx",
-                    "type": "gas_analysis",
-                    "size": 384000,
-                    "url": "/attachments/gas_ratio_change.xlsx"
-                }
-            ],
-            "tags": [
-                "vulcano",
-                "gas_composition",
-                "ratio_change",
-                "concurrent_event"
-            ],
-            "co2_so2_ratio": 0.15,
-            "previous_ratio": 0.28
-        },
-        {
-            "id": "evt_017",
-            "title": "Regional Seismic Network Alert",
-            "description": "Regional seismic network detects coordinated activity across multiple volcanoes. Point event marking the onset of increased regional monitoring.",
-            "author": "Dr. Giuseppe Bianchi",
-            "startTime": "2024-01-15T12:30:00Z",
-            "endTime": null,
-            "coordinates": {
-                "latitude": 40.0000,
-                "longitude": 14.5000,
-                "elevation": 0
-            },
-            "eventType": "seismic_swarm",
-            "fileAttachments": [
-                {
-                    "filename": "regional_network_alert.pdf",
-                    "type": "alert_report",
-                    "size": 512000,
-                    "url": "/attachments/regional_network_alert.pdf"
-                }
-            ],
-            "tags": [
-                "regional",
-                "network_alert",
-                "coordinated_activity",
-                "monitoring"
-            ],
-            "alert_level": "yellow",
-            "affected_volcanoes": 5
-        },
-        {
-            "id": "evt_018",
-            "title": "Ischia Coastal Thermal Anomaly",
-            "description": "Thermal anomaly detected in coastal waters near Ischia during microearthquake activity. Submarine thermal springs showing increased activity.",
-            "author": "Dr. Roberto Verde",
-            "startTime": "2024-01-15T18:00:00Z",
-            "endTime": "2024-01-15T22:00:00Z",
-            "coordinates": {
-                "latitude": 40.7330,
-                "longitude": 13.9080,
-                "elevation": -10
-            },
-            "eventType": "thermal_anomaly",
-            "fileAttachments": [
-                {
-                    "filename": "coastal_thermal_sat.tif",
-                    "type": "satellite_thermal",
-                    "size": 2048576,
-                    "url": "/attachments/coastal_thermal_sat.tif"
-                }
-            ],
-            "tags": [
-                "ischia",
-                "coastal_thermal",
-                "submarine_springs",
-                "concurrent"
-            ],
-            "max_temp_celsius": 32.5,
-            "baseline_temp_celsius": 18.2
-        },
-        {
-            "id": "evt_019",
-            "title": "Phlegraean Fields Gas Flux Spike",
-            "description": "Significant increase in CO2 flux from Phlegraean Fields soil during ground uplift events. Flux measurements show 300% increase from baseline.",
-            "author": "Dr. Marco Giallo",
-            "startTime": "2024-01-15T16:30:00Z",
-            "endTime": "2024-01-15T19:30:00Z",
-            "coordinates": {
-                "latitude": 40.8290,
-                "longitude": 14.1420,
-                "elevation": 465
-            },
-            "eventType": "gas_emission",
-            "fileAttachments": [
-                {
-                    "filename": "co2_flux_phlegraean.csv",
-                    "type": "gas_data",
-                    "size": 192000,
-                    "url": "/attachments/co2_flux_phlegraean.csv"
-                }
-            ],
-            "tags": [
-                "phlegraean_fields",
-                "co2_flux",
-                "soil_degassing",
-                "uplift_related"
-            ],
-            "co2_flux_increase_percent": 300,
-            "baseline_flux": 150
-        },
-        {
-            "id": "evt_020",
-            "title": "Etna Northeast Crater Subsidence",
-            "description": "Minor subsidence detected at Northeast Crater rim during ash emission event. InSAR data shows 2.5cm vertical displacement.",
-            "author": "Dr. Carla Rosso",
-            "startTime": "2024-01-15T15:45:00Z",
-            "endTime": "2024-01-15T17:45:00Z",
-            "coordinates": {
-                "latitude": 37.7525,
-                "longitude": 14.9950,
-                "elevation": 3335
-            },
-            "eventType": "ground_deformation",
-            "fileAttachments": [
-                {
-                    "filename": "crater_subsidence_insar.tif",
-                    "type": "insar_data",
-                    "size": 3145728,
-                    "url": "/attachments/crater_subsidence_insar.tif"
-                }
-            ],
-            "tags": [
-                "etna",
-                "crater_subsidence",
-                "northeast_crater",
-                "concurrent_emission"
-            ],
-            "subsidence_cm": 2.5,
-            "measurement_method": "InSAR"
-        },
-        {
-            "id": "evt_021",
-            "title": "Aeolian Islands Regional Tremor",
-            "description": "Regional volcanic tremor affecting entire Aeolian archipelago. Tremor correlates with multiple ongoing volcanic activities across the island chain.",
-            "author": "Dr. Alessandro Verdi",
-            "startTime": "2024-01-15T11:30:00Z",
-            "endTime": "2024-01-16T05:30:00Z",
-            "coordinates": {
-                "latitude": 38.5000,
-                "longitude": 14.8000,
-                "elevation": 0
-            },
-            "eventType": "seismic_swarm",
-            "fileAttachments": [
-                {
-                    "filename": "aeolian_regional_tremor.mseed",
-                    "type": "seismic_waveform",
-                    "size": 8388608,
-                    "url": "/attachments/aeolian_regional_tremor.mseed"
-                }
-            ],
-            "tags": [
-                "aeolian_islands",
-                "regional_tremor",
-                "archipelago_wide",
-                "volcanic_unrest"
-            ],
-            "tremor_duration_hours": 18,
-            "affected_islands": 7
-        },
-        {
-            "id": "evt_022",
-            "title": "Tyrrhenian Sea Earthquake",
-            "description": "Moderate earthquake in Tyrrhenian Sea affecting multiple volcanic systems. Potential trigger for increased volcanic activity across the region.",
-            "author": "Prof. Giuseppe Bianchi",
-            "startTime": "2024-01-15T11:45:00Z",
-            "endTime": "2024-01-15T12:15:00Z",
-            "coordinates": {
-                "latitude": 39.5000,
-                "longitude": 13.0000,
-                "elevation": 0,
-                "depth": 25.0
-            },
-            "eventType": "earthquake",
-            "fileAttachments": [
-                {
-                    "filename": "tyrrhenian_earthquake.mseed",
-                    "type": "seismic_waveform",
-                    "size": 2048576,
-                    "url": "/attachments/tyrrhenian_earthquake.mseed"
+                    "id": "thermal-9027-2",
+                    "timestamp": "2025-01-14T12:00:00Z",
+                    "location": "Bagno dell'Acqua",
+                    "temperature": 52,
+                    "type": "thermal_pool"
                 },
                 {
-                    "filename": "regional_impact_map.pdf",
-                    "type": "impact_analysis",
-                    "size": 1024000,
-                    "url": "/attachments/regional_impact_map.pdf"
+                    "id": "thermal-9027-3",
+                    "timestamp": "2025-01-14T18:00:00Z",
+                    "location": "Cala Gadir",
+                    "temperature": 48,
+                    "type": "coastal_spring"
                 }
             ],
-            "tags": [
-                "tyrrhenian_sea",
-                "regional_earthquake",
-                "volcanic_trigger",
-                "moderate"
-            ],
-            "magnitude": 4.8,
-            "depth_km": 25.0,
-            "mercalli_intensity": "V"
+            "computedStart": "2025-01-14T06:00:00Z",
+            "computedEnd": "2025-01-14T20:00:00Z",
+            "properties": {
+                "region": "Pantelleria Island",
+                "phenomenon": "hydrothermal_system",
+                "significance": "baseline_monitoring"
+            },
+            "aggregateData": {
+                "count": 3,
+                "maxTemperature": 85,
+                "minTemperature": 48,
+                "averageTemperature": 61.67,
+                "locationsAffected": 3,
+                "duration": "14h"
+            }
         },
         {
-            "id": "evt_023",
-            "title": "Etna Southwest Crater Reactivation",
-            "description": "Reactivation of Southwest Crater with new lava emissions during ongoing Northeast activities. Multiple crater complex showing coordinated behavior.",
-            "author": "Dr. Carla Rosso",
-            "startTime": "2024-01-15T16:15:00Z",
-            "endTime": null,
-            "coordinates": {
-                "latitude": 37.7490,
-                "longitude": 14.9920,
-                "elevation": 3320
-            },
-            "eventType": "lava_flow",
-            "fileAttachments": [
-                {
-                    "filename": "southwest_reactivation.mp4",
-                    "type": "thermal_video",
-                    "size": 16777216,
-                    "url": "/attachments/southwest_reactivation.mp4"
-                }
-            ],
-            "tags": [
-                "etna",
-                "southwest_crater",
-                "reactivation",
-                "multiple_craters"
-            ],
-            "crater_complex": "multiple",
-            "lava_emission_rate": "moderate"
+            "id": "evt-9028",
+            "type": "POINT",
+            "title": "Magnetic anomaly detection at Etna",
+            "startTime": "2025-01-20T11:30:00Z",
+            "properties": {
+                "magneticFieldNt": -150,
+                "anomalyType": "dipolar",
+                "surveyMethod": "aeromagnetic",
+                "altitudeM": 2000,
+                "location": "Central Crater area"
+            }
         },
         {
-            "id": "evt_024",
-            "title": "Campi Flegrei Fumarole Temperature Rise",
-            "description": "Significant temperature increase in Solfatara fumaroles during ongoing ground deformation events. Temperatures reached 180°C, highest in 5 years.",
-            "author": "Dr. Marco Giallo",
-            "startTime": "2024-01-15T17:00:00Z",
-            "endTime": "2024-01-15T23:00:00Z",
-            "coordinates": {
-                "latitude": 40.8260,
-                "longitude": 14.1380,
-                "elevation": 470
-            },
-            "eventType": "thermal_anomaly",
-            "fileAttachments": [
-                {
-                    "filename": "solfatara_temperatures.csv",
-                    "type": "temperature_data",
-                    "size": 256000,
-                    "url": "/attachments/solfatara_temperatures.csv"
-                }
-            ],
-            "tags": [
-                "campi_flegrei",
-                "solfatara",
-                "fumarole_heating",
-                "record_high"
-            ],
-            "max_temperature_celsius": 180,
-            "previous_max_celsius": 142,
-            "years_since_record": 5
+            "id": "evt-9029",
+            "type": "PERIOD",
+            "title": "Procida ground deformation monitoring",
+            "startTime": "2025-01-20T00:00:00Z",
+            "endTime": "2025-01-20T23:59:59Z",
+            "properties": {
+                "maxUpliftMm": 8,
+                "areaKm2": 12.5,
+                "deformationRate": 0.5,
+                "measurementMethod": "InSAR",
+                "referencePoint": "Marina Grande"
+            }
         },
         {
-            "id": "evt_025",
-            "title": "Stromboli Lava Flow Initiation",
-            "description": "New lava flow from Stromboli crater following explosive event. Flow advancing down Sciara del Fuoco slope at 5m/hour rate.",
-            "author": "Dr. Alessandro Verdi",
-            "startTime": "2024-01-15T14:45:00Z",
-            "endTime": "2024-01-16T08:45:00Z",
-            "coordinates": {
-                "latitude": 38.7885,
-                "longitude": 15.2125,
-                "elevation": 900
-            },
-            "eventType": "lava_flow",
-            "fileAttachments": [
-                {
-                    "filename": "stromboli_flow_thermal.tif",
-                    "type": "thermal_satellite",
-                    "size": 4194304,
-                    "url": "/attachments/stromboli_flow_thermal.tif"
-                },
-                {
-                    "filename": "flow_advance_rate.csv",
-                    "type": "field_data",
-                    "size": 128000,
-                    "url": "/attachments/flow_advance_rate.csv"
-                }
-            ],
-            "tags": [
-                "stromboli",
-                "lava_flow",
-                "sciara_del_fuoco",
-                "post_explosive"
-            ],
-            "flow_rate_m_per_hour": 5.0,
-            "flow_length_km": 0.8,
-            "slope_name": "Sciara del Fuoco"
+            "id": "evt-9030",
+            "type": "POINT",
+            "title": "Degassing rate increase at Vulcano Porto",
+            "startTime": "2025-01-20T15:20:00Z",
+            "properties": {
+                "so2FluxTonsPerDay": 950,
+                "co2FluxTonsPerDay": 65,
+                "h2sConcentration": 12,
+                "windDirection": "northwest",
+                "visibilityKm": 8
+            }
         },
         {
-            "id": "evt_026",
-            "title": "Vesuvius Crater Lake Temperature Change",
-            "description": "Unusual temperature increase detected in Vesuvius crater lake during deep tremor activity. Lake temperature rose by 8°C in 2 hours.",
-            "author": "Dr. Francesca Nero",
-            "startTime": "2024-01-15T15:00:00Z",
-            "endTime": "2024-01-15T18:00:00Z",
-            "coordinates": {
-                "latitude": 40.8215,
-                "longitude": 14.4265,
-                "elevation": 1270
-            },
-            "eventType": "thermal_anomaly",
-            "fileAttachments": [
-                {
-                    "filename": "crater_lake_thermal.csv",
-                    "type": "temperature_data",
-                    "size": 192000,
-                    "url": "/attachments/crater_lake_thermal.csv"
-                }
-            ],
-            "tags": [
-                "vesuvius",
-                "crater_lake",
-                "thermal_change",
-                "rapid_heating"
-            ],
-            "temperature_increase_celsius": 8,
-            "heating_duration_hours": 2,
-            "lake_volume_m3": 15000
-        },
-        {
-            "id": "evt_027",
-            "title": "Lipari Obsidian Flow Thermal Anomaly",
-            "description": "Thermal anomaly detected at ancient obsidian flow on Lipari. Anomaly coincides with regional hydrothermal activity and may indicate deep circulation changes.",
-            "author": "Dr. Marina Celeste",
-            "startTime": "2024-01-15T21:00:00Z",
-            "endTime": "2024-01-16T03:00:00Z",
-            "coordinates": {
-                "latitude": 38.4700,
-                "longitude": 14.9570,
-                "elevation": 200
-            },
-            "eventType": "thermal_anomaly",
-            "fileAttachments": [
-                {
-                    "filename": "obsidian_thermal_ir.tif",
-                    "type": "infrared_image",
-                    "size": 3145728,
-                    "url": "/attachments/obsidian_thermal_ir.tif"
-                }
-            ],
-            "tags": [
-                "lipari",
-                "obsidian_flow",
-                "thermal_anomaly",
-                "deep_circulation"
-            ],
-            "anomaly_temperature_celsius": 45,
-            "background_temperature_celsius": 18,
-            "flow_age_years": 1300
-        },
-        {
-            "id": "evt_028",
-            "title": "Alicudi Submarine Gas Venting",
-            "description": "New submarine gas venting detected off Alicudi island. Bubble plumes visible on sonar, potentially related to regional volcanic unrest.",
-            "author": "Dr. Marina Celeste",
-            "startTime": "2024-01-15T13:30:00Z",
-            "endTime": "2024-01-15T19:30:00Z",
-            "coordinates": {
-                "latitude": 38.5400,
-                "longitude": 14.3500,
-                "elevation": -85,
-                "depth": 85.0
-            },
-            "eventType": "gas_emission",
-            "fileAttachments": [
-                {
-                    "filename": "alicudi_sonar_bubbles.png",
-                    "type": "sonar_image",
-                    "size": 2048576,
-                    "url": "/attachments/alicudi_sonar_bubbles.png"
-                },
-                {
-                    "filename": "submarine_gas_composition.xlsx",
-                    "type": "gas_analysis",
-                    "size": 384000,
-                    "url": "/attachments/submarine_gas_composition.xlsx"
-                }
-            ],
-            "tags": [
-                "alicudi",
-                "submarine_venting",
-                "gas_emission",
-                "bubble_plumes"
-            ],
-            "vent_depth_m": 85,
-            "bubble_rate": "high",
-            "gas_composition": "CO2_dominated"
-        },
-        {
-            "id": "evt_029",
-            "title": "Etna Valle del Bove Landslide",
-            "description": "Small landslide triggered in Valle del Bove during lava flow advance and crater subsidence. Debris flow volume estimated at 5000 cubic meters.",
-            "author": "Dr. Carla Rosso",
-            "startTime": "2024-01-15T18:30:00Z",
-            "endTime": "2024-01-15T19:45:00Z",
-            "coordinates": {
-                "latitude": 37.7400,
-                "longitude": 15.0050,
-                "elevation": 2600
-            },
-            "eventType": "ground_deformation",
-            "fileAttachments": [
-                {
-                    "filename": "valle_bove_landslide.jpg",
-                    "type": "field_photo",
-                    "size": 1024000,
-                    "url": "/attachments/valle_bove_landslide.jpg"
-                },
-                {
-                    "filename": "debris_volume_calculation.pdf",
-                    "type": "analysis_report",
-                    "size": 768000,
-                    "url": "/attachments/debris_volume_calculation.pdf"
-                }
-            ],
-            "tags": [
-                "etna",
-                "valle_del_bove",
-                "landslide",
-                "volcanic_trigger"
-            ],
-            "debris_volume_m3": 5000,
-            "trigger_factor": "volcanic_activity",
-            "slope_angle_degrees": 35
-        },
-        {
-            "id": "evt_030",
-            "title": "Panarea Hydrothermal Field Expansion",
-            "description": "Expansion of hydrothermal field around Panarea island. New vents discovered 200m east of existing field during regional volcanic unrest period.",
-            "author": "Dr. Marina Celeste",
-            "startTime": "2024-01-15T22:15:00Z",
-            "endTime": "2024-01-16T04:15:00Z",
-            "coordinates": {
-                "latitude": 38.6300,
-                "longitude": 15.0800,
-                "elevation": -25,
-                "depth": 25.0
-            },
-            "eventType": "hydrothermal_activity",
-            "fileAttachments": [
-                {
-                    "filename": "panarea_new_vents.mp4",
-                    "type": "underwater_video",
-                    "size": 20971520,
-                    "url": "/attachments/panarea_new_vents.mp4"
-                },
-                {
-                    "filename": "hydrothermal_field_map.kmz",
-                    "type": "gis_data",
-                    "size": 512000,
-                    "url": "/attachments/hydrothermal_field_map.kmz"
-                }
-            ],
-            "tags": [
-                "panarea",
-                "hydrothermal_expansion",
-                "new_vents",
-                "field_mapping"
-            ],
-            "new_vents_count": 3,
-            "field_expansion_m": 200,
-            "water_depth_m": 25
+            "id": "evt-9031",
+            "type": "POINT",
+            "title": "Seismic tremor amplitude change at Stromboli",
+            "startTime": "2025-01-20T20:45:00Z",
+            "properties": {
+                "tremorAmplitude": 2.8,
+                "baselineAmplitude": 1.2,
+                "increasePercent": 133,
+                "dominantFrequency": 2.5,
+                "stationCode": "STRONorteast"
+            }
         }
-    ],
-    "event_types": [
-        "volcanic_eruption",
-        "earthquake",
-        "gas_emission",
-        "seismic_swarm",
-        "ground_deformation",
-        "thermal_anomaly",
-        "microseismic_activity",
-        "lava_flow",
-        "hydrothermal_activity"
     ]
 }
