@@ -93,6 +93,10 @@ class _TimelineDimensions {
   final double minScale;
   final double maxScale;
   final Duration defaultEventDuration;
+  final double memberCircleSize;
+  final FontWeight pointEventFontWeight;
+  final FontWeight periodEventFontWeight;
+  final FontWeight groupEventFontWeight;
 
   _TimelineDimensions._({
     required this.visibleStart,
@@ -114,6 +118,10 @@ class _TimelineDimensions {
     required this.minScale,
     required this.maxScale,
     required this.defaultEventDuration,
+    required this.memberCircleSize,
+    required this.pointEventFontWeight,
+    required this.periodEventFontWeight,
+    required this.groupEventFontWeight,
   });
 
   static _TimelineDimensions calculate({
@@ -144,6 +152,12 @@ class _TimelineDimensions {
     const eventSpacing = 8.0;
     const eventPadding = 10.0;
     const eventBorderRadius = 4.0;
+    const memberCircleSize = 16.0;
+
+    // Font weights for different event types
+    const pointEventFontWeight = FontWeight.w500;
+    const periodEventFontWeight = FontWeight.w500;
+    const groupEventFontWeight = FontWeight.w500;
 
     // Timeline height based on row count
     final timelineHeight = rowCount * rowHeight;
@@ -168,6 +182,10 @@ class _TimelineDimensions {
       minScale: 0.2,
       maxScale: 4.0,
       defaultEventDuration: const Duration(hours: 2),
+      memberCircleSize: memberCircleSize,
+      pointEventFontWeight: pointEventFontWeight,
+      periodEventFontWeight: periodEventFontWeight,
+      groupEventFontWeight: groupEventFontWeight,
     );
   }
 }
@@ -481,7 +499,16 @@ class _EventBox extends StatelessWidget {
       dimensions.visibleStart,
     );
     // Use the same calculation method as the grid: hours * pixelsPerHour
-    final leftOffset = eventOffset.inHours * dimensions.pixelsPerHour;
+    final timestampPixelPosition =
+        eventOffset.inHours * dimensions.pixelsPerHour;
+
+    // For point events, center the circle on the timestamp
+    final isPeriodic = event.hasDuration;
+    final leftOffset = isPeriodic
+        ? timestampPixelPosition
+        : timestampPixelPosition -
+              (dimensions.eventHeight / 2); // Center the circle
+
     final verticalCenter = (dimensions.rowHeight - dimensions.eventHeight) / 2;
 
     return Positioned(left: leftOffset, top: verticalCenter, child: child);
@@ -519,7 +546,7 @@ class _PointEventWidget extends StatelessWidget {
             event.title,
             style: TextStyle(
               fontSize: dimensions.fontSize,
-              fontWeight: FontWeight.normal,
+              fontWeight: dimensions.pointEventFontWeight,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -570,8 +597,7 @@ class _PeriodEventWidget extends StatelessWidget {
                 event.title,
                 style: TextStyle(
                   fontSize: dimensions.fontSize,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: dimensions.periodEventFontWeight,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -620,10 +646,15 @@ class _GroupedEventWidget extends StatelessWidget {
     final minMemberPos = memberPositions.reduce((a, b) => a < b ? a : b);
     final maxMemberPos = memberPositions.reduce((a, b) => a > b ? a : b);
 
-    const borderPadding = 8.0;
-    final borderLeft = minMemberPos - borderPadding;
-    final borderWidth =
-        (maxMemberPos - minMemberPos) + (borderPadding * 2) + 12;
+    // Visual-driven container sizing: size based on what user actually sees
+    final circleSize = dimensions.memberCircleSize;
+    final circleRadius = circleSize / 2;
+    final leftmostVisualPixel =
+        minMemberPos - circleRadius; // Left edge of first circle
+    final rightmostVisualPixel =
+        maxMemberPos + circleRadius; // Right edge of last circle
+    final borderLeft = leftmostVisualPixel;
+    final borderWidth = rightmostVisualPixel - leftmostVisualPixel;
     const titlePadding = 120.0;
     final totalWidth = borderWidth + titlePadding;
 
@@ -635,20 +666,35 @@ class _GroupedEventWidget extends StatelessWidget {
         height: dimensions.eventHeight,
         child: Stack(
           children: [
-            // Group border
-            _GroupBorder(
-              width: borderWidth,
-              height: dimensions.eventHeight,
-              color: color,
+            // Group horizontal lines (like equals sign) - only span timestamp range
+            Positioned(
+              left:
+                  circleRadius, // Offset by circle radius since container starts earlier
+              child: _GroupHorizontalLines(
+                width: maxMemberPos - minMemberPos, // Only timestamp range
+                height: dimensions.eventHeight,
+                color: color,
+              ),
             ),
             // Member circles
             ..._buildMemberCircles(members, memberPositions, borderLeft),
-            // Title
-            _GroupTitle(
-              event: event,
-              borderWidth: borderWidth,
-              color: color,
-              dimensions: dimensions,
+            // Title - inline like other event types
+            Positioned(
+              left: borderWidth + 8,
+              top: 0,
+              right: 0,
+              bottom: 0,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  event.title,
+                  style: TextStyle(
+                    fontSize: dimensions.fontSize,
+                    fontWeight: dimensions.groupEventFontWeight,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
           ],
         ),
@@ -661,27 +707,33 @@ class _GroupedEventWidget extends StatelessWidget {
     List<double> memberPositions,
     double borderLeft,
   ) {
+    final circleSize = dimensions.memberCircleSize;
+    final circleRadius = circleSize / 2;
+
     return members.asMap().entries.map((entry) {
       final index = entry.key;
-      final absolutePosition = memberPositions[index];
-      final relativePosition = absolutePosition - borderLeft;
+      final timestampPosition = memberPositions[index];
+      // Position circle so its CENTER is at the timestamp
+      // Container starts at (minPos - radius), so timestamp is at (timestamp - borderLeft)
+      // But we want circle center there, so position circle at (timestamp - borderLeft - radius)
+      final relativePosition = timestampPosition - borderLeft - circleRadius;
 
       return Positioned(
         left: relativePosition,
-        top: (dimensions.eventHeight - 12) / 2,
-        child: _MemberCircle(color: color),
+        top: (dimensions.eventHeight - circleSize) / 2,
+        child: _MemberCircle(color: color, size: circleSize),
       );
     }).toList();
   }
 }
 
-/// Group border widget
-class _GroupBorder extends StatelessWidget {
+/// Group horizontal lines widget (equals sign style)
+class _GroupHorizontalLines extends StatelessWidget {
   final double width;
   final double height;
   final Color color;
 
-  const _GroupBorder({
+  const _GroupHorizontalLines({
     required this.width,
     required this.height,
     required this.color,
@@ -689,13 +741,36 @@ class _GroupBorder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    const lineThickness = 3.0;
+
+    return SizedBox(
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        border: Border.all(color: color, width: 2),
-        borderRadius: BorderRadius.circular(4),
-        color: color.withValues(alpha: 0.1),
+      child: Stack(
+        children: [
+          // Top horizontal line
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(height: lineThickness, color: color),
+          ),
+          // Bottom horizontal line
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(height: lineThickness, color: color),
+          ),
+          // Optional: Light background between the lines
+          Positioned(
+            top: lineThickness,
+            bottom: lineThickness,
+            left: 0,
+            right: 0,
+            child: Container(color: color.withValues(alpha: 0.05)),
+          ),
+        ],
       ),
     );
   }
@@ -704,55 +779,19 @@ class _GroupBorder extends StatelessWidget {
 /// Member circle widget
 class _MemberCircle extends StatelessWidget {
   final Color color;
+  final double size;
 
-  const _MemberCircle({required this.color});
+  const _MemberCircle({required this.color, this.size = 16.0});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 12,
-      height: 12,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 1),
-      ),
-    );
-  }
-}
-
-/// Group title widget
-class _GroupTitle extends StatelessWidget {
-  final Event event;
-  final double borderWidth;
-  final Color color;
-  final _TimelineDimensions dimensions;
-
-  const _GroupTitle({
-    required this.event,
-    required this.borderWidth,
-    required this.color,
-    required this.dimensions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: borderWidth + 8,
-      top: 0,
-      right: 0,
-      bottom: 0,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          event.title,
-          style: TextStyle(
-            fontSize: dimensions.fontSize,
-            color: Colors.black87,
-            fontWeight: FontWeight.bold,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
       ),
     );
   }
