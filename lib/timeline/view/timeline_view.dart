@@ -40,43 +40,26 @@ class _TimelineViewState extends State<TimelineView> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Hoist all repeated calculations to compute once
-          final visibleWindow = state.visibleEnd.difference(state.visibleStart);
-          final divisions = visibleWindow.inHours;
-          final timelineWidth = divisions * TimelineConstants.pixelsPerHour;
-          final timelineHeight =
-              state.rows.length * TimelineConstants.rowHeight;
+          // Calculate consistent dimensions based on time and content
+          final dimensions = _TimelineDimensions.calculate(
+            visibleStart: state.visibleStart,
+            visibleEnd: state.visibleEnd,
+            rowCount: state.rows.length,
+          );
 
           return Column(
             children: [
               // Sticky ruler header
-              Container(
-                height: TimelineConstants.rulerHeight,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-                ),
-                child: _buildStickyRuler(state, timelineWidth, divisions),
+              _StickyRuler(
+                dimensions: dimensions,
+                transformationController: _transformationController,
               ),
               // Timeline content with InteractiveViewer
               Expanded(
-                child: InteractiveViewer(
+                child: _TimelineContent(
+                  rows: state.rows,
+                  dimensions: dimensions,
                   transformationController: _transformationController,
-                  minScale: TimelineConstants.minScale,
-                  maxScale: TimelineConstants.maxScale,
-                  constrained: false,
-                  child: SizedBox(
-                    width: timelineWidth,
-                    height: timelineHeight,
-                    child: Column(
-                      children: _buildTimelineRows(
-                        state,
-                        timelineWidth,
-                        visibleWindow,
-                        divisions,
-                      ),
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -85,155 +68,233 @@ class _TimelineViewState extends State<TimelineView> {
       ),
     );
   }
+}
 
-  Widget _buildStickyRuler(
-    TimelineState state,
-    double timelineWidth,
-    int divisions,
-  ) {
-    return ClipRect(
-      child: AnimatedBuilder(
-        animation: _transformationController,
-        builder: (context, child) {
-          // Get both translation and scale from the transformation matrix
-          final matrix = _transformationController.value;
-          final translation = matrix.getTranslation();
-          final scale = matrix.getMaxScaleOnAxis();
+/// Responsive dimensions calculator for timeline
+class _TimelineDimensions {
+  final DateTime visibleStart;
+  final DateTime visibleEnd;
+  final Duration visibleWindow;
+  final int divisions;
+  final double timelineWidth;
+  final double timelineHeight;
+  final double pixelsPerHour;
 
-          return SizedBox(
-            height: TimelineConstants.rulerHeight,
-            child: Stack(
-              children: [
-                // Scaled ruler structure (borders and segments)
-                Transform(
-                  transform: Matrix4.identity()
-                    ..translate(translation.x, 0.0)
-                    ..scale(scale, 1.0),
-                  child: OverflowBox(
-                    alignment: Alignment.centerLeft,
-                    minWidth: 0,
-                    maxWidth: double.infinity,
-                    child: SizedBox(
-                      width: timelineWidth,
-                      height: TimelineConstants.rulerHeight,
-                      child: _ColumnGrid(
-                        divisions: divisions,
-                        totalWidth: timelineWidth,
-                        height: TimelineConstants.rulerHeight,
-                      ),
-                    ),
-                  ),
-                ),
-                // Non-scaled text overlay
-                Transform(
-                  transform: Matrix4.identity()..translate(translation.x, 0.0),
-                  child: OverflowBox(
-                    alignment: Alignment.centerLeft,
-                    minWidth: 0,
-                    maxWidth: double.infinity,
-                    child: SizedBox(
-                      width: timelineWidth * scale,
-                      height: TimelineConstants.rulerHeight,
-                      child: Row(
-                        children: _buildRulerLabels(
-                          state,
-                          timelineWidth,
-                          scale,
-                          divisions,
+  // Calculated responsive dimensions
+  final double rowHeight;
+  final double eventHeight;
+  final double rulerHeight;
+  final double fontSize;
+  final double rulerFontSize;
+  final double eventSpacing;
+  final double eventPadding;
+  final double eventBorderRadius;
+  final double eventOpacity;
+  final double minScale;
+  final double maxScale;
+  final Duration defaultEventDuration;
+
+  _TimelineDimensions._({
+    required this.visibleStart,
+    required this.visibleEnd,
+    required this.visibleWindow,
+    required this.divisions,
+    required this.timelineWidth,
+    required this.timelineHeight,
+    required this.pixelsPerHour,
+    required this.rowHeight,
+    required this.eventHeight,
+    required this.rulerHeight,
+    required this.fontSize,
+    required this.rulerFontSize,
+    required this.eventSpacing,
+    required this.eventPadding,
+    required this.eventBorderRadius,
+    required this.eventOpacity,
+    required this.minScale,
+    required this.maxScale,
+    required this.defaultEventDuration,
+  });
+
+  static _TimelineDimensions calculate({
+    required DateTime visibleStart,
+    required DateTime visibleEnd,
+    required int rowCount,
+  }) {
+    final visibleWindow = visibleEnd.difference(visibleStart);
+    final divisions = visibleWindow.inHours;
+
+    // Calculate timeline width based on optimal readability
+    // Use a base density that provides good readability for event titles and positioning
+    const baseDensityPixelsPerHour =
+        120.0; // Reasonable base for most use cases
+    final timelineWidth = divisions * baseDensityPixelsPerHour;
+    final pixelsPerHour = baseDensityPixelsPerHour;
+
+    // Use consistent, well-proportioned dimensions
+    const rowHeight = 75.0;
+    const eventHeight = 45.0; // 60% of row height
+    const rulerHeight = 55.0;
+
+    // Consistent typography
+    const fontSize = 13.0;
+    const rulerFontSize = 11.0;
+
+    // Consistent spacing
+    const eventSpacing = 8.0;
+    const eventPadding = 10.0;
+    const eventBorderRadius = 4.0;
+
+    // Timeline height based on row count
+    final timelineHeight = rowCount * rowHeight;
+
+    return _TimelineDimensions._(
+      visibleStart: visibleStart,
+      visibleEnd: visibleEnd,
+      visibleWindow: visibleWindow,
+      divisions: divisions,
+      timelineWidth: timelineWidth,
+      timelineHeight: timelineHeight,
+      pixelsPerHour: pixelsPerHour,
+      rowHeight: rowHeight,
+      eventHeight: eventHeight,
+      rulerHeight: rulerHeight,
+      fontSize: fontSize,
+      rulerFontSize: rulerFontSize,
+      eventSpacing: eventSpacing,
+      eventPadding: eventPadding,
+      eventBorderRadius: eventBorderRadius,
+      eventOpacity: 0.9,
+      minScale: 0.2,
+      maxScale: 4.0,
+      defaultEventDuration: const Duration(hours: 2),
+    );
+  }
+}
+
+/// Sticky ruler header component
+class _StickyRuler extends StatelessWidget {
+  final _TimelineDimensions dimensions;
+  final TransformationController transformationController;
+
+  const _StickyRuler({
+    required this.dimensions,
+    required this.transformationController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: dimensions.rulerHeight,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+      ),
+      child: ClipRect(
+        child: AnimatedBuilder(
+          animation: transformationController,
+          builder: (context, child) {
+            // Get both translation and scale from the transformation matrix
+            final matrix = transformationController.value;
+            final translation = matrix.getTranslation();
+            final scale = matrix.getMaxScaleOnAxis();
+
+            return SizedBox(
+              height: dimensions.rulerHeight,
+              child: Stack(
+                children: [
+                  // Scaled ruler structure (borders and segments)
+                  Transform(
+                    transform: Matrix4.identity()
+                      ..translate(translation.x, 0.0)
+                      ..scale(scale, 1.0),
+                    child: OverflowBox(
+                      alignment: Alignment.centerLeft,
+                      minWidth: 0,
+                      maxWidth: double.infinity,
+                      child: SizedBox(
+                        width: dimensions.timelineWidth,
+                        height: dimensions.rulerHeight,
+                        child: _RulerGrid(
+                          divisions: dimensions.divisions,
+                          totalWidth: dimensions.timelineWidth,
+                          height: dimensions.rulerHeight,
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                  // Non-scaled text overlay
+                  Transform(
+                    transform: Matrix4.identity()
+                      ..translate(translation.x, 0.0),
+                    child: OverflowBox(
+                      alignment: Alignment.centerLeft,
+                      minWidth: 0,
+                      maxWidth: double.infinity,
+                      child: SizedBox(
+                        width: dimensions.timelineWidth * scale,
+                        height: dimensions.rulerHeight,
+                        child: _RulerLabels(
+                          dimensions: dimensions,
+                          scale: scale,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
+}
 
-  List<Widget> _buildRulerLabels(
-    TimelineState state,
-    double timelineWidth,
-    double scale,
-    int divisions,
-  ) {
-    final segmentWidth = timelineWidth * scale / divisions;
+/// Timeline content with InteractiveViewer
+class _TimelineContent extends StatelessWidget {
+  final List<TimelineRow> rows;
+  final _TimelineDimensions dimensions;
+  final TransformationController transformationController;
 
-    return List.generate(divisions, (index) {
-      String label;
+  const _TimelineContent({
+    required this.rows,
+    required this.dimensions,
+    required this.transformationController,
+  });
 
-      // Hour labels
-      final segmentStart = state.visibleStart.add(Duration(hours: index));
-      label =
-          '${segmentStart.day}/${segmentStart.month} ${segmentStart.hour.toString().padLeft(2, '0')}:00';
-
-      return SizedBox(
-        width: segmentWidth,
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: TimelineConstants.rulerFontSize,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+  @override
+  Widget build(BuildContext context) {
+    return InteractiveViewer(
+      transformationController: transformationController,
+      minScale: dimensions.minScale,
+      maxScale: dimensions.maxScale,
+      constrained: false,
+      child: SizedBox(
+        width: dimensions.timelineWidth,
+        height: dimensions.timelineHeight,
+        child: Column(
+          children: rows
+              .map(
+                (row) => _TimelineRowWidget(row: row, dimensions: dimensions),
+              )
+              .toList(),
         ),
-      );
-    });
-  }
-
-  List<Widget> _buildTimelineRows(
-    TimelineState state,
-    double timelineWidth,
-    Duration visibleWindow,
-    int divisions,
-  ) {
-    return state.rows.map((row) {
-      return Container(
-        height: TimelineConstants.rowHeight,
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
-        ),
-        child: Stack(
-          children: [
-            // Vertical grid lines behind events
-            _ColumnGrid(
-              divisions: divisions,
-              totalWidth: timelineWidth,
-              height: TimelineConstants.rowHeight,
-            ),
-
-            // Single loop over all events
-            ...row.events.map((event) {
-              final isGrouped = event.type == EventType.grouped;
-
-              return _EventBox(
-                event: event,
-                state: state,
-                timelineWidth: timelineWidth,
-                visibleWindow: visibleWindow,
-                isGrouped: isGrouped,
-              );
-            }),
-          ],
-        ),
-      );
-    }).toList();
+      ),
+    );
   }
 }
 
-/// A widget that draws `divisions` vertical lines across `totalWidth`
-class _ColumnGrid extends StatelessWidget {
+/// Ruler grid component
+class _RulerGrid extends StatelessWidget {
   final int divisions;
   final double totalWidth;
-  final double? height;
+  final double height;
 
-  const _ColumnGrid({
+  const _RulerGrid({
     required this.divisions,
     required this.totalWidth,
-    this.height,
+    required this.height,
   });
 
   @override
@@ -260,246 +321,136 @@ class _ColumnGrid extends StatelessWidget {
   }
 }
 
-/// Unified event rendering widget that handles all event types
+/// Ruler labels component
+class _RulerLabels extends StatelessWidget {
+  final _TimelineDimensions dimensions;
+  final double scale;
+
+  const _RulerLabels({required this.dimensions, required this.scale});
+
+  @override
+  Widget build(BuildContext context) {
+    final totalWidth = dimensions.timelineWidth * scale;
+    final segmentWidth = totalWidth / dimensions.divisions;
+
+    return Row(
+      children: List.generate(dimensions.divisions, (index) {
+        final segmentStart = dimensions.visibleStart.add(
+          Duration(hours: index),
+        );
+        final label =
+            '${segmentStart.day}/${segmentStart.month} ${segmentStart.hour.toString().padLeft(2, '0')}:00';
+
+        // For the last segment, use Expanded to take remaining space
+        // to avoid floating point precision issues
+        if (index == dimensions.divisions - 1) {
+          return Expanded(
+            child: Center(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: dimensions.rulerFontSize,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return SizedBox(
+          width: segmentWidth,
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: dimensions.rulerFontSize,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+/// Timeline row widget
+class _TimelineRowWidget extends StatelessWidget {
+  final TimelineRow row;
+  final _TimelineDimensions dimensions;
+
+  const _TimelineRowWidget({required this.row, required this.dimensions});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: dimensions.rowHeight,
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: Stack(
+        children: [
+          // Vertical grid lines behind events
+          _RulerGrid(
+            divisions: dimensions.divisions,
+            totalWidth: dimensions.timelineWidth,
+            height: dimensions.rowHeight,
+          ),
+          // Event boxes
+          ...row.events.map(
+            (event) => _EventBox(event: event, dimensions: dimensions),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Event display component
 class _EventBox extends StatelessWidget {
   final Event event;
-  final TimelineState state;
-  final double timelineWidth;
-  final Duration visibleWindow;
-  final bool isGrouped;
+  final _TimelineDimensions dimensions;
 
-  const _EventBox({
-    required this.event,
-    required this.state,
-    required this.timelineWidth,
-    required this.visibleWindow,
-    required this.isGrouped,
-  });
+  const _EventBox({required this.event, required this.dimensions});
 
   @override
   Widget build(BuildContext context) {
     final color = _getEventColor(event);
+    final isGrouped = event.type == EventType.grouped;
 
     // Handle grouped events specially
     if (isGrouped) {
-      return _buildGroupedContents(color);
+      return _GroupedEventWidget(
+        event: event,
+        dimensions: dimensions,
+        color: color,
+      );
     }
 
     final isPeriodic = event.hasDuration;
-    final Duration eventDuration = isPeriodic
+    final eventDuration = isPeriodic
         ? event.duration!
-        : TimelineConstants.defaultEventDuration;
+        : dimensions.defaultEventDuration;
 
-    final textWidth = _computeEventTextWidth(
-      eventDuration: eventDuration,
-      visibleWindow: visibleWindow,
-      timelineWidth: timelineWidth,
-    );
+    final textWidth = _computeEventTextWidth(eventDuration);
 
     return _wrapEventPosition(
-      startTime: event.effectiveStartTime,
-      state: state,
-      timelineWidth: timelineWidth,
-      visibleWindow: visibleWindow,
       child: SizedBox(
         width: textWidth,
-        height: TimelineConstants.eventHeight,
+        height: dimensions.eventHeight,
         child: isPeriodic
-            ? _buildPeriodContents(color, eventDuration)
-            : _buildPointContents(color),
+            ? _PeriodEventWidget(
+                event: event,
+                color: color,
+                eventDuration: eventDuration,
+                dimensions: dimensions,
+              )
+            : _PointEventWidget(
+                event: event,
+                color: color,
+                dimensions: dimensions,
+              ),
       ),
-    );
-  }
-
-  Widget _buildGroupedContents(Color color) {
-    if (event.members == null || event.members!.isEmpty) {
-      // Fallback to regular rendering if no members
-      return _buildPointContents(color);
-    }
-
-    final members = event.members!;
-    final groupStart = event.effectiveStartTime;
-    final groupEnd = event.effectiveEndTime!;
-
-    // Calculate positions for all members relative to the visible timeline
-    final memberPositions = members.map((member) {
-      final memberOffset = member.timestamp.difference(state.visibleStart);
-      final positionRatio =
-          memberOffset.inMilliseconds / visibleWindow.inMilliseconds;
-      return positionRatio * timelineWidth;
-    }).toList();
-
-    // Calculate the group's position relative to the visible timeline
-    final groupStartOffset = groupStart.difference(state.visibleStart);
-    final groupStartPosition =
-        (groupStartOffset.inMilliseconds / visibleWindow.inMilliseconds) *
-        timelineWidth;
-
-    // Find the bounds of all member positions to create the border
-    final minMemberPos = memberPositions.reduce((a, b) => a < b ? a : b);
-    final maxMemberPos = memberPositions.reduce((a, b) => a > b ? a : b);
-
-    // Add some padding around the members for the border
-    const borderPadding = 8.0;
-    final borderLeft = minMemberPos - borderPadding;
-    final borderWidth =
-        (maxMemberPos - minMemberPos) +
-        (borderPadding * 2) +
-        12; // +12 for circle size
-
-    // Position the entire container at the leftmost member position
-    const titlePadding = 120.0;
-    final totalWidth = borderWidth + titlePadding;
-
-    return Positioned(
-      left: borderLeft,
-      top: (TimelineConstants.rowHeight - TimelineConstants.eventHeight) / 2,
-      child: SizedBox(
-        width: totalWidth,
-        height: TimelineConstants.eventHeight,
-        child: Stack(
-          children: [
-            // Border around the grouped events
-            Positioned(
-              left: 0,
-              top: 0,
-              child: Container(
-                width: borderWidth,
-                height: TimelineConstants.eventHeight,
-                decoration: BoxDecoration(
-                  border: Border.all(color: color, width: 2),
-                  borderRadius: BorderRadius.circular(4),
-                  color: color.withValues(alpha: 0.1),
-                ),
-              ),
-            ),
-            // Individual member events as small circles
-            ...members.asMap().entries.map((entry) {
-              final index = entry.key;
-              final member = entry.value;
-              final absolutePosition = memberPositions[index];
-              final relativePosition = absolutePosition - borderLeft;
-
-              return Positioned(
-                left: relativePosition,
-                top: (TimelineConstants.eventHeight - 12) / 2,
-                child: Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 1),
-                  ),
-                ),
-              );
-            }),
-            // Title text to the right of the group
-            Positioned(
-              left: borderWidth + 8,
-              top: 0,
-              right: 0,
-              bottom: 0,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  event.title,
-                  style: TextStyle(
-                    fontSize: TimelineConstants.fontSize,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPointContents(Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: TimelineConstants.eventHeight,
-          height: TimelineConstants.eventHeight,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: TimelineConstants.eventOpacity),
-            shape: BoxShape.circle,
-            border: isGrouped ? Border.all(color: color, width: 2) : null,
-          ),
-          child: isGrouped
-              ? Icon(Icons.group_work, size: 16, color: Colors.white)
-              : null,
-        ),
-        SizedBox(width: TimelineConstants.eventSpacing),
-        Expanded(
-          child: Text(
-            event.title,
-            style: TextStyle(
-              fontSize: TimelineConstants.fontSize,
-              fontWeight: isGrouped ? FontWeight.bold : FontWeight.normal,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPeriodContents(Color color, Duration eventDuration) {
-    final fullWidth = _computeEventFullWidth(
-      eventDuration: eventDuration,
-      visibleWindow: visibleWindow,
-      timelineWidth: timelineWidth,
-    );
-
-    return Stack(
-      children: [
-        Container(
-          width: fullWidth,
-          height: TimelineConstants.eventHeight,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: TimelineConstants.eventOpacity),
-            borderRadius: BorderRadius.circular(
-              TimelineConstants.eventBorderRadius,
-            ),
-            border: isGrouped ? Border.all(color: color, width: 2) : null,
-          ),
-        ),
-        if (isGrouped)
-          Positioned(
-            left: 4,
-            top: 4,
-            child: Icon(Icons.group_work, size: 16, color: color),
-          ),
-        Positioned(
-          left: isGrouped ? 24 : 0,
-          top: 0,
-          right: 0,
-          bottom: 0,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: TimelineConstants.eventPadding,
-            ),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                event.title,
-                style: TextStyle(
-                  fontSize: TimelineConstants.fontSize,
-                  color: Colors.black87,
-                  fontWeight: isGrouped ? FontWeight.bold : FontWeight.w500,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -517,41 +468,292 @@ class _EventBox extends StatelessWidget {
     return eventColors[event.hashCode % eventColors.length].shade300;
   }
 
-  double _computeEventTextWidth({
-    required Duration eventDuration,
-    required Duration visibleWindow,
-    required double timelineWidth,
-  }) {
-    final maxTextSpan = eventDuration < TimelineConstants.defaultEventDuration
-        ? TimelineConstants.defaultEventDuration
+  double _computeEventTextWidth(Duration eventDuration) {
+    final maxTextSpan = eventDuration < dimensions.defaultEventDuration
+        ? dimensions.defaultEventDuration
         : eventDuration;
-    final ratio = maxTextSpan.inMilliseconds / visibleWindow.inMilliseconds;
-    return ratio * timelineWidth;
+    // Use the same calculation method as the grid: hours * pixelsPerHour
+    return maxTextSpan.inHours * dimensions.pixelsPerHour;
   }
 
-  double _computeEventFullWidth({
-    required Duration eventDuration,
-    required Duration visibleWindow,
-    required double timelineWidth,
-  }) {
-    final ratio = eventDuration.inMilliseconds / visibleWindow.inMilliseconds;
-    return ratio * timelineWidth;
-  }
-
-  Widget _wrapEventPosition({
-    required DateTime startTime,
-    required TimelineState state,
-    required double timelineWidth,
-    required Duration visibleWindow,
-    required Widget child,
-  }) {
-    final eventOffset = startTime.difference(state.visibleStart);
-    final positionRatio =
-        eventOffset.inMilliseconds / visibleWindow.inMilliseconds;
-    final leftOffset = positionRatio * timelineWidth;
-    final verticalCenter =
-        (TimelineConstants.rowHeight - TimelineConstants.eventHeight) / 2;
+  Widget _wrapEventPosition({required Widget child}) {
+    final eventOffset = event.effectiveStartTime.difference(
+      dimensions.visibleStart,
+    );
+    // Use the same calculation method as the grid: hours * pixelsPerHour
+    final leftOffset = eventOffset.inHours * dimensions.pixelsPerHour;
+    final verticalCenter = (dimensions.rowHeight - dimensions.eventHeight) / 2;
 
     return Positioned(left: leftOffset, top: verticalCenter, child: child);
+  }
+}
+
+/// Point event widget (circular event)
+class _PointEventWidget extends StatelessWidget {
+  final Event event;
+  final Color color;
+  final _TimelineDimensions dimensions;
+
+  const _PointEventWidget({
+    required this.event,
+    required this.color,
+    required this.dimensions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: dimensions.eventHeight,
+          height: dimensions.eventHeight,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: dimensions.eventOpacity),
+            shape: BoxShape.circle,
+          ),
+        ),
+        SizedBox(width: dimensions.eventSpacing),
+        Expanded(
+          child: Text(
+            event.title,
+            style: TextStyle(
+              fontSize: dimensions.fontSize,
+              fontWeight: FontWeight.normal,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Period event widget (rectangular event with duration)
+class _PeriodEventWidget extends StatelessWidget {
+  final Event event;
+  final Color color;
+  final Duration eventDuration;
+  final _TimelineDimensions dimensions;
+
+  const _PeriodEventWidget({
+    required this.event,
+    required this.color,
+    required this.eventDuration,
+    required this.dimensions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fullWidth = _computeEventFullWidth();
+
+    return Stack(
+      children: [
+        Container(
+          width: fullWidth,
+          height: dimensions.eventHeight,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: dimensions.eventOpacity),
+            borderRadius: BorderRadius.circular(dimensions.eventBorderRadius),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          top: 0,
+          right: 0,
+          bottom: 0,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: dimensions.eventPadding),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                event.title,
+                style: TextStyle(
+                  fontSize: dimensions.fontSize,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  double _computeEventFullWidth() {
+    // Use the same calculation method as the grid: hours * pixelsPerHour
+    return eventDuration.inHours * dimensions.pixelsPerHour;
+  }
+}
+
+/// Grouped event widget (shows multiple related events)
+class _GroupedEventWidget extends StatelessWidget {
+  final Event event;
+  final _TimelineDimensions dimensions;
+  final Color color;
+
+  const _GroupedEventWidget({
+    required this.event,
+    required this.dimensions,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (event.members == null || event.members!.isEmpty) {
+      return _PointEventWidget(
+        event: event,
+        color: color,
+        dimensions: dimensions,
+      );
+    }
+
+    final members = event.members!;
+    final memberPositions = members.map((member) {
+      final memberOffset = member.timestamp.difference(dimensions.visibleStart);
+      // Use the same calculation method as the grid: hours * pixelsPerHour
+      return memberOffset.inHours * dimensions.pixelsPerHour;
+    }).toList();
+
+    final minMemberPos = memberPositions.reduce((a, b) => a < b ? a : b);
+    final maxMemberPos = memberPositions.reduce((a, b) => a > b ? a : b);
+
+    const borderPadding = 8.0;
+    final borderLeft = minMemberPos - borderPadding;
+    final borderWidth =
+        (maxMemberPos - minMemberPos) + (borderPadding * 2) + 12;
+    const titlePadding = 120.0;
+    final totalWidth = borderWidth + titlePadding;
+
+    return Positioned(
+      left: borderLeft,
+      top: (dimensions.rowHeight - dimensions.eventHeight) / 2,
+      child: SizedBox(
+        width: totalWidth,
+        height: dimensions.eventHeight,
+        child: Stack(
+          children: [
+            // Group border
+            _GroupBorder(
+              width: borderWidth,
+              height: dimensions.eventHeight,
+              color: color,
+            ),
+            // Member circles
+            ..._buildMemberCircles(members, memberPositions, borderLeft),
+            // Title
+            _GroupTitle(
+              event: event,
+              borderWidth: borderWidth,
+              color: color,
+              dimensions: dimensions,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildMemberCircles(
+    List<GroupMember> members,
+    List<double> memberPositions,
+    double borderLeft,
+  ) {
+    return members.asMap().entries.map((entry) {
+      final index = entry.key;
+      final absolutePosition = memberPositions[index];
+      final relativePosition = absolutePosition - borderLeft;
+
+      return Positioned(
+        left: relativePosition,
+        top: (dimensions.eventHeight - 12) / 2,
+        child: _MemberCircle(color: color),
+      );
+    }).toList();
+  }
+}
+
+/// Group border widget
+class _GroupBorder extends StatelessWidget {
+  final double width;
+  final double height;
+  final Color color;
+
+  const _GroupBorder({
+    required this.width,
+    required this.height,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        border: Border.all(color: color, width: 2),
+        borderRadius: BorderRadius.circular(4),
+        color: color.withValues(alpha: 0.1),
+      ),
+    );
+  }
+}
+
+/// Member circle widget
+class _MemberCircle extends StatelessWidget {
+  final Color color;
+
+  const _MemberCircle({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 1),
+      ),
+    );
+  }
+}
+
+/// Group title widget
+class _GroupTitle extends StatelessWidget {
+  final Event event;
+  final double borderWidth;
+  final Color color;
+  final _TimelineDimensions dimensions;
+
+  const _GroupTitle({
+    required this.event,
+    required this.borderWidth,
+    required this.color,
+    required this.dimensions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: borderWidth + 8,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          event.title,
+          style: TextStyle(
+            fontSize: dimensions.fontSize,
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
   }
 }
