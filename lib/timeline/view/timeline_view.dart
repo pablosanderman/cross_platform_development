@@ -18,6 +18,8 @@ class TimelineView extends StatefulWidget {
 class _TimelineViewState extends State<TimelineView> {
   final TransformationController _transformationController =
       TransformationController();
+  int? _draggedRowIndex;
+  int? _dragTargetIndex;
 
   @override
   void dispose() {
@@ -54,12 +56,40 @@ class _TimelineViewState extends State<TimelineView> {
                 dimensions: dimensions,
                 transformationController: _transformationController,
               ),
-              // Timeline content with InteractiveViewer
+              // Timeline content with drag and drop functionality
               Expanded(
-                child: _TimelineContent(
+                child: _DraggableTimelineContent(
                   rows: state.rows,
                   dimensions: dimensions,
                   transformationController: _transformationController,
+                  draggedRowIndex: _draggedRowIndex,
+                  dragTargetIndex: _dragTargetIndex,
+                  onDragStarted: (index) {
+                    setState(() {
+                      _draggedRowIndex = index;
+                    });
+                  },
+                  onDragEnded: () {
+                    setState(() {
+                      _draggedRowIndex = null;
+                      _dragTargetIndex = null;
+                    });
+                  },
+                  onDragAccepted: (draggedIndex, targetIndex) {
+                    context.read<TimelineCubit>().reorderRows(
+                      draggedIndex,
+                      targetIndex,
+                    );
+                    setState(() {
+                      _draggedRowIndex = null;
+                      _dragTargetIndex = null;
+                    });
+                  },
+                  onDragTargetChanged: (index) {
+                    setState(() {
+                      _dragTargetIndex = index;
+                    });
+                  },
                 ),
               ),
             ],
@@ -792,6 +822,290 @@ class _MemberCircle extends StatelessWidget {
         color: color,
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 1),
+      ),
+    );
+  }
+}
+
+/// Timeline content with drag and drop functionality
+class _DraggableTimelineContent extends StatelessWidget {
+  final List<TimelineRow> rows;
+  final _TimelineDimensions dimensions;
+  final TransformationController transformationController;
+  final int? draggedRowIndex;
+  final int? dragTargetIndex;
+  final Function(int) onDragStarted;
+  final VoidCallback onDragEnded;
+  final Function(int, int) onDragAccepted;
+  final Function(int) onDragTargetChanged;
+
+  const _DraggableTimelineContent({
+    required this.rows,
+    required this.dimensions,
+    required this.transformationController,
+    required this.draggedRowIndex,
+    required this.dragTargetIndex,
+    required this.onDragStarted,
+    required this.onDragEnded,
+    required this.onDragAccepted,
+    required this.onDragTargetChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Original timeline content
+        _TimelineContent(
+          rows: rows,
+          dimensions: dimensions,
+          transformationController: transformationController,
+        ),
+        // Drag handles and drop targets that respond to transformation
+        AnimatedBuilder(
+          animation: transformationController,
+          builder: (context, child) {
+            final matrix = transformationController.value;
+            final translation = matrix.getTranslation();
+            final scale = matrix.getMaxScaleOnAxis();
+
+            return Stack(
+              children: [
+                // Drop targets (behind drag handles)
+                ..._buildResponsiveDropTargets(
+                  context,
+                  translation.x,
+                  translation.y,
+                  scale,
+                ),
+                // Floating drag handles (on top)
+                ..._buildResponsiveDragHandles(
+                  context,
+                  translation.x,
+                  translation.y,
+                  scale,
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildResponsiveDragHandles(
+    BuildContext context,
+    double translationX,
+    double translationY,
+    double scale,
+  ) {
+    return rows
+        .asMap()
+        .entries
+        .map((entry) {
+          final index = entry.key;
+          final isBeingDragged = draggedRowIndex == index;
+
+          // Calculate row position after transformation
+          final rowTop = index * dimensions.rowHeight;
+          final transformedY = rowTop * scale + translationY;
+          final handleY =
+              transformedY + (dimensions.rowHeight * scale - 40) / 2;
+
+          // Check if row is visible on screen
+          final isVisible =
+              transformedY > -dimensions.rowHeight * scale &&
+              transformedY < MediaQuery.of(context).size.height;
+
+          if (!isVisible) return const SizedBox.shrink();
+
+          return Positioned(
+            left: 8.0, // Fixed position from left edge - no scaling
+            top: handleY,
+            child: GestureDetector(
+              onTap: () {
+                print('Drag handle tapped for row $index');
+              },
+              child: Draggable<int>(
+                data: index,
+                feedback: _DragFeedback(
+                  row: rows[index],
+                  dimensions: dimensions,
+                ),
+                childWhenDragging: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                onDragStarted: () {
+                  print('Drag started for row $index');
+                  onDragStarted(index);
+                },
+                onDragEnd: (_) {
+                  print('Drag ended for row $index');
+                  onDragEnded();
+                },
+                child: _DragHandle(
+                  isBeingDragged: isBeingDragged,
+                  dimensions: dimensions,
+                ),
+              ),
+            ),
+          );
+        })
+        .where((widget) => widget is! SizedBox)
+        .toList();
+  }
+
+  List<Widget> _buildResponsiveDropTargets(
+    BuildContext context,
+    double translationX,
+    double translationY,
+    double scale,
+  ) {
+    return rows
+        .asMap()
+        .entries
+        .map((entry) {
+          final index = entry.key;
+          final isDragging = draggedRowIndex != null;
+
+          // Calculate row position after transformation
+          final rowTop = index * dimensions.rowHeight;
+          final transformedY = rowTop * scale + translationY;
+          final transformedHeight = dimensions.rowHeight * scale;
+
+          // Check if row is visible on screen
+          final isVisible =
+              transformedY > -transformedHeight &&
+              transformedY < MediaQuery.of(context).size.height;
+
+          if (!isVisible && isDragging) return const SizedBox.shrink();
+
+          return Positioned(
+            left: 0,
+            top: transformedY,
+            right: 0,
+            height: transformedHeight,
+            child: IgnorePointer(
+              ignoring:
+                  !isDragging, // Only accept gestures when actively dragging
+              child: DragTarget<int>(
+                onWillAccept: (draggedIndex) {
+                  if (draggedIndex != null && draggedIndex != index) {
+                    onDragTargetChanged(index);
+                    return true;
+                  }
+                  return false;
+                },
+                onAccept: (draggedIndex) {
+                  print('Drag accepted: moving row $draggedIndex to $index');
+                  onDragAccepted(draggedIndex, index);
+                },
+                onLeave: (_) {
+                  onDragTargetChanged(-1);
+                },
+                builder: (context, candidateData, rejectedData) {
+                  final isHighlighted =
+                      dragTargetIndex == index && draggedRowIndex != null;
+                  return Container(
+                    height: transformedHeight,
+                    decoration: isHighlighted
+                        ? BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            border: Border.all(color: Colors.blue, width: 2),
+                          )
+                        : null,
+                  );
+                },
+              ),
+            ),
+          );
+        })
+        .where((widget) => widget is! SizedBox)
+        .toList();
+  }
+}
+
+/// Drag handle widget
+class _DragHandle extends StatelessWidget {
+  final bool isBeingDragged;
+  final _TimelineDimensions dimensions;
+
+  const _DragHandle({required this.isBeingDragged, required this.dimensions});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: isBeingDragged
+            ? Colors.blue.withOpacity(0.8)
+            : Colors.grey[600]?.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Icon(Icons.drag_handle, color: Colors.white, size: 18),
+    );
+  }
+}
+
+/// Drag feedback widget shown during dragging
+class _DragFeedback extends StatelessWidget {
+  final TimelineRow row;
+  final _TimelineDimensions dimensions;
+
+  const _DragFeedback({required this.row, required this.dimensions});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 8,
+      borderRadius: BorderRadius.circular(4),
+      child: Container(
+        width: 200,
+        height: dimensions.rowHeight * 0.8,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: Colors.blue, width: 2),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Row ${row.events.length} events',
+              style: TextStyle(
+                fontSize: dimensions.fontSize,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (row.events.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                row.events.first.title,
+                style: TextStyle(
+                  fontSize: dimensions.fontSize * 0.9,
+                  color: Colors.grey[600],
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

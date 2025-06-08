@@ -120,4 +120,30 @@ class TimelineCubit extends Cubit<TimelineState> {
     return a.effectiveStartTime.isBefore(b.layoutEndTime) &&
         a.layoutEndTime.isAfter(b.effectiveStartTime);
   }
+
+  /// Reorder rows by moving a row from one index to another
+  void reorderRows(int fromIndex, int toIndex) {
+    if (fromIndex == toIndex ||
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= state.rows.length ||
+        toIndex >= state.rows.length) {
+      return;
+    }
+
+    final rows = List<TimelineRow>.from(state.rows);
+    final draggedRow = rows.removeAt(fromIndex);
+    rows.insert(toIndex, draggedRow);
+
+    // Update row indices to maintain consistency
+    final updatedRows = rows.asMap().entries.map((entry) {
+      return TimelineRow(
+        index: entry.key,
+        events: entry.value.events,
+        height: entry.value.height,
+      );
+    }).toList();
+
+    emit(state.copyWith(rows: updatedRows));
+  }
 }
