@@ -123,8 +123,11 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   /// Reorder rows by moving a row from one index to another
   void reorderRows(int fromIndex, int toIndex) {
-    if (fromIndex == toIndex ||
-        fromIndex < 0 ||
+    if (fromIndex == toIndex) {
+      return; // No-op for same position
+    }
+
+    if (fromIndex < 0 ||
         toIndex < 0 ||
         fromIndex >= state.rows.length ||
         toIndex >= state.rows.length) {

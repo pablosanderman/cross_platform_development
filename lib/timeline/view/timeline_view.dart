@@ -76,10 +76,13 @@ class _TimelineViewState extends State<TimelineView> {
                     });
                   },
                   onDragAccepted: (draggedIndex, targetIndex) {
-                    context.read<TimelineCubit>().reorderRows(
-                      draggedIndex,
-                      targetIndex,
-                    );
+                    // Only perform reorder if targetIndex is valid (not -1)
+                    if (targetIndex >= 0 && targetIndex != draggedIndex) {
+                      context.read<TimelineCubit>().reorderRows(
+                        draggedIndex,
+                        targetIndex,
+                      );
+                    }
                     setState(() {
                       _draggedRowIndex = null;
                       _dragTargetIndex = null;
@@ -300,15 +303,21 @@ class _StickyRuler extends StatelessWidget {
 }
 
 /// Timeline content with InteractiveViewer
-class _TimelineContent extends StatelessWidget {
+
+/// Timeline content with animated rows during drag operations
+class _AnimatedTimelineContent extends StatelessWidget {
   final List<TimelineRow> rows;
   final _TimelineDimensions dimensions;
   final TransformationController transformationController;
+  final int? draggedRowIndex;
+  final int? dragTargetIndex;
 
-  const _TimelineContent({
+  const _AnimatedTimelineContent({
     required this.rows,
     required this.dimensions,
     required this.transformationController,
+    required this.draggedRowIndex,
+    required this.dragTargetIndex,
   });
 
   @override
@@ -321,15 +330,110 @@ class _TimelineContent extends StatelessWidget {
       child: SizedBox(
         width: dimensions.timelineWidth,
         height: dimensions.timelineHeight,
-        child: Column(
-          children: rows
-              .map(
-                (row) => _TimelineRowWidget(row: row, dimensions: dimensions),
-              )
-              .toList(),
-        ),
+        child: Stack(children: _buildAnimatedRows()),
       ),
     );
+  }
+
+  List<Widget> _buildAnimatedRows() {
+    final widgets = <Widget>[];
+
+    for (int i = 0; i < rows.length; i++) {
+      final row = rows[i];
+      double topPosition = _calculateRowPosition(i);
+
+      // Skip the dragged row - it's shown as feedback
+      if (i == draggedRowIndex) {
+        // Add placeholder gap where dragged row was
+        widgets.add(
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 200),
+            left: 0,
+            top: topPosition,
+            right: 0,
+            height: dimensions.rowHeight,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                border: Border.all(
+                  color: Colors.blue.withValues(alpha: 0.3),
+                  width: 2,
+                  style: BorderStyle.solid,
+                ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Center(
+                child: Text(
+                  'Drop here',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                    fontSize: dimensions.fontSize,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+
+      widgets.add(
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          left: 0,
+          top: topPosition,
+          right: 0,
+          height: dimensions.rowHeight,
+          child: _TimelineRowWidget(row: row, dimensions: dimensions),
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
+  double _calculateRowPosition(int index) {
+    // Only animate if we have both a dragged row AND a valid drop target
+    if (draggedRowIndex == null ||
+        dragTargetIndex == null ||
+        dragTargetIndex == -1) {
+      return index * dimensions.rowHeight;
+    }
+
+    final draggedIndex = draggedRowIndex!;
+    final targetIndex = dragTargetIndex!;
+
+    // If dragging down (target > dragged)
+    if (targetIndex > draggedIndex) {
+      if (index <= draggedIndex) {
+        // Rows above and including dragged stay in place
+        return index * dimensions.rowHeight;
+      } else if (index <= targetIndex) {
+        // Rows between dragged and target move up
+        return (index - 1) * dimensions.rowHeight;
+      } else {
+        // Rows below target stay in place
+        return index * dimensions.rowHeight;
+      }
+    }
+    // If dragging up (target < dragged)
+    else if (targetIndex < draggedIndex) {
+      if (index < targetIndex) {
+        // Rows above target stay in place
+        return index * dimensions.rowHeight;
+      } else if (index < draggedIndex) {
+        // Rows between target and dragged move down
+        return (index + 1) * dimensions.rowHeight;
+      } else {
+        // Rows below and including dragged stay in place
+        return index * dimensions.rowHeight;
+      }
+    }
+
+    // Default case
+    return index * dimensions.rowHeight;
   }
 }
 
@@ -855,11 +959,13 @@ class _DraggableTimelineContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Original timeline content
-        _TimelineContent(
+        // Animated timeline content with visual feedback
+        _AnimatedTimelineContent(
           rows: rows,
           dimensions: dimensions,
           transformationController: transformationController,
+          draggedRowIndex: draggedRowIndex,
+          dragTargetIndex: dragTargetIndex,
         ),
         // Drag handles and drop targets that respond to transformation
         AnimatedBuilder(
@@ -871,13 +977,14 @@ class _DraggableTimelineContent extends StatelessWidget {
 
             return Stack(
               children: [
-                // Drop targets (behind drag handles)
-                ..._buildResponsiveDropTargets(
-                  context,
-                  translation.x,
-                  translation.y,
-                  scale,
-                ),
+                // Drop targets (behind drag handles) - reduced to avoid conflicts during animation
+                if (draggedRowIndex != null)
+                  ..._buildResponsiveDropTargets(
+                    context,
+                    translation.x,
+                    translation.y,
+                    scale,
+                  ),
                 // Floating drag handles (on top)
                 ..._buildResponsiveDragHandles(
                   context,
@@ -922,37 +1029,59 @@ class _DraggableTimelineContent extends StatelessWidget {
           return Positioned(
             left: 8.0, // Fixed position from left edge - no scaling
             top: handleY,
-            child: GestureDetector(
-              onTap: () {
-                print('Drag handle tapped for row $index');
+            child: DragTarget<int>(
+              onWillAcceptWithDetails: (details) {
+                final draggedIndex = details.data;
+                // Accept drops on the same row's handle to reset target
+                if (draggedIndex == index) {
+                  onDragTargetChanged(
+                    -1,
+                  ); // Reset target to indicate cancellation
+                  return true;
+                }
+                return false;
               },
-              child: Draggable<int>(
-                data: index,
-                feedback: _DragFeedback(
-                  row: rows[index],
-                  dimensions: dimensions,
-                ),
-                childWhenDragging: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                onDragStarted: () {
-                  print('Drag started for row $index');
-                  onDragStarted(index);
-                },
-                onDragEnd: (_) {
-                  print('Drag ended for row $index');
+              onAcceptWithDetails: (details) {
+                final draggedIndex = details.data;
+                if (draggedIndex == index) {
+                  // Same row drop on handle - cancel the drag
                   onDragEnded();
-                },
-                child: _DragHandle(
-                  isBeingDragged: isBeingDragged,
-                  dimensions: dimensions,
-                ),
-              ),
+                  return;
+                }
+              },
+              builder: (context, candidateData, rejectedData) {
+                return GestureDetector(
+                  onTap: () {
+                    // Drag handle tap (optional: could add functionality here)
+                  },
+                  child: Draggable<int>(
+                    data: index,
+                    feedback: _DragFeedback(
+                      row: rows[index],
+                      dimensions: dimensions,
+                      transformationController: transformationController,
+                    ),
+                    childWhenDragging: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onDragStarted: () {
+                      onDragStarted(index);
+                    },
+                    onDragEnd: (_) {
+                      onDragEnded();
+                    },
+                    child: _DragHandle(
+                      isBeingDragged: isBeingDragged,
+                      dimensions: dimensions,
+                    ),
+                  ),
+                );
+              },
             ),
           );
         })
@@ -994,15 +1123,21 @@ class _DraggableTimelineContent extends StatelessWidget {
               ignoring:
                   !isDragging, // Only accept gestures when actively dragging
               child: DragTarget<int>(
-                onWillAccept: (draggedIndex) {
-                  if (draggedIndex != null && draggedIndex != index) {
+                onWillAcceptWithDetails: (details) {
+                  final draggedIndex = details.data;
+                  if (draggedIndex != index) {
                     onDragTargetChanged(index);
                     return true;
                   }
-                  return false;
+                  return true; // Accept same-row drops to ensure cleanup
                 },
-                onAccept: (draggedIndex) {
-                  print('Drag accepted: moving row $draggedIndex to $index');
+                onAcceptWithDetails: (details) {
+                  final draggedIndex = details.data;
+                  if (draggedIndex == index) {
+                    // Same row drop - manually trigger cleanup since onDragEnd won't be called
+                    onDragEnded(); // Call the parent's cleanup callback
+                    return;
+                  }
                   onDragAccepted(draggedIndex, index);
                 },
                 onLeave: (_) {
@@ -1010,12 +1145,14 @@ class _DraggableTimelineContent extends StatelessWidget {
                 },
                 builder: (context, candidateData, rejectedData) {
                   final isHighlighted =
-                      dragTargetIndex == index && draggedRowIndex != null;
+                      dragTargetIndex == index &&
+                      draggedRowIndex != null &&
+                      draggedRowIndex != index;
                   return Container(
                     height: transformedHeight,
                     decoration: isHighlighted
                         ? BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
+                            color: Colors.blue.withValues(alpha: 0.1),
                             border: Border.all(color: Colors.blue, width: 2),
                           )
                         : null,
@@ -1044,13 +1181,13 @@ class _DragHandle extends StatelessWidget {
       height: 40,
       decoration: BoxDecoration(
         color: isBeingDragged
-            ? Colors.blue.withOpacity(0.8)
-            : Colors.grey[600]?.withOpacity(0.7),
+            ? Colors.blue.withValues(alpha: 0.8)
+            : Colors.grey[600]?.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white, width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -1065,46 +1202,153 @@ class _DragHandle extends StatelessWidget {
 class _DragFeedback extends StatelessWidget {
   final TimelineRow row;
   final _TimelineDimensions dimensions;
+  final TransformationController transformationController;
 
-  const _DragFeedback({required this.row, required this.dimensions});
+  const _DragFeedback({
+    required this.row,
+    required this.dimensions,
+    required this.transformationController,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Get current transformation
+    final matrix = transformationController.value;
+    final translation = matrix.getTranslation();
+    final scale = matrix.getMaxScaleOnAxis();
+
+    // Calculate what part of the timeline is currently visible on screen
+    final screenWidth = MediaQuery.of(context).size.width;
+    final visibleTimelineStart =
+        -translation.x / scale; // Left edge of visible area in timeline coords
+    final visibleTimelineWidth =
+        screenWidth / scale; // Width of visible area in timeline coords
+    final visibleTimelineEnd = visibleTimelineStart + visibleTimelineWidth;
+
+    // Create a preview showing only the visible portion at current scale
+    final previewWidth = screenWidth * 0.8;
+    final previewHeight =
+        dimensions.rowHeight * scale; // Scale the height to match zoom
+
     return Material(
       elevation: 8,
       borderRadius: BorderRadius.circular(4),
-      child: Container(
-        width: 200,
-        height: dimensions.rowHeight * 0.8,
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: Colors.blue, width: 2),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Row ${row.events.length} events',
-              style: TextStyle(
-                fontSize: dimensions.fontSize,
-                fontWeight: FontWeight.bold,
+      child: Transform.scale(
+        scale: 0.95,
+        child: Opacity(
+          opacity: 0.9,
+          child: Container(
+            width: previewWidth,
+            height: previewHeight,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.blue, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: Stack(
+                children: [
+                  // Background grid (similar to timeline)
+                  Container(
+                    width: previewWidth,
+                    height: previewHeight,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey[200]!),
+                      ),
+                    ),
+                  ),
+                  // Show events that are visible in current viewport with proper scaling
+                  ...row.events
+                      .where((event) {
+                        final eventStart =
+                            event.effectiveStartTime
+                                .difference(dimensions.visibleStart)
+                                .inHours *
+                            dimensions.pixelsPerHour;
+                        final eventEnd =
+                            eventStart +
+                            (event.hasDuration
+                                ? event.duration!.inHours *
+                                      dimensions.pixelsPerHour
+                                : dimensions.defaultEventDuration.inHours *
+                                      dimensions.pixelsPerHour);
+
+                        // Check if event overlaps with visible area
+                        return eventEnd > visibleTimelineStart &&
+                            eventStart < visibleTimelineEnd;
+                      })
+                      .map((event) {
+                        // Calculate event position relative to visible area
+                        final eventStart =
+                            event.effectiveStartTime
+                                .difference(dimensions.visibleStart)
+                                .inHours *
+                            dimensions.pixelsPerHour;
+                        final relativeStart = eventStart - visibleTimelineStart;
+
+                        // Scale to preview size and position
+                        final previewStart =
+                            (relativeStart / visibleTimelineWidth) *
+                            previewWidth;
+
+                        // Create dimensions that match the current zoom level
+                        final scaledDimensions = _TimelineDimensions._(
+                          visibleStart: dimensions.visibleStart,
+                          visibleEnd: dimensions.visibleEnd,
+                          visibleWindow: dimensions.visibleWindow,
+                          divisions: dimensions.divisions,
+                          timelineWidth: dimensions.timelineWidth * scale,
+                          timelineHeight: dimensions.timelineHeight * scale,
+                          pixelsPerHour: dimensions.pixelsPerHour * scale,
+                          rowHeight: dimensions.rowHeight * scale,
+                          eventHeight: dimensions.eventHeight * scale,
+                          rulerHeight: dimensions.rulerHeight,
+                          fontSize: dimensions.fontSize,
+                          rulerFontSize: dimensions.rulerFontSize,
+                          eventSpacing: dimensions.eventSpacing * scale,
+                          eventPadding: dimensions.eventPadding * scale,
+                          eventBorderRadius: dimensions.eventBorderRadius,
+                          eventOpacity: dimensions.eventOpacity,
+                          minScale: dimensions.minScale,
+                          maxScale: dimensions.maxScale,
+                          defaultEventDuration: dimensions.defaultEventDuration,
+                          memberCircleSize: dimensions.memberCircleSize * scale,
+                          pointEventFontWeight: dimensions.pointEventFontWeight,
+                          periodEventFontWeight:
+                              dimensions.periodEventFontWeight,
+                          groupEventFontWeight: dimensions.groupEventFontWeight,
+                        );
+
+                        return Positioned(
+                          left: previewStart,
+                          top:
+                              (previewHeight - scaledDimensions.eventHeight) /
+                              2, // Properly center vertically
+                          child: Transform.scale(
+                            scale:
+                                (previewWidth / visibleTimelineWidth) /
+                                scale, // Adjust for preview scaling
+                            alignment: Alignment.centerLeft,
+                            child: _EventBox(
+                              event: event,
+                              dimensions: scaledDimensions,
+                            ),
+                          ),
+                        );
+                      }),
+                ],
               ),
             ),
-            if (row.events.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                row.events.first.title,
-                style: TextStyle(
-                  fontSize: dimensions.fontSize * 0.9,
-                  color: Colors.grey[600],
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
