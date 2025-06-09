@@ -1032,14 +1032,17 @@ class _DraggableTimelineContent extends StatelessWidget {
             child: DragTarget<int>(
               onWillAcceptWithDetails: (details) {
                 final draggedIndex = details.data;
-                // Accept drops on the same row's handle to reset target
+                // Accept drops on any row's handle
                 if (draggedIndex == index) {
                   onDragTargetChanged(
                     -1,
                   ); // Reset target to indicate cancellation
                   return true;
+                } else {
+                  // Accept drops from other rows - treat as dropping on this row
+                  onDragTargetChanged(index);
+                  return true;
                 }
-                return false;
               },
               onAcceptWithDetails: (details) {
                 final draggedIndex = details.data;
@@ -1047,6 +1050,9 @@ class _DraggableTimelineContent extends StatelessWidget {
                   // Same row drop on handle - cancel the drag
                   onDragEnded();
                   return;
+                } else {
+                  // Different row drop on handle - perform the reorder
+                  onDragAccepted(draggedIndex, index);
                 }
               },
               builder: (context, candidateData, rejectedData) {
