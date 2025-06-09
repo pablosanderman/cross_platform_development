@@ -812,7 +812,7 @@ class _GroupedEventWidget extends StatelessWidget {
       height: dimensions.eventHeight,
       child: Stack(
         children: [
-          // Group horizontal lines (like equals sign) - only span timestamp range
+          // Group border line - only span timestamp range
           Positioned(
             left:
                 circleRadius, // Offset by circle radius since container starts earlier
@@ -822,7 +822,7 @@ class _GroupedEventWidget extends StatelessWidget {
               color: color,
             ),
           ),
-          // Member circles
+          // Member circles - positioned on top of the border
           ..._buildMemberCircles(members, memberPositions),
           // Title - inline like other event types
           Positioned(
@@ -869,7 +869,7 @@ class _GroupedEventWidget extends StatelessWidget {
   }
 }
 
-/// Group horizontal lines widget (equals sign style)
+/// Group border widget for grouped events
 class _GroupHorizontalLines extends StatelessWidget {
   final double width;
   final double height;
@@ -883,36 +883,19 @@ class _GroupHorizontalLines extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const lineThickness = 3.0;
+    const borderThickness = 2.0;
 
     return SizedBox(
       width: width,
       height: height,
-      child: Stack(
-        children: [
-          // Top horizontal line
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(height: lineThickness, color: color),
-          ),
-          // Bottom horizontal line
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(height: lineThickness, color: color),
-          ),
-          // Optional: Light background between the lines
-          Positioned(
-            top: lineThickness,
-            bottom: lineThickness,
-            left: 0,
-            right: 0,
-            child: Container(color: color.withValues(alpha: 0.05)),
-          ),
-        ],
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          border: Border.all(color: color, width: borderThickness),
+          borderRadius: BorderRadius.circular(2),
+          color: color.withValues(alpha: 0.05), // Light background fill
+        ),
       ),
     );
   }
