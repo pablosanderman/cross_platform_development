@@ -570,12 +570,19 @@ class _EventBox extends StatelessWidget {
     final color = _getEventColor(event);
     final isGrouped = event.type == EventType.grouped;
 
+    // Calculate positioning
+    final leftOffset = _calculateLeftOffset();
+    final verticalCenter = (dimensions.rowHeight - dimensions.eventHeight) / 2;
+
     // Handle grouped events specially
     if (isGrouped) {
-      return _GroupedEventWidget(
-        event: event,
-        dimensions: dimensions,
-        color: color,
+      return Transform.translate(
+        offset: Offset(leftOffset, verticalCenter),
+        child: _GroupedEventWidget(
+          event: event,
+          dimensions: dimensions,
+          color: color,
+        ),
       );
     }
 
@@ -586,7 +593,8 @@ class _EventBox extends StatelessWidget {
 
     final textWidth = _computeEventTextWidth(eventDuration);
 
-    return _wrapEventPosition(
+    return Transform.translate(
+      offset: Offset(leftOffset, verticalCenter),
       child: SizedBox(
         width: textWidth,
         height: dimensions.eventHeight,
@@ -628,7 +636,24 @@ class _EventBox extends StatelessWidget {
     return maxTextSpan.inHours * dimensions.pixelsPerHour;
   }
 
-  Widget _wrapEventPosition({required Widget child}) {
+  double _calculateLeftOffset() {
+    final isGrouped = event.type == EventType.grouped;
+
+    // For grouped events, calculate the leftmost position based on all members
+    if (isGrouped && event.members != null && event.members!.isNotEmpty) {
+      final memberPositions = event.members!.map((member) {
+        final memberOffset = member.timestamp.difference(
+          dimensions.visibleStart,
+        );
+        return memberOffset.inHours * dimensions.pixelsPerHour;
+      }).toList();
+
+      final minMemberPos = memberPositions.reduce((a, b) => a < b ? a : b);
+      final circleRadius = dimensions.memberCircleSize / 2;
+      return minMemberPos - circleRadius; // Left edge of first circle
+    }
+
+    // For regular events
     final eventOffset = event.effectiveStartTime.difference(
       dimensions.visibleStart,
     );
@@ -638,14 +663,10 @@ class _EventBox extends StatelessWidget {
 
     // For point events, center the circle on the timestamp
     final isPeriodic = event.hasDuration;
-    final leftOffset = isPeriodic
+    return isPeriodic
         ? timestampPixelPosition
         : timestampPixelPosition -
               (dimensions.eventHeight / 2); // Center the circle
-
-    final verticalCenter = (dimensions.rowHeight - dimensions.eventHeight) / 2;
-
-    return Positioned(left: leftOffset, top: verticalCenter, child: child);
   }
 }
 
@@ -780,58 +801,48 @@ class _GroupedEventWidget extends StatelessWidget {
     final minMemberPos = memberPositions.reduce((a, b) => a < b ? a : b);
     final maxMemberPos = memberPositions.reduce((a, b) => a > b ? a : b);
 
-    // Visual-driven container sizing: size based on what user actually sees
-    final circleSize = dimensions.memberCircleSize;
-    final circleRadius = circleSize / 2;
-    final leftmostVisualPixel =
-        minMemberPos - circleRadius; // Left edge of first circle
-    final rightmostVisualPixel =
-        maxMemberPos + circleRadius; // Right edge of last circle
-    final borderLeft = leftmostVisualPixel;
-    final borderWidth = rightmostVisualPixel - leftmostVisualPixel;
+    // Calculate container sizing based on member positions
+    final circleRadius = dimensions.memberCircleSize / 2;
+    final memberSpan = maxMemberPos - minMemberPos;
     const titlePadding = 120.0;
-    final totalWidth = borderWidth + titlePadding;
+    final totalWidth = memberSpan + (circleRadius * 2) + titlePadding;
 
-    return Positioned(
-      left: borderLeft,
-      top: (dimensions.rowHeight - dimensions.eventHeight) / 2,
-      child: SizedBox(
-        width: totalWidth,
-        height: dimensions.eventHeight,
-        child: Stack(
-          children: [
-            // Group horizontal lines (like equals sign) - only span timestamp range
-            Positioned(
-              left:
-                  circleRadius, // Offset by circle radius since container starts earlier
-              child: _GroupHorizontalLines(
-                width: maxMemberPos - minMemberPos, // Only timestamp range
-                height: dimensions.eventHeight,
-                color: color,
-              ),
+    return SizedBox(
+      width: totalWidth,
+      height: dimensions.eventHeight,
+      child: Stack(
+        children: [
+          // Group horizontal lines (like equals sign) - only span timestamp range
+          Positioned(
+            left:
+                circleRadius, // Offset by circle radius since container starts earlier
+            child: _GroupHorizontalLines(
+              width: maxMemberPos - minMemberPos, // Only timestamp range
+              height: dimensions.eventHeight,
+              color: color,
             ),
-            // Member circles
-            ..._buildMemberCircles(members, memberPositions, borderLeft),
-            // Title - inline like other event types
-            Positioned(
-              left: borderWidth + 8,
-              top: 0,
-              right: 0,
-              bottom: 0,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  event.title,
-                  style: TextStyle(
-                    fontSize: dimensions.fontSize,
-                    fontWeight: dimensions.groupEventFontWeight,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+          ),
+          // Member circles
+          ..._buildMemberCircles(members, memberPositions),
+          // Title - inline like other event types
+          Positioned(
+            left: memberSpan + (circleRadius * 2) + 8,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                event.title,
+                style: TextStyle(
+                  fontSize: dimensions.fontSize,
+                  fontWeight: dimensions.groupEventFontWeight,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -839,18 +850,15 @@ class _GroupedEventWidget extends StatelessWidget {
   List<Widget> _buildMemberCircles(
     List<GroupMember> members,
     List<double> memberPositions,
-    double borderLeft,
   ) {
     final circleSize = dimensions.memberCircleSize;
-    final circleRadius = circleSize / 2;
+    final minMemberPos = memberPositions.reduce((a, b) => a < b ? a : b);
 
     return members.asMap().entries.map((entry) {
       final index = entry.key;
       final timestampPosition = memberPositions[index];
-      // Position circle so its CENTER is at the timestamp
-      // Container starts at (minPos - radius), so timestamp is at (timestamp - borderLeft)
-      // But we want circle center there, so position circle at (timestamp - borderLeft - radius)
-      final relativePosition = timestampPosition - borderLeft - circleRadius;
+      // Position circles relative to the leftmost member position
+      final relativePosition = timestampPosition - minMemberPos;
 
       return Positioned(
         left: relativePosition,
@@ -1006,29 +1014,29 @@ class _DraggableTimelineContent extends StatelessWidget {
     double translationY,
     double scale,
   ) {
-    return rows
-        .asMap()
-        .entries
-        .map((entry) {
-          final index = entry.key;
-          final isBeingDragged = draggedRowIndex == index;
+    final List<Widget> handles = [];
 
-          // Calculate row position after transformation
-          final rowTop = index * dimensions.rowHeight;
-          final transformedY = rowTop * scale + translationY;
-          final handleY =
-              transformedY + (dimensions.rowHeight * scale - 40) / 2;
+    for (int index = 0; index < rows.length; index++) {
+      final isBeingDragged = draggedRowIndex == index;
 
-          // Check if row is visible on screen
-          final isVisible =
-              transformedY > -dimensions.rowHeight * scale &&
-              transformedY < MediaQuery.of(context).size.height;
+      // Calculate row position after transformation
+      final rowTop = index * dimensions.rowHeight;
+      final transformedY = rowTop * scale + translationY;
+      final handleY = transformedY + (dimensions.rowHeight * scale - 40) / 2;
 
-          if (!isVisible) return const SizedBox.shrink();
+      // Check if row is visible on screen
+      final isVisible =
+          transformedY > -dimensions.rowHeight * scale &&
+          transformedY < MediaQuery.of(context).size.height;
 
-          return Positioned(
-            left: 8.0, // Fixed position from left edge - no scaling
-            top: handleY,
+      // Always create a positioned widget, but make it invisible if not visible
+      handles.add(
+        Positioned(
+          key: ValueKey('drag_handle_$index'),
+          left: 8.0, // Fixed position from left edge - no scaling
+          top: handleY,
+          child: Visibility(
+            visible: isVisible,
             child: DragTarget<int>(
               onWillAcceptWithDetails: (details) {
                 final draggedIndex = details.data;
@@ -1089,10 +1097,12 @@ class _DraggableTimelineContent extends StatelessWidget {
                 );
               },
             ),
-          );
-        })
-        .where((widget) => widget is! SizedBox)
-        .toList();
+          ),
+        ),
+      );
+    }
+
+    return handles;
   }
 
   List<Widget> _buildResponsiveDropTargets(
@@ -1101,30 +1111,31 @@ class _DraggableTimelineContent extends StatelessWidget {
     double translationY,
     double scale,
   ) {
-    return rows
-        .asMap()
-        .entries
-        .map((entry) {
-          final index = entry.key;
-          final isDragging = draggedRowIndex != null;
+    final List<Widget> targets = [];
 
-          // Calculate row position after transformation
-          final rowTop = index * dimensions.rowHeight;
-          final transformedY = rowTop * scale + translationY;
-          final transformedHeight = dimensions.rowHeight * scale;
+    for (int index = 0; index < rows.length; index++) {
+      final isDragging = draggedRowIndex != null;
 
-          // Check if row is visible on screen
-          final isVisible =
-              transformedY > -transformedHeight &&
-              transformedY < MediaQuery.of(context).size.height;
+      // Calculate row position after transformation
+      final rowTop = index * dimensions.rowHeight;
+      final transformedY = rowTop * scale + translationY;
+      final transformedHeight = dimensions.rowHeight * scale;
 
-          if (!isVisible && isDragging) return const SizedBox.shrink();
+      // Check if row is visible on screen
+      final isVisible =
+          transformedY > -transformedHeight &&
+          transformedY < MediaQuery.of(context).size.height;
 
-          return Positioned(
-            left: 0,
-            top: transformedY,
-            right: 0,
-            height: transformedHeight,
+      // Always create a positioned widget, but control visibility and interaction
+      targets.add(
+        Positioned(
+          key: ValueKey('drop_target_$index'),
+          left: 0,
+          top: transformedY,
+          right: 0,
+          height: transformedHeight,
+          child: Visibility(
+            visible: isVisible || isDragging,
             child: IgnorePointer(
               ignoring:
                   !isDragging, // Only accept gestures when actively dragging
@@ -1166,10 +1177,12 @@ class _DraggableTimelineContent extends StatelessWidget {
                 },
               ),
             ),
-          );
-        })
-        .where((widget) => widget is! SizedBox)
-        .toList();
+          ),
+        ),
+      );
+    }
+
+    return targets;
   }
 }
 
