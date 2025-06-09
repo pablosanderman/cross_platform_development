@@ -46,7 +46,7 @@ class _TimelineViewState extends State<TimelineView> {
           final dimensions = _TimelineDimensions.calculate(
             visibleStart: state.visibleStart,
             visibleEnd: state.visibleEnd,
-            rowCount: state.rows.length,
+            rows: state.rows,
           );
 
           return Column(
@@ -160,7 +160,7 @@ class _TimelineDimensions {
   static _TimelineDimensions calculate({
     required DateTime visibleStart,
     required DateTime visibleEnd,
-    required int rowCount,
+    required List<TimelineRow> rows,
   }) {
     final visibleWindow = visibleEnd.difference(visibleStart);
     final divisions = visibleWindow.inHours;
@@ -173,8 +173,9 @@ class _TimelineDimensions {
     final pixelsPerHour = baseDensityPixelsPerHour;
 
     // Use consistent, well-proportioned dimensions
-    const rowHeight = 75.0;
-    const eventHeight = 45.0; // 60% of row height
+    const rowHeight =
+        75.0; // Default row height (not used for positioning anymore)
+    const eventHeight = 45.0; // 60% of default row height
     const rulerHeight = 55.0;
 
     // Consistent typography
@@ -192,8 +193,11 @@ class _TimelineDimensions {
     const periodEventFontWeight = FontWeight.w500;
     const groupEventFontWeight = FontWeight.w500;
 
-    // Timeline height based on row count
-    final timelineHeight = rowCount * rowHeight;
+    // Timeline height based on actual row heights
+    final timelineHeight = rows.fold<double>(
+      0.0,
+      (sum, row) => sum + row.height,
+    );
 
     return _TimelineDimensions._(
       visibleStart: visibleStart,
@@ -351,7 +355,7 @@ class _AnimatedTimelineContent extends StatelessWidget {
             left: 0,
             top: topPosition,
             right: 0,
-            height: dimensions.rowHeight,
+            height: row.height, // Use actual row height
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.blue.withValues(alpha: 0.1),
@@ -385,7 +389,7 @@ class _AnimatedTimelineContent extends StatelessWidget {
           left: 0,
           top: topPosition,
           right: 0,
-          height: dimensions.rowHeight,
+          height: row.height, // Use actual row height
           child: _TimelineRowWidget(row: row, dimensions: dimensions),
         ),
       );
@@ -395,45 +399,36 @@ class _AnimatedTimelineContent extends StatelessWidget {
   }
 
   double _calculateRowPosition(int index) {
+    // Calculate cumulative height for rows above this index
+    double position = 0.0;
+    for (int i = 0; i < index && i < rows.length; i++) {
+      position += rows[i].height;
+    }
+
     // Only animate if we have both a dragged row AND a valid drop target
     if (draggedRowIndex == null ||
         dragTargetIndex == null ||
         dragTargetIndex == -1) {
-      return index * dimensions.rowHeight;
+      return position;
     }
 
     final draggedIndex = draggedRowIndex!;
     final targetIndex = dragTargetIndex!;
 
-    // If dragging down (target > dragged)
-    if (targetIndex > draggedIndex) {
-      if (index <= draggedIndex) {
-        // Rows above and including dragged stay in place
-        return index * dimensions.rowHeight;
-      } else if (index <= targetIndex) {
-        // Rows between dragged and target move up
-        return (index - 1) * dimensions.rowHeight;
-      } else {
-        // Rows below target stay in place
-        return index * dimensions.rowHeight;
+    // Animate rows to make space for the dragged row
+    if (draggedIndex < targetIndex) {
+      // Dragging down: rows between draggedIndex and targetIndex move up
+      if (index > draggedIndex && index <= targetIndex) {
+        position -= rows[draggedIndex].height;
       }
-    }
-    // If dragging up (target < dragged)
-    else if (targetIndex < draggedIndex) {
-      if (index < targetIndex) {
-        // Rows above target stay in place
-        return index * dimensions.rowHeight;
-      } else if (index < draggedIndex) {
-        // Rows between target and dragged move down
-        return (index + 1) * dimensions.rowHeight;
-      } else {
-        // Rows below and including dragged stay in place
-        return index * dimensions.rowHeight;
+    } else if (draggedIndex > targetIndex) {
+      // Dragging up: rows between targetIndex and draggedIndex move down
+      if (index >= targetIndex && index < draggedIndex) {
+        position += rows[draggedIndex].height;
       }
     }
 
-    // Default case
-    return index * dimensions.rowHeight;
+    return position;
   }
 }
 
@@ -526,17 +521,36 @@ class _RulerLabels extends StatelessWidget {
   }
 }
 
-/// Timeline row widget
-class _TimelineRowWidget extends StatelessWidget {
+/// Timeline row widget with hover-based resize handle
+class _TimelineRowWidget extends StatefulWidget {
   final TimelineRow row;
   final _TimelineDimensions dimensions;
 
   const _TimelineRowWidget({required this.row, required this.dimensions});
 
   @override
+  State<_TimelineRowWidget> createState() => _TimelineRowWidgetState();
+}
+
+class _TimelineRowWidgetState extends State<_TimelineRowWidget> {
+  bool _isHoveringBottomBorder = false;
+  bool _isDragging = false;
+
+  void _onDragStarted() {
+    setState(() => _isDragging = true);
+  }
+
+  void _onDragEnded() {
+    setState(() => _isDragging = false);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Show handle if hovering OR actively dragging
+    final shouldShowHandle = _isHoveringBottomBorder || _isDragging;
+
     return Container(
-      height: dimensions.rowHeight,
+      height: widget.row.height,
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
       ),
@@ -544,13 +558,39 @@ class _TimelineRowWidget extends StatelessWidget {
         children: [
           // Vertical grid lines behind events
           _RulerGrid(
-            divisions: dimensions.divisions,
-            totalWidth: dimensions.timelineWidth,
-            height: dimensions.rowHeight,
+            divisions: widget.dimensions.divisions,
+            totalWidth: widget.dimensions.timelineWidth,
+            height: widget.row.height,
           ),
-          // Event boxes
-          ...row.events.map(
-            (event) => _EventBox(event: event, dimensions: dimensions),
+          // Event boxes with dynamic content based on row height
+          ...widget.row.events.map(
+            (event) => _EventBox(
+              event: event,
+              dimensions: widget.dimensions,
+              rowHeight: widget.row.height,
+            ),
+          ),
+          // Bottom border hover area for resize handle
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 8, // 8px hover zone at bottom
+            child: MouseRegion(
+              onEnter: (_) => setState(() => _isHoveringBottomBorder = true),
+              onExit: (_) => setState(() => _isHoveringBottomBorder = false),
+              child: Container(
+                color: Colors.transparent, // Invisible but detects hovers
+                child: shouldShowHandle
+                    ? _ResizeHandle(
+                        rowIndex: widget.row.index,
+                        currentHeight: widget.row.height,
+                        onDragStarted: _onDragStarted,
+                        onDragEnded: _onDragEnded,
+                      )
+                    : null,
+              ),
+            ),
           ),
         ],
       ),
@@ -562,8 +602,27 @@ class _TimelineRowWidget extends StatelessWidget {
 class _EventBox extends StatelessWidget {
   final Event event;
   final _TimelineDimensions dimensions;
+  final double rowHeight;
 
-  const _EventBox({required this.event, required this.dimensions});
+  const _EventBox({
+    required this.event,
+    required this.dimensions,
+    required this.rowHeight,
+  });
+
+  /// Get the display height for this event based on row height
+  double _getEventDisplayHeight() {
+    // For compact rows (≤75px), use standard event height
+    if (rowHeight <= 75) {
+      return dimensions.eventHeight;
+    }
+    // For taller rows, maintain symmetric padding (same as top padding)
+    final topPadding =
+        (75.0 - dimensions.eventHeight) / 2; // Same as verticalTop calculation
+    final availableHeight =
+        rowHeight - (topPadding * 2); // Subtract top and bottom padding
+    return availableHeight.clamp(dimensions.eventHeight, double.infinity);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -572,16 +631,19 @@ class _EventBox extends StatelessWidget {
 
     // Calculate positioning
     final leftOffset = _calculateLeftOffset();
-    final verticalCenter = (dimensions.rowHeight - dimensions.eventHeight) / 2;
+    // Position events to look centered at default height, then grow down from there
+    final verticalTop =
+        (75.0 - dimensions.eventHeight) / 2; // Centers at default 75px height
 
     // Handle grouped events specially
     if (isGrouped) {
       return Transform.translate(
-        offset: Offset(leftOffset, verticalCenter),
+        offset: Offset(leftOffset, verticalTop),
         child: _GroupedEventWidget(
           event: event,
           dimensions: dimensions,
           color: color,
+          rowHeight: rowHeight,
         ),
       );
     }
@@ -594,21 +656,23 @@ class _EventBox extends StatelessWidget {
     final textWidth = _computeEventTextWidth(eventDuration);
 
     return Transform.translate(
-      offset: Offset(leftOffset, verticalCenter),
+      offset: Offset(leftOffset, verticalTop),
       child: SizedBox(
         width: textWidth,
-        height: dimensions.eventHeight,
+        height: _getEventDisplayHeight(),
         child: isPeriodic
             ? _PeriodEventWidget(
                 event: event,
                 color: color,
                 eventDuration: eventDuration,
                 dimensions: dimensions,
+                rowHeight: rowHeight,
               )
             : _PointEventWidget(
                 event: event,
                 color: color,
                 dimensions: dimensions,
+                rowHeight: rowHeight,
               ),
       ),
     );
@@ -625,7 +689,7 @@ class _EventBox extends StatelessWidget {
       Colors.teal,
       Colors.indigo,
     ];
-    return eventColors[event.hashCode % eventColors.length].shade300;
+    return eventColors[event.hashCode % eventColors.length].shade200;
   }
 
   double _computeEventTextWidth(Duration eventDuration) {
@@ -675,38 +739,140 @@ class _PointEventWidget extends StatelessWidget {
   final Event event;
   final Color color;
   final _TimelineDimensions dimensions;
+  final double rowHeight;
 
   const _PointEventWidget({
     required this.event,
     required this.color,
     required this.dimensions,
+    required this.rowHeight,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: dimensions.eventHeight,
-          height: dimensions.eventHeight,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: dimensions.eventOpacity),
-            shape: BoxShape.circle,
-          ),
-        ),
-        SizedBox(width: dimensions.eventSpacing),
-        Expanded(
-          child: Text(
-            event.title,
-            style: TextStyle(
-              fontSize: dimensions.fontSize,
-              fontWeight: dimensions.pointEventFontWeight,
+    // For compact rows, show traditional layout
+    if (rowHeight <= 75) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: dimensions.eventHeight,
+            height: dimensions.eventHeight,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: dimensions.eventOpacity),
+              shape: BoxShape.circle,
             ),
-            overflow: TextOverflow.ellipsis,
           ),
-        ),
-      ],
+          SizedBox(width: dimensions.eventSpacing),
+          Expanded(
+            child: Text(
+              event.title,
+              style: TextStyle(
+                fontSize: dimensions.fontSize,
+                fontWeight: dimensions.pointEventFontWeight,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      );
+    }
+
+    // For expanded rows, show vertical layout with image and description
+    return ClipRect(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top row: circle + title
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: dimensions.eventHeight,
+                height: dimensions.eventHeight,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: dimensions.eventOpacity),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              SizedBox(width: dimensions.eventSpacing),
+              Expanded(
+                child: Text(
+                  event.title,
+                  style: TextStyle(
+                    fontSize: dimensions.fontSize,
+                    fontWeight: dimensions.pointEventFontWeight,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          // Expanded content below (only if enough space)
+          if (rowHeight > 130) ...[
+            SizedBox(height: 4),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Description first
+                  Flexible(
+                    child: Text(
+                      event.displayDescription,
+                      style: TextStyle(
+                        fontSize: dimensions.fontSize - 1,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: rowHeight > 170 ? 2 : 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  // Image below description (if row is tall enough)
+                  if (rowHeight > 170) ...[
+                    SizedBox(height: 6),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: Image.asset(
+                              'volcano_graph_image.webp',
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 120,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.grey[600],
+                                      size: 24,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -717,49 +883,165 @@ class _PeriodEventWidget extends StatelessWidget {
   final Color color;
   final Duration eventDuration;
   final _TimelineDimensions dimensions;
+  final double rowHeight;
 
   const _PeriodEventWidget({
     required this.event,
     required this.color,
     required this.eventDuration,
     required this.dimensions,
+    required this.rowHeight,
   });
 
   @override
   Widget build(BuildContext context) {
     final fullWidth = _computeEventFullWidth();
 
-    return Stack(
-      children: [
-        Container(
-          width: fullWidth,
-          height: dimensions.eventHeight,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: dimensions.eventOpacity),
-            borderRadius: BorderRadius.circular(dimensions.eventBorderRadius),
+    // For compact rows, show traditional layout
+    if (rowHeight <= 75) {
+      return Stack(
+        children: [
+          Container(
+            width: fullWidth,
+            height: dimensions.eventHeight,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: dimensions.eventOpacity),
+              borderRadius: BorderRadius.circular(dimensions.eventBorderRadius),
+            ),
           ),
-        ),
-        Positioned(
-          left: 0,
-          top: 0,
-          right: 0,
-          bottom: 0,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: dimensions.eventPadding),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                event.title,
-                style: TextStyle(
-                  fontSize: dimensions.fontSize,
-                  fontWeight: dimensions.periodEventFontWeight,
+          Positioned(
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: dimensions.eventPadding,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  event.title,
+                  style: TextStyle(
+                    fontSize: dimensions.fontSize,
+                    fontWeight: dimensions.periodEventFontWeight,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      );
+    }
+
+    // For expanded rows, show fixed container with expandable content below
+    return ClipRect(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Fixed height container (same as compact)
+          Stack(
+            children: [
+              Container(
+                width: fullWidth,
+                height: dimensions.eventHeight,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: dimensions.eventOpacity),
+                  borderRadius: BorderRadius.circular(
+                    dimensions.eventBorderRadius,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                top: 0,
+                right: 0,
+                bottom: 0,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: dimensions.eventPadding,
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      event.title,
+                      style: TextStyle(
+                        fontSize: dimensions.fontSize,
+                        fontWeight: dimensions.periodEventFontWeight,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // Expanded content below the container (only if enough space)
+          if (rowHeight > 130) ...[
+            SizedBox(height: 4),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Description first
+                  Flexible(
+                    child: Text(
+                      event.displayDescription,
+                      style: TextStyle(
+                        fontSize: dimensions.fontSize - 1,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: rowHeight > 170 ? 2 : 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  // Image below description (if row is tall enough)
+                  if (rowHeight > 170) ...[
+                    SizedBox(height: 6),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: Image.asset(
+                              'volcano_graph_image.webp',
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 120,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.grey[600],
+                                      size: 24,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -774,11 +1056,13 @@ class _GroupedEventWidget extends StatelessWidget {
   final Event event;
   final _TimelineDimensions dimensions;
   final Color color;
+  final double rowHeight;
 
   const _GroupedEventWidget({
     required this.event,
     required this.dimensions,
     required this.color,
+    required this.rowHeight,
   });
 
   @override
@@ -788,6 +1072,7 @@ class _GroupedEventWidget extends StatelessWidget {
         event: event,
         color: color,
         dimensions: dimensions,
+        rowHeight: rowHeight,
       );
     }
 
@@ -1002,14 +1287,17 @@ class _DraggableTimelineContent extends StatelessWidget {
     for (int index = 0; index < rows.length; index++) {
       final isBeingDragged = draggedRowIndex == index;
 
-      // Calculate row position after transformation
-      final rowTop = index * dimensions.rowHeight;
+      // Calculate row position after transformation using cumulative heights
+      double rowTop = 0.0;
+      for (int i = 0; i < index && i < rows.length; i++) {
+        rowTop += rows[i].height;
+      }
       final transformedY = rowTop * scale + translationY;
-      final handleY = transformedY + (dimensions.rowHeight * scale - 40) / 2;
+      final handleY = transformedY + (rows[index].height * scale - 40) / 2;
 
       // Check if row is visible on screen
       final isVisible =
-          transformedY > -dimensions.rowHeight * scale &&
+          transformedY > -rows[index].height * scale &&
           transformedY < MediaQuery.of(context).size.height;
 
       // Always create a positioned widget, but make it invisible if not visible
@@ -1099,10 +1387,13 @@ class _DraggableTimelineContent extends StatelessWidget {
     for (int index = 0; index < rows.length; index++) {
       final isDragging = draggedRowIndex != null;
 
-      // Calculate row position after transformation
-      final rowTop = index * dimensions.rowHeight;
+      // Calculate row position after transformation using cumulative heights
+      double rowTop = 0.0;
+      for (int i = 0; i < index && i < rows.length; i++) {
+        rowTop += rows[i].height;
+      }
       final transformedY = rowTop * scale + translationY;
-      final transformedHeight = dimensions.rowHeight * scale;
+      final transformedHeight = rows[index].height * scale;
 
       // Check if row is visible on screen
       final isVisible =
@@ -1229,8 +1520,7 @@ class _DragFeedback extends StatelessWidget {
 
     // Create a preview showing only the visible portion at current scale
     final previewWidth = screenWidth * 0.8;
-    final previewHeight =
-        dimensions.rowHeight * scale; // Scale the height to match zoom
+    final previewHeight = row.height * scale; // Scale the height to match zoom
 
     return Material(
       elevation: 8,
@@ -1343,6 +1633,7 @@ class _DragFeedback extends StatelessWidget {
                             child: _EventBox(
                               event: event,
                               dimensions: scaledDimensions,
+                              rowHeight: row.height,
                             ),
                           ),
                         );
@@ -1351,6 +1642,76 @@ class _DragFeedback extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Resize handle widget for adjusting row height
+class _ResizeHandle extends StatefulWidget {
+  final int rowIndex;
+  final double currentHeight;
+  final VoidCallback onDragStarted;
+  final VoidCallback onDragEnded;
+
+  const _ResizeHandle({
+    required this.rowIndex,
+    required this.currentHeight,
+    required this.onDragStarted,
+    required this.onDragEnded,
+  });
+
+  @override
+  State<_ResizeHandle> createState() => _ResizeHandleState();
+}
+
+class _ResizeHandleState extends State<_ResizeHandle> {
+  double? _initialHeight;
+  double? _startY;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onPanStart: (details) {
+        _initialHeight = widget.currentHeight;
+        _startY = details.globalPosition.dy;
+        widget.onDragStarted();
+      },
+      onPanUpdate: (details) {
+        if (_initialHeight != null && _startY != null) {
+          final deltaY = details.globalPosition.dy - _startY!;
+          final unconstrained = _initialHeight! + deltaY;
+
+          // Apply min/max constraints immediately - match cubit constraints exactly
+          const minHeight = 75.0; // Must match TimelineCubit.defaultRowHeight
+          const maxHeight = 250.0; // Must match cubit maxHeight
+          final newHeight = unconstrained.clamp(minHeight, maxHeight);
+
+          // Update global state directly (no more local optimization)
+          context.read<TimelineCubit>().updateRowHeight(
+            widget.rowIndex,
+            newHeight,
+          );
+        }
+      },
+      onPanEnd: (details) {
+        _initialHeight = null;
+        _startY = null;
+        widget.onDragEnded();
+      },
+      child: MouseRegion(
+        cursor: SystemMouseCursors.resizeRow,
+        child: Container(
+          height: 8,
+          decoration: BoxDecoration(
+            color: Colors.blue.withValues(alpha: 0.3),
+            border: Border.all(
+              color: Colors.blue.withValues(alpha: 0.6),
+              width: 1,
+            ),
+          ),
+          child: Center(child: Container(height: 2, color: Colors.blue)),
         ),
       ),
     );

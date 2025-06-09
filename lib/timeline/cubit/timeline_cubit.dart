@@ -149,4 +149,30 @@ class TimelineCubit extends Cubit<TimelineState> {
 
     emit(state.copyWith(rows: updatedRows));
   }
+
+  /// Update the height of a specific row
+  void updateRowHeight(int rowIndex, double newHeight) {
+    if (rowIndex < 0 || rowIndex >= state.rows.length) {
+      return;
+    }
+
+    // Ensure minimum height is the default row height, and reasonable maximum
+    final minHeight = defaultRowHeight; // Can't go smaller than default
+    const maxHeight = 250.0;
+    final constrainedHeight = newHeight.clamp(minHeight, maxHeight);
+
+    final rows = List<TimelineRow>.from(state.rows);
+    final currentRow = rows[rowIndex];
+
+    rows[rowIndex] = TimelineRow(
+      index: currentRow.index,
+      events: currentRow.events,
+      height: constrainedHeight,
+    );
+
+    emit(state.copyWith(rows: rows));
+  }
+
+  /// Get the default row height
+  static const double defaultRowHeight = 75.0;
 }

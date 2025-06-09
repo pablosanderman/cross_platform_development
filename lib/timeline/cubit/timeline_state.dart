@@ -57,7 +57,7 @@ class TimelineRow extends Equatable {
   const TimelineRow({
     required this.index,
     required this.events,
-    this.height = 60.0,
+    this.height = 75.0,
   });
 
   @override

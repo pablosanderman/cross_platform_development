@@ -10,6 +10,8 @@ class Event extends Equatable {
   final String id;
   final EventType type;
   final String title;
+  final String? description;
+  final String? imageUrl;
   final DateTime? startTime;
   final DateTime? endTime;
   final List<GroupMember>? members;
@@ -22,6 +24,8 @@ class Event extends Equatable {
     required this.id,
     required this.type,
     required this.title,
+    this.description,
+    this.imageUrl,
     this.startTime,
     this.endTime,
     this.members,
@@ -41,6 +45,8 @@ class Event extends Equatable {
       id: json['id'],
       type: type,
       title: json['title'],
+      description: json['description'] as String?,
+      imageUrl: json['imageUrl'] as String?,
       startTime: _parseNullableDate(json['startTime']),
       endTime: _parseNullableDate(json['endTime']),
       members: (json['members'] as List<dynamic>?)
@@ -89,11 +95,45 @@ class Event extends Equatable {
     return end.difference(effectiveStartTime);
   }
 
+  /// Get description or generate placeholder lorem ipsum
+  String get displayDescription {
+    if (description != null && description!.isNotEmpty) {
+      return description!;
+    }
+    // Generate event-specific lorem ipsum based on event type
+    switch (type) {
+      case EventType.point:
+        return 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.';
+      case EventType.period:
+        return 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.';
+      case EventType.grouped:
+        return 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Multiple related events detected in temporal sequence.';
+    }
+  }
+
+  /// Get placeholder image URL if none provided
+  String get displayImageUrl {
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return imageUrl!;
+    }
+    // Return placeholder image based on event type
+    switch (type) {
+      case EventType.point:
+        return 'https://via.placeholder.com/150x100/FF6B6B/FFFFFF?text=Point+Event';
+      case EventType.period:
+        return 'https://via.placeholder.com/150x100/4ECDC4/FFFFFF?text=Period+Event';
+      case EventType.grouped:
+        return 'https://via.placeholder.com/150x100/45B7D1/FFFFFF?text=Group+Event';
+    }
+  }
+
   @override
   List<Object?> get props => [
     id,
     type,
     title,
+    description,
+    imageUrl,
     startTime,
     endTime,
     members,
