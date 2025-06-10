@@ -25,8 +25,8 @@ class NavBar extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // building a navButton like this is a bit cleaner and easier to alter the button placements
-                          buildNavButton(navigationBloc, Text("Timeline"), ToggleTimeline()),
-                          buildNavButton(navigationBloc, Text("Map"), ToggleMap()),
+                          buildNavButton(navigationBloc, "Timeline", ToggleTimeline()),
+                          buildNavButton(navigationBloc, "Map", ToggleMap()),
                         ],
                       ),
                     );
@@ -44,11 +44,11 @@ class NavBar extends StatelessWidget {
 
   TextButton buildNavButton(
     NavigationBloc navigationBloc,
-    Text title,
+    String title,
     NavigationEvent event,
   ) {
     return TextButton(
-      child: title,
+      child: Text(title),
       onPressed: () {
         navigationBloc.add(event);
       },
