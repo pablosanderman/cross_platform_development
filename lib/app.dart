@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
           width: 1,
           child: Column(
             children: [
-              const NavBar(),
+              const NavigationView(),
               Expanded(
                 child: BlocBuilder<NavigationBloc, NavigationState>(
                   builder: (context, state) {

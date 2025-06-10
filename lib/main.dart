@@ -6,22 +6,20 @@ import 'navigation/navigation.dart';
 import 'app.dart';
 
 void main() {
-  appWindow.size = const Size(600, 450);
   Bloc.observer = const NavigationObserver();
   runApp(
     MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (_) => NavigationBloc(),
-        )
+        ),
       ],
       child: const MyApp(),
     )
   );
-  appWindow.show();
   doWhenWindowReady(() {
     final win = appWindow;
-    const initialSize = Size(600, 450);
+    const initialSize = Size(1080, 450);
     win.minSize = initialSize;
     win.size = initialSize;
     win.alignment = Alignment.center;

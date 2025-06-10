@@ -2,9 +2,10 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:cross_platform_development/utc_timer/utc_timer.dart';
 
-class NavBar extends StatelessWidget {
-  const NavBar({super.key});
+class NavigationView extends StatelessWidget {
+  const NavigationView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +26,44 @@ class NavBar extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // building a navButton like this is a bit cleaner and easier to alter the button placements
-                          buildNavButton(navigationBloc, "Timeline", ToggleTimeline()),
+                          buildNavButton(
+                            navigationBloc,
+                            "History",
+                            PlaceHolder(),
+                          ),
+                          buildNavButton(
+                            navigationBloc,
+                            "Notifications",
+                            PlaceHolder(),
+                          ),
+                          buildNavButton(
+                            navigationBloc,
+                            "Group",
+                            PlaceHolder(),
+                          ),
+                          buildNavButton(
+                            navigationBloc,
+                            "Timeline",
+                            ToggleTimeline(),
+                          ),
                           buildNavButton(navigationBloc, "Map", ToggleMap()),
+
                         ],
                       ),
                     );
                   },
                 ),
+
                 Expanded(child: MoveWindow()),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
+                  child: NavigationSearchBar()
+                ),
+
+                BlocProvider(
+                  create: (_) => UtcTimeCubit(),
+                  child: const UtcTimerView(),
+                ),
                 const WindowButtons(),
               ],
             ),
@@ -52,6 +83,71 @@ class NavBar extends StatelessWidget {
       onPressed: () {
         navigationBloc.add(event);
       },
+    );
+  }
+}
+
+class NavigationSearchBar extends StatefulWidget {
+  const NavigationSearchBar({super.key});
+
+  @override
+  State<NavigationSearchBar> createState() => _NavigationSearchBarState();
+}
+
+class _NavigationSearchBarState extends State<NavigationSearchBar> {
+
+  // This is an example list, here we can put a list of all the events from the timeline.
+  final List<String> allItems = List<String>.generate(
+    20,
+    (index) => 'item $index',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 350), // Set maximum width
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width, // Make it responsive
+        child: SearchAnchor(
+          builder: (BuildContext context, SearchController controller) {
+            return SearchBar(
+              controller: controller,
+              padding: const WidgetStatePropertyAll<EdgeInsets>(
+                EdgeInsets.symmetric(horizontal: 12.0),
+              ),
+              onTap: () {
+                controller.openView();
+              },
+              onChanged: (_) {
+                controller.openView();
+              },
+              leading: const Icon(Icons.search),
+            );
+          },
+          suggestionsBuilder:
+              (BuildContext context, SearchController controller) {
+                final String input = controller.text;
+                final List<String> filteredItems = allItems
+                    .where(
+                      (item) =>
+                          item.toLowerCase().contains(input.toLowerCase()),
+                    )
+                    .toList();
+
+                return List<ListTile>.generate(filteredItems.length, (
+                  int index,
+                ) {
+                  final String item = filteredItems[index];
+                  return ListTile(
+                    title: Text(item),
+                    onTap: () {
+                      controller.closeView(item);
+                    },
+                  );
+                });
+              },
+        ),
+      ),
     );
   }
 }
