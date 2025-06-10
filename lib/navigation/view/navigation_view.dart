@@ -26,26 +26,10 @@ class NavigationView extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // building a navButton like this is a bit cleaner and easier to alter the button placements
-                          buildNavButton(
-                            navigationBloc,
-                            "History",
-                            PlaceHolder(),
-                          ),
-                          buildNavButton(
-                            navigationBloc,
-                            "Notifications",
-                            PlaceHolder(),
-                          ),
-                          buildNavButton(
-                            navigationBloc,
-                            "Group",
-                            PlaceHolder(),
-                          ),
-                          buildNavButton(
-                            navigationBloc,
-                            "Timeline",
-                            ToggleTimeline(),
-                          ),
+                          buildNavButton(navigationBloc, "History", PlaceHolder(),),
+                          buildNavButton(navigationBloc, "Notifications", PlaceHolder(),),
+                          buildNavButton(navigationBloc, "Group", PlaceHolder(),),
+                          buildNavButton(navigationBloc, "Timeline", ToggleTimeline(),),
                           buildNavButton(navigationBloc, "Map", ToggleMap()),
 
                         ],
@@ -96,7 +80,7 @@ class NavigationSearchBar extends StatefulWidget {
 
 class _NavigationSearchBarState extends State<NavigationSearchBar> {
 
-  // This is an example list, here we can put a list of all the events from the timeline.
+  // This is an example list, here we can put a list of all the events from the timeline. Or just further beneath.
   final List<String> allItems = List<String>.generate(
     20,
     (index) => 'item $index',
@@ -105,9 +89,9 @@ class _NavigationSearchBarState extends State<NavigationSearchBar> {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 350), // Set maximum width
+      constraints: const BoxConstraints(maxWidth: 350),
       child: SizedBox(
-        width: MediaQuery.of(context).size.width, // Make it responsive
+        width: MediaQuery.of(context).size.width,
         child: SearchAnchor(
           builder: (BuildContext context, SearchController controller) {
             return SearchBar(
