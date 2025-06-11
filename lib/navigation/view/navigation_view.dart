@@ -41,12 +41,17 @@ class NavigationView extends StatelessWidget {
                 ),
 
                 Expanded(child: MoveWindow()),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10.0,
-                    vertical: 3.0,
+
+                // Navigation Search Bar Wrapped in Expanded to make it flexible.
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0,
+                      vertical: 3.0,
+                    ),
+                    child: NavigationSearchBar(),
                   ),
-                  child: NavigationSearchBar(),
                 ),
 
                 BlocProvider(
@@ -68,7 +73,10 @@ class NavigationView extends StatelessWidget {
     NavigationEvent event,
   ) {
     return TextButton(
-      child: Text(title),
+      child: Text(
+        title,
+        style: TextStyle(color: Colors.white),
+      ),
       onPressed: () {
         navigationBloc.add(event);
       },
@@ -92,13 +100,7 @@ class _NavigationSearchBarState extends State<NavigationSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 500),
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return SizedBox(
-            width: constraints.maxWidth,
-            child: SearchAnchor(
+            return SearchAnchor(
               builder: (BuildContext context, SearchController controller) {
                 return SearchBar(
                   controller: controller,
@@ -145,11 +147,7 @@ class _NavigationSearchBarState extends State<NavigationSearchBar> {
                       );
                     });
                   },
-            ),
-          );
-        },
-      ),
-    );
+            );
   }
 }
 
