@@ -31,7 +31,6 @@ class NavigationView extends StatelessWidget {
                           buildNavButton(navigationBloc, "Group", PlaceHolder(),),
                           buildNavButton(navigationBloc, "Timeline", ToggleTimeline(),),
                           buildNavButton(navigationBloc, "Map", ToggleMap()),
-
                         ],
                       ),
                     );
@@ -40,8 +39,11 @@ class NavigationView extends StatelessWidget {
 
                 Expanded(child: MoveWindow()),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
-                  child: NavigationSearchBar()
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10.0,
+                    vertical: 3.0,
+                  ),
+                  child: NavigationSearchBar(),
                 ),
 
                 BlocProvider(
@@ -79,7 +81,6 @@ class NavigationSearchBar extends StatefulWidget {
 }
 
 class _NavigationSearchBarState extends State<NavigationSearchBar> {
-
   // This is an example list, here we can put a list of all the events from the timeline. Or just further beneath.
   final List<String> allItems = List<String>.generate(
     20,
@@ -96,43 +97,45 @@ class _NavigationSearchBarState extends State<NavigationSearchBar> {
             width: constraints.maxWidth,
             child: SearchAnchor(
               builder: (BuildContext context, SearchController controller) {
-            return SearchBar(
-              controller: controller,
-              padding: const WidgetStatePropertyAll<EdgeInsets>(
-                EdgeInsets.symmetric(horizontal: 12.0),
-              ),
-              onTap: () {
-                controller.openView();
+                return SearchBar(
+                  controller: controller,
+                  padding: const WidgetStatePropertyAll<EdgeInsets>(
+                    EdgeInsets.symmetric(horizontal: 12.0),
+                  ),
+                  onTap: () {
+                    controller.openView();
+                  },
+                  onChanged: (_) {
+                    controller.openView();
+                  },
+                  leading: const Icon(Icons.search),
+                );
               },
-              onChanged: (_) {
-                controller.openView();
-              },
-              leading: const Icon(Icons.search),
-            );
-          },
-          suggestionsBuilder:
-              (BuildContext context, SearchController controller) {
-                final String input = controller.text;
-                final List<String> filteredItems = allItems
-                    .where(
-                      (item) =>
-                          item.toLowerCase().contains(input.toLowerCase()),
-                    )
-                    .toList();
+              suggestionsBuilder:
+                  (BuildContext context, SearchController controller) {
+                    final String input = controller.text;
+                    final List<String> filteredItems = allItems
+                        .where(
+                          (item) =>
+                              item.toLowerCase().contains(input.toLowerCase()),
+                        )
+                        .toList();
 
-                return List<ListTile>.generate(filteredItems.length, (
-                  int index,
-                ) {
-                  final String item = filteredItems[index];
-                  return ListTile(
-                    title: Text(item),
-                    onTap: () {
-                      controller.closeView(item);
-                    },
-                  );
-                });
-              },
-        ),
+                    return List<ListTile>.generate(filteredItems.length, (
+                      int index,
+                    ) {
+                      final String item = filteredItems[index];
+                      return ListTile(
+                        title: Text(item),
+                        onTap: () {
+                          controller.closeView(item);
+                        },
+                      );
+                    });
+                  },
+            ),
+          );
+        },
       ),
     );
   }
