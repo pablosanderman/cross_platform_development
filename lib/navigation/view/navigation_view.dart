@@ -90,10 +90,12 @@ class _NavigationSearchBarState extends State<NavigationSearchBar> {
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 350),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: SearchAnchor(
-          builder: (BuildContext context, SearchController controller) {
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return SizedBox(
+            width: constraints.maxWidth,
+            child: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
             return SearchBar(
               controller: controller,
               padding: const WidgetStatePropertyAll<EdgeInsets>(
