@@ -1,4 +1,4 @@
-import 'package:cross_platform_development/navigation_observer.dart';
+import 'package:cross_platform_development/app_observer.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +6,7 @@ import 'navigation/navigation.dart';
 import 'app.dart';
 
 void main() {
-  Bloc.observer = const NavigationObserver();
+  Bloc.observer = const AppObserver();
   runApp(
     MultiBlocProvider(
       providers: [
