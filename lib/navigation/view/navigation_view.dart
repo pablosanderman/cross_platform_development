@@ -1,8 +1,10 @@
 ﻿import 'package:cross_platform_development/navigation/navigation.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:cross_platform_development/timeline/models/models.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:cross_platform_development/utc_timer/utc_timer.dart';
+import 'package:cross_platform_development/timeline/timeline.dart';
 
 class NavigationView extends StatelessWidget {
   const NavigationView({super.key});
@@ -82,10 +84,10 @@ class NavigationSearchBar extends StatefulWidget {
 
 class _NavigationSearchBarState extends State<NavigationSearchBar> {
   // This is an example list, here we can put a list of all the events from the timeline. Or just further beneath.
-  final List<String> allItems = List<String>.generate(
-    20,
-    (index) => 'item $index',
-  );
+  // final List<String> allItems = List<String>.generate(
+  //   20,
+  //   (index) => 'item $index',
+  // );
 
   @override
   Widget build(BuildContext context) {
@@ -112,23 +114,24 @@ class _NavigationSearchBarState extends State<NavigationSearchBar> {
                 );
               },
               suggestionsBuilder:
-                  (BuildContext context, SearchController controller) {
+                  (BuildContext context, SearchController controller) async {
                     final String input = controller.text;
-                    final List<String> filteredItems = allItems
+                    final List<Event> events = await TimelineCubit().loadEvents();
+                    final List<Event> filteredItems = events
                         .where(
                           (item) =>
-                              item.toLowerCase().contains(input.toLowerCase()),
+                              item.title.toLowerCase().contains(input.toLowerCase()),
                         )
                         .toList();
 
                     return List<ListTile>.generate(filteredItems.length, (
                       int index,
                     ) {
-                      final String item = filteredItems[index];
+                      final Event item = filteredItems[index];
                       return ListTile(
-                        title: Text(item),
+                        title: Text(item.title),
                         onTap: () {
-                          controller.closeView(item);
+                          controller.closeView(item.title);
                         },
                       );
                     });

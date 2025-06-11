@@ -31,7 +31,7 @@ class TimelineCubit extends Cubit<TimelineState> {
         ),
       );
 
-  Future<void> loadTimeline() async {
+  Future<List<Event>> loadEvents() async {
     final raw = await rootBundle.loadString('data.json');
     final data = jsonDecode(raw) as Map<String, dynamic>;
     final events = (data['events'] as List)
@@ -39,7 +39,11 @@ class TimelineCubit extends Cubit<TimelineState> {
         .toList()
         .cast<Event>();
     events.sort((a, b) => a.effectiveStartTime.compareTo(b.effectiveStartTime));
+    return events;
+  }
 
+  Future<void> loadTimeline() async {
+    final List<Event> events = await loadEvents();
     // Calculate visible window based on events
     DateTime visibleStart;
     DateTime visibleEnd;
