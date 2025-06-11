@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:cross_platform_development/utc_timer/utc_timer.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
+import 'package:intl/intl.dart';
 
 class NavigationView extends StatelessWidget {
   const NavigationView({super.key});
@@ -92,7 +93,7 @@ class _NavigationSearchBarState extends State<NavigationSearchBar> {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 350),
+      constraints: const BoxConstraints(maxWidth: 500),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return SizedBox(
@@ -128,8 +129,16 @@ class _NavigationSearchBarState extends State<NavigationSearchBar> {
                       int index,
                     ) {
                       final Event item = filteredItems[index];
+                      final startTime = item.startTime != null
+                          ? DateFormat('HH:mm:ss').format(item.startTime as DateTime)
+                          : "No StartTime";
+
+                      final endTime = item.endTime != null
+                          ? DateFormat('HH:mm:ss').format(item.endTime as DateTime)
+                          : "No EndTime";
+
                       return ListTile(
-                        title: Text(item.title),
+                        title: Text("${item.title}   Date: $startTime --- $endTime"),
                         onTap: () {
                           controller.closeView(item.title);
                         },

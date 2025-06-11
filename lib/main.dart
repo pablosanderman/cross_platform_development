@@ -19,7 +19,7 @@ void main() {
   );
   doWhenWindowReady(() {
     final win = appWindow;
-    const initialSize = Size(1080, 450);
+    const initialSize = Size(1200, 600);
     win.minSize = initialSize;
     win.size = initialSize;
     win.alignment = Alignment.center;
