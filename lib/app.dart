@@ -50,23 +50,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-
-const sidebarColor = Color(0xFFF6A00C);
-
-class LeftSide extends StatelessWidget {
-  const LeftSide({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      child: Container(
-        color: sidebarColor,
-        child: Column(children: [Expanded(child: Text("TIMELINE"))]),
-      ),
-    );
-  }
-}
-
 const backgroundStartColor = Color(0xFFFFD500);
 
 class RightSide extends StatelessWidget {
