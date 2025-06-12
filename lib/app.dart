@@ -1,3 +1,4 @@
+import 'package:cross_platform_development/groups/groups.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,9 +25,10 @@ class MyApp extends StatelessWidget {
                 child: BlocBuilder<NavigationBloc, NavigationState>(
                   builder: (context, state) {
                     final bothVisible = state.showTimeline && state.showMap;
-
                     return Row(
                       children: [
+                        if (context.read<NavigationBloc>().state.currentPageIndex == 1)
+                          GroupsPage(),
                         if (state.showTimeline)
                           Expanded(
                             flex: bothVisible ? 1 : 2,

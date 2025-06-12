@@ -1,21 +1,22 @@
-﻿abstract class NavigationEvent {}
+﻿abstract class NavigationEvent {
+  final bool forceNavigate;
+  NavigationEvent({this.forceNavigate = false});
+}
 
-class PlaceHolder extends NavigationEvent {}
+class PlaceHolder extends NavigationEvent {
+  PlaceHolder() : super(forceNavigate: false);
+}
 
 class ToggleTimeline extends NavigationEvent {
-  final bool forceNavigate;
-
-  ToggleTimeline({this.forceNavigate = false});
+  ToggleTimeline({bool forceNavigate = false}) : super(forceNavigate: forceNavigate);
 }
 
 class ToggleMap extends NavigationEvent {
-  final bool forceNavigate;
-
-  ToggleMap({this.forceNavigate = false});
+  ToggleMap({bool forceNavigate = false}) : super(forceNavigate: forceNavigate);
 }
 
 class ChangePage extends NavigationEvent {
   final int pageIndex;
 
-  ChangePage(this.pageIndex);
+  ChangePage(this.pageIndex) : super(forceNavigate: true);
 }

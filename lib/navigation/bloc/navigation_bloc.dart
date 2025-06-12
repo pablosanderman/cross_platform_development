@@ -21,7 +21,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if(!newtimelineState && !state.showMap) { return; }
 
     if (state.currentPageIndex != 0 || event.forceNavigate) {
-      emit(state.copyWith(currentPageIndex: 0));
+      emit(state.copyWith(showTimeline: true, currentPageIndex: 0));
     } else {
       emit(state.copyWith(showTimeline: !state.showTimeline));
     }
@@ -35,7 +35,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (!newMapState && !state.showTimeline) { return; }
 
     if (state.currentPageIndex != 0 || event.forceNavigate) {
-      emit(state.copyWith(currentPageIndex: 0));
+      emit(state.copyWith(showMap: true,currentPageIndex: 0));
     } else {
       emit(state.copyWith(showMap: !state.showMap));
     }
@@ -45,6 +45,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       ChangePage event,
       Emitter<NavigationState> emit,
       ) {
-    emit(state.copyWith(currentPageIndex: event.pageIndex));
+    emit(state.copyWith(
+        showTimeline: false,
+        showMap: false,
+        currentPageIndex: event.pageIndex));
   }
 }

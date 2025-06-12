@@ -12,7 +12,6 @@ class NavigationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navigationBloc = context.read<NavigationBloc>();
 
     return Container(
       color: Color.fromARGB(100, 120, 70, 1),
@@ -42,7 +41,10 @@ class NavigationView extends StatelessWidget {
                           buildNavButton(
                             context,
                             "Group",
-                            onPressed: () => PlaceHolder(),
+                            onPressed: () =>
+                                context.read<NavigationBloc>().add(ChangePage(1)),
+                            isSelected:
+                              state.currentPageIndex == 1,
                           ),
                           buildNavButton(
                             context,
@@ -133,11 +135,6 @@ class NavigationSearchBar extends StatefulWidget {
 }
 
 class _NavigationSearchBarState extends State<NavigationSearchBar> {
-  // This is an example list, here we can put a list of all the events from the timeline. Or just further beneath.
-  // final List<String> allItems = List<String>.generate(
-  //   20,
-  //   (index) => 'item $index',
-  // );
 
   @override
   Widget build(BuildContext context) {
