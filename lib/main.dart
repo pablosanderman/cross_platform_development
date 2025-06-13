@@ -3,6 +3,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'navigation/navigation.dart';
+import 'navigation/nav_item/nav_item.dart';
 import 'app.dart';
 
 void main() {
@@ -10,9 +11,8 @@ void main() {
   runApp(
     MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (_) => NavigationBloc(),
-        ),
+        BlocProvider(create: (_) => NavigationBloc(),),
+        BlocProvider(create: (_) => NavItemsCubit(),)
       ],
       child: const MyApp(),
     )

@@ -1,13 +1,16 @@
 ﻿import 'package:cross_platform_development/groups/models/person.dart';
-import 'package:equatable/equatable.dart';
 
 class Group {
   Group({
     required this.name,
-    this.groupMembers = const [],
-  });
+    required this.id,
+    List<Person>? groupMembers,
+  }) : groupMembers = groupMembers ?? [];
+
+
 
   final String name;
+  final String id ;
   final List<Person> groupMembers;
 
   void addMember(Person person) {
@@ -15,10 +18,7 @@ class Group {
   }
 
   void removeMember(Person personToRemove) {
-    for (Person person in groupMembers) {
-      if(person == personToRemove) {
-        groupMembers.remove(person);
-      }
-    }
+    groupMembers.removeWhere((person) => person == personToRemove);
   }
+
 }

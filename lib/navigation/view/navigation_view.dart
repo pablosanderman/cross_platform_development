@@ -1,18 +1,18 @@
-﻿import 'package:cross_platform_development/navigation/navigation.dart';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:cross_platform_development/timeline/models/models.dart';
+﻿import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:cross_platform_development/utc_timer/utc_timer.dart';
-import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:intl/intl.dart';
+
+import '../../utc_timer/utc_timer.dart';
+import '../../timeline/timeline.dart';
+import '../nav_item/nav_item.dart';
+import '../navigation.dart';
 
 class NavigationView extends StatelessWidget {
   const NavigationView({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       color: Color.fromARGB(100, 120, 70, 1),
       child: Column(
@@ -21,51 +21,48 @@ class NavigationView extends StatelessWidget {
             child: Row(
               children: [
                 BlocBuilder<NavigationBloc, NavigationState>(
-                  builder: (context, state) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // building a navButton like this is a bit cleaner and easier to alter the button placements
-                          buildNavButton(
-                            context,
-                            "History",
-                            onPressed: () => PlaceHolder(),
+                  builder: (context, navState) {
+                    return BlocBuilder<NavItemsCubit, NavItemsState>(
+                      builder: (context, itemsState) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: itemsState.items.reversed.map((item) {
+                              return buildNavButton(
+                                context,
+                                item.label,
+                                onPressed: () {
+                                  if (item.requiresToggle) {
+                                    if (item.label == 'Timeline') {
+                                      context.read<NavigationBloc>().add(
+                                        ToggleTimeline(),
+                                      );
+                                    } else if (item.label == 'Map') {
+                                      context.read<NavigationBloc>().add(
+                                        ToggleMap(),
+                                      );
+                                    }
+                                  } else {
+                                    context.read<NavigationBloc>().add(
+                                      ChangePage(item.pageIndex),
+                                    );
+                                  }
+                                },
+                                isSelected: item.requiresToggle
+                                    ? (item.label == 'Timeline' &&
+                                              navState.showTimeline &&
+                                              navState.currentPageIndex == 0) ||
+                                          (item.label == 'Map' &&
+                                              navState.showMap &&
+                                              navState.currentPageIndex == 0)
+                                    : navState.currentPageIndex ==
+                                          item.pageIndex,
+                              );
+                            }).toList(),
                           ),
-                          buildNavButton(
-                            context,
-                            "Notifications",
-                            onPressed: () => PlaceHolder(),
-                          ),
-                          buildNavButton(
-                            context,
-                            "Group",
-                            onPressed: () =>
-                                context.read<NavigationBloc>().add(ChangePage(1)),
-                            isSelected:
-                              state.currentPageIndex == 1,
-                          ),
-                          buildNavButton(
-                            context,
-                            "Timeline",
-                            onPressed: () => context.read<NavigationBloc>().add(
-                              ToggleTimeline(),
-                            ),
-                            isSelected:
-                                state.showTimeline &&
-                                state.currentPageIndex == 0,
-                          ),
-                          buildNavButton(
-                            context,
-                            "Map",
-                            onPressed: () =>
-                                context.read<NavigationBloc>().add(ToggleMap()),
-                            isSelected:
-                                state.showMap && state.currentPageIndex == 0,
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     );
                   },
                 ),
@@ -135,7 +132,6 @@ class NavigationSearchBar extends StatefulWidget {
 }
 
 class _NavigationSearchBarState extends State<NavigationSearchBar> {
-
   @override
   Widget build(BuildContext context) {
     return SearchAnchor(

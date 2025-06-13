@@ -1,5 +1,4 @@
-import 'package:cross_platform_development/groups/groups.dart';
-import 'package:cross_platform_development/timeline/timeline.dart';
+import 'package:cross_platform_development/navigation/nav_item/nav_item.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -21,28 +20,20 @@ class MyApp extends StatelessWidget {
           child: Column(
             children: [
               const NavigationView(),
-              Expanded(
-                child: BlocBuilder<NavigationBloc, NavigationState>(
-                  builder: (context, state) {
-                    final bothVisible = state.showTimeline && state.showMap;
-                    return Row(
-                      children: [
-                        if (context.read<NavigationBloc>().state.currentPageIndex == 1)
-                          GroupsPage(),
-                        if (state.showTimeline)
-                          Expanded(
-                            flex: bothVisible ? 1 : 2,
-                            child: const TimelinePage(),
-                          ),
-                        if (state.showMap)
-                          Expanded(
-                            flex: bothVisible ? 1 : 2,
-                            child: const RightSide(),
-                          ),
-                      ],
-                    );
-                  },
-                ),
+               BlocBuilder<NavigationBloc, NavigationState>(
+                builder: (context, navState) {
+                  final navContext = context.read<NavigationBloc>();
+                  // Hacky way of doing this, please don't kill me :).
+                  final currentIndex = navContext.state.currentPageIndex == 1
+                      ? navContext.state.currentPageIndex - 1
+                      : navContext.state.currentPageIndex;
+                  return BlocBuilder<NavItemsCubit, NavItemsState>(
+                      builder: (context, itemsState) {
+                        print(itemsState.items[currentIndex].page.toString());
+                        return itemsState.items[currentIndex].page;
+                      }
+                  );
+                },
               ),
             ],
           ),
@@ -52,17 +43,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
-const backgroundStartColor = Color(0xFFFFD500);
 
-class RightSide extends StatelessWidget {
-  const RightSide({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      child: Container(
-        color: backgroundStartColor,
-        child: Column(children: [Text("MAPMAPMAP")]),
-      ),
-    );
-  }
-}
+
+// class MainContentView extends StatelessWidget {
+//   const MainContentView({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//
+//   }
+// }

@@ -8,7 +8,7 @@ enum GroupRoles {
 }
 
 class Person extends Equatable {
-  final int id;
+  final String id;
   final String firstName;
   final String lastName;
   late final GroupRoles? role;
