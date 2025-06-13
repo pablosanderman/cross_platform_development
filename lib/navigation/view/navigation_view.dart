@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cross_platform_development/utc_timer/utc_timer.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
 
 class NavigationView extends StatelessWidget {
   const NavigationView({super.key});
@@ -24,15 +25,34 @@ class NavigationView extends StatelessWidget {
                 BlocBuilder<NavigationBloc, NavigationState>(
                   builder: (context, state) {
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: EdgeInsets.only(
+                        left: Platform.isMacOS ? 60.0 : 8.0,
+                        right: 8.0,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // building a navButton like this is a bit cleaner and easier to alter the button placements
-                          buildNavButton(navigationBloc, "History", PlaceHolder(),),
-                          buildNavButton(navigationBloc, "Notifications", PlaceHolder(),),
-                          buildNavButton(navigationBloc, "Group", PlaceHolder(),),
-                          buildNavButton(navigationBloc, "Timeline", ToggleTimeline(),),
+                          buildNavButton(
+                            navigationBloc,
+                            "History",
+                            PlaceHolder(),
+                          ),
+                          buildNavButton(
+                            navigationBloc,
+                            "Notifications",
+                            PlaceHolder(),
+                          ),
+                          buildNavButton(
+                            navigationBloc,
+                            "Group",
+                            PlaceHolder(),
+                          ),
+                          buildNavButton(
+                            navigationBloc,
+                            "Timeline",
+                            ToggleTimeline(),
+                          ),
                           buildNavButton(navigationBloc, "Map", ToggleMap()),
                         ],
                       ),
@@ -73,10 +93,7 @@ class NavigationView extends StatelessWidget {
     NavigationEvent event,
   ) {
     return TextButton(
-      child: Text(
-        title,
-        style: TextStyle(color: Colors.white),
-      ),
+      child: Text(title, style: TextStyle(color: Colors.white)),
       onPressed: () {
         navigationBloc.add(event);
       },
@@ -100,54 +117,52 @@ class _NavigationSearchBarState extends State<NavigationSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-            return SearchAnchor(
-              builder: (BuildContext context, SearchController controller) {
-                return SearchBar(
-                  controller: controller,
-                  padding: const WidgetStatePropertyAll<EdgeInsets>(
-                    EdgeInsets.symmetric(horizontal: 12.0),
-                  ),
-                  onTap: () {
-                    controller.openView();
-                  },
-                  onChanged: (_) {
-                    controller.openView();
-                  },
-                  leading: const Icon(Icons.search),
-                );
-              },
-              suggestionsBuilder:
-                  (BuildContext context, SearchController controller) async {
-                    final String input = controller.text;
-                    final List<Event> events = await TimelineCubit().loadEvents();
-                    final List<Event> filteredItems = events
-                        .where(
-                          (item) =>
-                              item.title.toLowerCase().contains(input.toLowerCase()),
-                        )
-                        .toList();
+    return SearchAnchor(
+      builder: (BuildContext context, SearchController controller) {
+        return SearchBar(
+          controller: controller,
+          padding: const WidgetStatePropertyAll<EdgeInsets>(
+            EdgeInsets.symmetric(horizontal: 12.0),
+          ),
+          onTap: () {
+            controller.openView();
+          },
+          onChanged: (_) {
+            controller.openView();
+          },
+          leading: const Icon(Icons.search),
+        );
+      },
+      suggestionsBuilder:
+          (BuildContext context, SearchController controller) async {
+            final String input = controller.text;
+            final List<Event> events = await TimelineCubit().loadEvents();
+            final List<Event> filteredItems = events
+                .where(
+                  (item) =>
+                      item.title.toLowerCase().contains(input.toLowerCase()),
+                )
+                .toList();
 
-                    return List<ListTile>.generate(filteredItems.length, (
-                      int index,
-                    ) {
-                      final Event item = filteredItems[index];
-                      final startTime = item.startTime != null
-                          ? DateFormat('HH:mm:ss').format(item.startTime as DateTime)
-                          : "No StartTime";
+            return List<ListTile>.generate(filteredItems.length, (int index) {
+              final Event item = filteredItems[index];
+              final startTime = item.startTime != null
+                  ? DateFormat('HH:mm:ss').format(item.startTime as DateTime)
+                  : "No StartTime";
 
-                      final endTime = item.endTime != null
-                          ? DateFormat('HH:mm:ss').format(item.endTime as DateTime)
-                          : "No EndTime";
+              final endTime = item.endTime != null
+                  ? DateFormat('HH:mm:ss').format(item.endTime as DateTime)
+                  : "No EndTime";
 
-                      return ListTile(
-                        title: Text("${item.title}   Date: $startTime --- $endTime"),
-                        onTap: () {
-                          controller.closeView(item.title);
-                        },
-                      );
-                    });
-                  },
-            );
+              return ListTile(
+                title: Text("${item.title}   Date: $startTime --- $endTime"),
+                onTap: () {
+                  controller.closeView(item.title);
+                },
+              );
+            });
+          },
+    );
   }
 }
 
