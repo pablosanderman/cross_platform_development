@@ -5,6 +5,8 @@
             "type": "POINT",
             "title": "M 4.2 earthquake near Etna",
             "startTime": "2025-01-15T21:45:00Z",
+            "latitude": 37.7513,
+            "longitude": 14.9934,
             "properties": {
                 "magnitude": 4.2,
                 "depthKm": 10.5,
@@ -43,6 +45,8 @@
             "type": "POINT",
             "title": "Gas emission spike at Vulcano",
             "startTime": "2025-01-15T08:30:00Z",
+            "latitude": 38.4042,
+            "longitude": 14.9619,
             "properties": {
                 "so2FluxTonsPerDay": 850,
                 "backgroundLevel": 120,
@@ -56,6 +60,8 @@
             "title": "Campi Flegrei ground uplift",
             "startTime": "2025-01-15T00:00:00Z",
             "endTime": "2025-01-15T23:59:59Z",
+            "latitude": 40.8270,
+            "longitude": 14.1390,
             "properties": {
                 "maxDisplacementCm": 3.2,
                 "measurementMethod": "InSAR",
@@ -67,6 +73,8 @@
             "id": "evt-group-9001",
             "type": "GROUPED",
             "title": "Etna microearthquake swarm",
+            "latitude": 37.7513,
+            "longitude": 14.9934,
             "members": [
                 {
                     "id": "evt-9001-1",
@@ -165,6 +173,8 @@
             "type": "POINT",
             "title": "M 3.8 earthquake at Vesuvius",
             "startTime": "2025-01-14T05:22:00Z",
+            "latitude": 40.8218,
+            "longitude": 14.4281,
             "properties": {
                 "magnitude": 3.8,
                 "depthKm": 6.2,
@@ -191,6 +201,8 @@
             "type": "POINT",
             "title": "Ash emission at Etna",
             "startTime": "2025-01-14T12:15:00Z",
+            "latitude": 37.7513,
+            "longitude": 14.9934,
             "properties": {
                 "ashHeightKm": 2.8,
                 "windDirection": "southeast",
