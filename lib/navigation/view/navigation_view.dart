@@ -15,9 +15,7 @@ class NavigationView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Color.fromARGB(100, 120, 70, 1),
-      child: Column(
-        children: [
-          WindowTitleBarBox(
+      child: WindowTitleBarBox(
             child: Row(
               children: [
                 BlocBuilder<NavigationBloc, NavigationState>(
@@ -85,12 +83,11 @@ class NavigationView extends StatelessWidget {
                   create: (_) => UtcTimeCubit(),
                   child: const UtcTimerView(),
                 ),
+
                 const WindowButtons(),
               ],
             ),
           ),
-        ],
-      ),
     );
   }
 

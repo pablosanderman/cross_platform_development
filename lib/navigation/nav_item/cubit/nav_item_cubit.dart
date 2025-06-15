@@ -13,7 +13,7 @@ class NavItemsCubit extends Cubit<NavItemsState> {
   static final List<NavItem> _defaultNavItems = [
     NavItem(label: 'Map', page: TimelineMapView(), pageIndex: 0, requiresToggle: true),
     NavItem(label: 'Timeline', page: TimelineMapView(), pageIndex: 1, requiresToggle: true),
-    NavItem(label: 'Group', page: GroupsView(), pageIndex: 2),
+    NavItem(label: 'Group', page: GroupsPage(), pageIndex: 2),
     NavItem(label: 'Notifications', page: Container(), pageIndex: 3),
     NavItem(label: 'History', page: Container(), pageIndex: 4),
   ];

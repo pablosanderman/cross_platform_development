@@ -22,14 +22,13 @@ class MyApp extends StatelessWidget {
               const NavigationView(),
                BlocBuilder<NavigationBloc, NavigationState>(
                 builder: (context, navState) {
-                  final navContext = context.read<NavigationBloc>();
                   // Hacky way of doing this, please don't kill me :).
-                  final currentIndex = navContext.state.currentPageIndex == 1
-                      ? navContext.state.currentPageIndex - 1
-                      : navContext.state.currentPageIndex;
+                  final currentIndex = navState.currentPageIndex == 1
+                      ? navState.currentPageIndex - 1
+                      : navState.currentPageIndex;
+
                   return BlocBuilder<NavItemsCubit, NavItemsState>(
                       builder: (context, itemsState) {
-                        print(itemsState.items[currentIndex].page.toString());
                         return itemsState.items[currentIndex].page;
                       }
                   );
@@ -42,14 +41,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
-
-// class MainContentView extends StatelessWidget {
-//   const MainContentView({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//
-//   }
-// }

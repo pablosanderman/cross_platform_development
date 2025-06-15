@@ -1,40 +1,101 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:cross_platform_development/groups/cubit/groups_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../cubit/groups_cubit.dart';
+import '../cubit/groups_bloc.dart';
+import '../cubit/groups_event.dart';
 
+const backgroundStartColor = Color(0xFFFFD500);
 
-class GroupsView extends StatelessWidget {
+class GroupsView extends StatefulWidget {
   const GroupsView({super.key});
 
   @override
+  State<GroupsView> createState() => _GroupsViewState();
+
+
+}
+
+class _GroupsViewState extends State<GroupsView> {
+
+  @override
   Widget build(BuildContext context) {
-    return Expanded(  // Add this to make it fill available space
+    // Add this to make it fill available space
+    return Expanded(
       child: Row(
         children: [
-          Expanded(
-            flex: 1,
-            child: LeftSide(),
-          ),
-          Expanded(
-            flex: 3,
-            child: const RightSide(),
-          ),
+          Expanded(flex: 1, child: LeftSide()),
+          Expanded(flex: 3, child: const RightSide()),
         ],
       ),
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<GroupsBloc>();
+  }
 }
 
-const backgroundStartColor = Color(0xFFFFD500);
 
 class LeftSide extends StatelessWidget {
   LeftSide({super.key});
   final TextEditingController _textFieldController = TextEditingController();
 
+  @override
+  Widget build(BuildContext context) {
+    
+    return SizedBox(
+        child: Stack(
+          children: [
+            Container(
+              width: double.infinity,
+              height: MediaQuery.of(context).size.height,
+              color: backgroundStartColor,
+              child: BlocBuilder<GroupsBloc, GroupsState>(
+                builder: (context, groupState) {
+                  return ListView(
+                    children: groupState.groups.map((group) {
+                      return ListTile(
+                        tileColor: Colors.blueAccent,
+                        title: Text(group.name),
+                        onTap: () => {
+                          context.read<GroupsBloc>().add(
+                            ChooseGroup(group)
+                          )
+                        },
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton.extended(
+                label: Text("Create Group"),
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  _displayTextInputDialog(context);
+                },
+              ),
+            )
+          ],
+        )
+    );
+
+  }
+
   Future<void> _displayTextInputDialog(BuildContext context) async {
     return showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: Text('Group name'),
           content: TextField(
@@ -45,47 +106,25 @@ class LeftSide extends StatelessWidget {
             TextButton(
               child: Text('CANCEL'),
               onPressed: () {
-                Navigator.pop(context);
+                _textFieldController.clear();
+                Navigator.pop(dialogContext);
               },
             ),
             TextButton(
               child: Text('OK'),
               onPressed: () {
-                print(_textFieldController.text);
-                GroupsCubit.instance.createGroup(_textFieldController.value.text);
-                Navigator.pop(context);
+                if (_textFieldController.text.isNotEmpty) {
+                  // Use the original context, not the dialog context
+                  context.read<GroupsBloc>().createGroup(_textFieldController.text);
+                  print('Creating group: ${_textFieldController.text}');
+                  _textFieldController.clear();
+                  Navigator.pop(dialogContext);
+                }
               },
             ),
           ],
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        label: Text("Create Group"),
-        icon: Icon(Icons.add),
-        onPressed: () {
-          _displayTextInputDialog(context);
-        },
-        
-      ),
-      body: Container(
-        width: double.infinity,
-        color: backgroundStartColor,
-        child: Column(
-          children: <Widget>[
-            Material(
-              child: ListTile(
-                title: Text("test"),
-              ),
-            )
-          ],
-        ),
-      ),
     );
   }
 
@@ -95,14 +134,24 @@ class RightSide extends StatelessWidget {
   const RightSide({super.key});
   @override
   Widget build(BuildContext context) {
+
     return Container(
-      width: double.infinity,
+      height: MediaQuery.of(context).size.height,
       color: backgroundStartColor,
-      child: Column(
-        children: [
-          Text("Group Management")
-        ],
-      ),
+      child: BlocBuilder<GroupsBloc, GroupsState>(
+        builder: (context, groupState) {
+          if(groupState.chosenGroup == null) return Container();
+          final groupMembers = groupState.chosenGroup?.groupMembers;
+          return ListView(
+            children: groupMembers!.keys.map((person) {
+              return ListTile(
+                tileColor: Colors.blueAccent,
+                title: Text("Name: ${person.firstName} ${person.lastName}"),
+              );
+            }).toList(),
+          );
+      },
+    )
     );
   }
 }

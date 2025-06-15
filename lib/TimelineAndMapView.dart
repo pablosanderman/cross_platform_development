@@ -30,7 +30,6 @@ class TimelineMapView extends StatelessWidget{
             ),
           );
         }
-
     );
   }
 }

@@ -14,9 +14,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   }
 
   void _handleToggleTimeline(
-      ToggleTimeline event,
-      Emitter<NavigationState> emit,
-      ) {
+    ToggleTimeline event,
+    Emitter<NavigationState> emit,
+    ) {
     final newtimelineState = !state.showTimeline;
     if(!newtimelineState && !state.showMap) { return; }
 
