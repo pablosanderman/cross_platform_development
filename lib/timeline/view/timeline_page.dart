@@ -4,7 +4,7 @@ import 'package:cross_platform_development/timeline/timeline.dart';
 
 /// {@template timeline_page}
 /// A [StatelessWidget] which is responsible for providing a
-/// [TimelineCubit] instance to the [TimelineView].
+/// [TimelineView] that uses the app-level TimelineCubit.
 /// {@endtemplate}
 class TimelinePage extends StatelessWidget {
   /// {@macro timeline_page}
@@ -12,9 +12,6 @@ class TimelinePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => TimelineCubit(),
-      child: const TimelineView(),
-    );
+    return const TimelineView();
   }
 }

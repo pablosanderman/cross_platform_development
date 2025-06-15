@@ -28,12 +28,6 @@ class _TimelineViewState extends State<TimelineView> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    context.read<TimelineCubit>().loadTimeline();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocBuilder<TimelineCubit, TimelineState>(

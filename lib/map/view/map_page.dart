@@ -14,10 +14,7 @@ class MapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => MapCubit()..loadMapEvents(),
-      child: const MapView(),
-    );
+    return const MapView();
   }
 }
 
