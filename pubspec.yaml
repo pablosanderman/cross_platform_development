@@ -42,6 +42,10 @@ dependencies:
   bloc: ^9.0.0
   equatable: ^2.0.5
 
+  # Map functionality
+  flutter_map: ^8.1.1
+  latlong2: ^0.9.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

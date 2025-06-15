@@ -1,4 +1,5 @@
 import 'package:cross_platform_development/timeline/timeline.dart';
+import 'package:cross_platform_development/map/map.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
                         if (state.showMap)
                           Expanded(
                             flex: bothVisible ? 1 : 2,
-                            child: const RightSide(),
+                            child: const MapPage(),
                           ),
                       ],
                     );
