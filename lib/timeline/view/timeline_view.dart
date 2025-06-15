@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
-import 'package:cross_platform_development/timeline/models/models.dart';
+import 'package:cross_platform_development/shared/shared.dart';
 
 /// {@template timeline_view}
 /// A [StatelessWidget] which reacts to the provided

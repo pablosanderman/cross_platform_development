@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:bloc/bloc.dart';
-import 'package:flutter/services.dart';
-import 'package:cross_platform_development/timeline/models/models.dart';
+import 'package:cross_platform_development/shared/shared.dart';
 import 'timeline_state.dart';
 
 /// Extension to add layout-specific properties to Event
@@ -23,23 +21,19 @@ extension EventLayout on Event {
 /// {@endtemplate}
 class TimelineCubit extends Cubit<TimelineState> {
   /// {@macro timeline_cubit}
-  TimelineCubit()
-    : super(
+  TimelineCubit({EventsRepository? eventsRepository})
+    : _eventsRepository = eventsRepository ?? const EventsRepository(),
+      super(
         TimelineState(
           visibleStart: DateTime.now().subtract(const Duration(hours: 2)),
           visibleEnd: DateTime.now().add(const Duration(hours: 6)),
         ),
       );
 
+  final EventsRepository _eventsRepository;
+
   Future<List<Event>> loadEvents() async {
-    final raw = await rootBundle.loadString('data.json');
-    final data = jsonDecode(raw) as Map<String, dynamic>;
-    final events = (data['events'] as List)
-        .map((e) => Event.fromJson(e))
-        .toList()
-        .cast<Event>();
-    events.sort((a, b) => a.effectiveStartTime.compareTo(b.effectiveStartTime));
-    return events;
+    return _eventsRepository.loadEvents();
   }
 
   Future<void> loadTimeline() async {

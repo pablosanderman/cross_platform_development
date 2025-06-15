@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:cross_platform_development/timeline/models/models.dart';
+import 'package:cross_platform_development/shared/shared.dart';
 
 class TimelineState extends Equatable {
   const TimelineState({

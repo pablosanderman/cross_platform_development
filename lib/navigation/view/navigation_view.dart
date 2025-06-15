@@ -1,6 +1,6 @@
 ﻿import 'package:cross_platform_development/navigation/navigation.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:cross_platform_development/timeline/models/models.dart';
+import 'package:cross_platform_development/shared/shared.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:cross_platform_development/utc_timer/utc_timer.dart';
