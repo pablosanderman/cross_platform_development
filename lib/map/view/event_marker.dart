@@ -11,6 +11,7 @@ class EventMarker extends StatelessWidget {
     super.key,
     required this.event,
     this.isSelected = false,
+    this.isHighlighted = false,
     this.onTap,
   });
 
@@ -20,6 +21,9 @@ class EventMarker extends StatelessWidget {
   /// Whether this marker is currently selected
   final bool isSelected;
 
+  /// Whether this marker is highlighted from timeline hover
+  final bool isHighlighted;
+
   /// Callback when marker is tapped
   final VoidCallback? onTap;
 
@@ -27,20 +31,21 @@ class EventMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: isSelected ? 32 : 24,
-        height: isSelected ? 32 : 24,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: _getMarkerSize(),
+        height: _getMarkerSize(),
         decoration: BoxDecoration(
           color: _getMarkerColor(),
           shape: _getMarkerShape(),
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.black26,
-            width: isSelected ? 3 : 1,
+            color: _getBorderColor(),
+            width: _getBorderWidth(),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 4,
+              color: Colors.black.withOpacity(isHighlighted ? 0.5 : 0.3),
+              blurRadius: isHighlighted ? 8 : 4,
               offset: const Offset(0, 2),
             ),
           ],
@@ -48,6 +53,27 @@ class EventMarker extends StatelessWidget {
         child: Center(child: _buildMarkerContent()),
       ),
     );
+  }
+
+  /// Get the size for this marker based on state
+  double _getMarkerSize() {
+    if (isSelected) return 32;
+    if (isHighlighted) return 28;
+    return 24;
+  }
+
+  /// Get the border color based on state
+  Color _getBorderColor() {
+    if (isSelected) return Colors.white;
+    if (isHighlighted) return Colors.yellow;
+    return Colors.black26;
+  }
+
+  /// Get the border width based on state
+  double _getBorderWidth() {
+    if (isSelected) return 3;
+    if (isHighlighted) return 2;
+    return 1;
   }
 
   /// Get the color for this event type

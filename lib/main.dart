@@ -9,12 +9,19 @@ import 'app.dart';
 
 void main() {
   Bloc.observer = const AppObserver();
+
+  // Create NavigationBloc first
+  final navigationBloc = NavigationBloc();
+
+  // Create MapCubit with NavigationBloc so it can show map view
+  final mapCubit = MapCubit(navigationBloc: navigationBloc);
+
   runApp(
     MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => NavigationBloc()),
-        BlocProvider(create: (_) => MapCubit()..loadMapEvents()),
-        BlocProvider(create: (_) => TimelineCubit()..loadTimeline()),
+        BlocProvider.value(value: navigationBloc),
+        BlocProvider.value(value: mapCubit),
+        BlocProvider(create: (_) => TimelineCubit(mapCubit: mapCubit)),
       ],
       child: const MyApp(),
     ),

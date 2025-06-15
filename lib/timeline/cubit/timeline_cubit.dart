@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:cross_platform_development/shared/shared.dart';
+import 'package:cross_platform_development/map/map.dart';
 import 'timeline_state.dart';
 
 /// Extension to add layout-specific properties to Event
@@ -21,8 +22,9 @@ extension EventLayout on Event {
 /// {@endtemplate}
 class TimelineCubit extends Cubit<TimelineState> {
   /// {@macro timeline_cubit}
-  TimelineCubit({EventsRepository? eventsRepository})
+  TimelineCubit({EventsRepository? eventsRepository, MapCubit? mapCubit})
     : _eventsRepository = eventsRepository ?? const EventsRepository(),
+      _mapCubit = mapCubit,
       super(
         TimelineState(
           visibleStart: DateTime.now().subtract(const Duration(hours: 2)),
@@ -31,6 +33,7 @@ class TimelineCubit extends Cubit<TimelineState> {
       );
 
   final EventsRepository _eventsRepository;
+  final MapCubit? _mapCubit;
 
   Future<List<Event>> loadEvents() async {
     return _eventsRepository.loadEvents();
@@ -173,4 +176,16 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   /// Get the default row height
   static const double defaultRowHeight = 75.0;
+
+  /// Set hovered event and notify map to highlight corresponding marker
+  void setHoveredEvent(Event? event) {
+    emit(state.copyWith(hoveredEvent: event));
+    _mapCubit?.highlightEvent(event);
+  }
+
+  /// Clear hovered event
+  void clearHoveredEvent() {
+    emit(state.copyWith(hoveredEvent: null));
+    _mapCubit?.clearHighlight();
+  }
 }

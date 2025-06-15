@@ -13,6 +13,8 @@ class MapState extends Equatable {
     this.popupEvents = const <Event>[],
     this.popupCurrentIndex = 0,
     this.showPopup = false,
+    this.highlightedEvent,
+    this.centerOnEvent,
   });
 
   /// The loading status of the map
@@ -33,6 +35,12 @@ class MapState extends Equatable {
   /// Whether to show the popup
   final bool showPopup;
 
+  /// Event highlighted from timeline hover (if any)
+  final Event? highlightedEvent;
+
+  /// Event to center map on (triggered from "View on Map" button)
+  final Event? centerOnEvent;
+
   /// Copy with method for state updates
   MapState copyWith({
     MapStatus? status,
@@ -41,6 +49,9 @@ class MapState extends Equatable {
     List<Event>? popupEvents,
     int? popupCurrentIndex,
     bool? showPopup,
+    Event? highlightedEvent,
+    Event? centerOnEvent,
+    bool clearCenterOnEvent = false,
   }) {
     return MapState(
       status: status ?? this.status,
@@ -49,6 +60,10 @@ class MapState extends Equatable {
       popupEvents: popupEvents ?? this.popupEvents,
       popupCurrentIndex: popupCurrentIndex ?? this.popupCurrentIndex,
       showPopup: showPopup ?? this.showPopup,
+      highlightedEvent: highlightedEvent ?? this.highlightedEvent,
+      centerOnEvent: clearCenterOnEvent
+          ? null
+          : (centerOnEvent ?? this.centerOnEvent),
     );
   }
 
@@ -60,6 +75,8 @@ class MapState extends Equatable {
     popupEvents,
     popupCurrentIndex,
     showPopup,
+    highlightedEvent,
+    centerOnEvent,
   ];
 }
 

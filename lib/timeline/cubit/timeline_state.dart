@@ -9,6 +9,7 @@ class TimelineState extends Equatable {
     this.rows = const [],
     this.isLoading = false,
     this.error,
+    this.hoveredEvent,
   });
 
   final DateTime visibleStart;
@@ -17,6 +18,7 @@ class TimelineState extends Equatable {
   final List<TimelineRow> rows;
   final bool isLoading;
   final String? error;
+  final Event? hoveredEvent;
 
   TimelineState copyWith({
     DateTime? visibleStart,
@@ -25,6 +27,7 @@ class TimelineState extends Equatable {
     List<TimelineRow>? rows,
     bool? isLoading,
     String? error,
+    Event? hoveredEvent,
   }) {
     return TimelineState(
       visibleStart: visibleStart ?? this.visibleStart,
@@ -33,6 +36,7 @@ class TimelineState extends Equatable {
       rows: rows ?? this.rows,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      hoveredEvent: hoveredEvent ?? this.hoveredEvent,
     );
   }
 
@@ -46,6 +50,7 @@ class TimelineState extends Equatable {
     rows,
     isLoading,
     error,
+    hoveredEvent,
   ];
 }
 

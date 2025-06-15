@@ -32,6 +32,15 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   final MapController _mapController = MapController();
 
+  @override
+  void initState() {
+    super.initState();
+    // Load map events after widget is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MapCubit>().loadMapEvents();
+    });
+  }
+
   /// Build markers with manual clustering logic
   List<Marker> _buildClusteredMarkers(BuildContext context, MapState state) {
     // Group events by exact coordinates
@@ -58,6 +67,7 @@ class _MapViewState extends State<MapView> {
             child: EventMarker(
               event: firstEvent,
               isSelected: state.selectedEvent?.id == firstEvent.id,
+              isHighlighted: state.highlightedEvent?.id == firstEvent.id,
               onTap: () {
                 context.read<MapCubit>().showEventPopup(firstEvent);
               },
@@ -72,6 +82,9 @@ class _MapViewState extends State<MapView> {
             child: ClusterMarker(
               events: events,
               isSelected: events.any((e) => state.selectedEvent?.id == e.id),
+              isHighlighted: events.any(
+                (e) => state.highlightedEvent?.id == e.id,
+              ),
               onTap: () {
                 context.read<MapCubit>().showClusterPopup(events);
               },
@@ -86,43 +99,64 @@ class _MapViewState extends State<MapView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MapCubit, MapState>(
-      builder: (context, state) {
-        return Stack(
-          children: [
-            // Map
-            FlutterMap(
-              mapController: _mapController,
-              options: const MapOptions(
-                // Center on Italy/Sicily area where the volcanic events are
-                initialCenter: LatLng(
-                  37.7513,
-                  14.9934,
-                ), // Mount Etna coordinates
-                initialZoom: 8.0,
-                minZoom: 3.0,
-                maxZoom: 18.0,
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName:
-                      'com.example.cross_platform_development',
-                ),
-                if (state.status == MapStatus.loaded) ...[
-                  MarkerLayer(markers: _buildClusteredMarkers(context, state)),
-                ],
-                if (state.status == MapStatus.loading) ...[
-                  const Center(child: CircularProgressIndicator()),
-                ],
-              ],
-            ),
+    return BlocListener<MapCubit, MapState>(
+      listener: (context, state) {
+        // Center map on event when centerOnEvent is set
+        if (state.centerOnEvent != null) {
+          final event = state.centerOnEvent!;
+          final location = LatLng(event.latitude!, event.longitude!);
 
-            // Popup overlay
-            const EventPopup(),
-          ],
-        );
+          // Move map to event location with animation
+          _mapController.move(
+            location,
+            12.0,
+          ); // Zoom level 12 for detailed view
+
+          // Immediately clear the centerOnEvent flag to allow normal map interaction
+          context.read<MapCubit>().clearCenterOnEvent();
+        }
       },
+      child: BlocBuilder<MapCubit, MapState>(
+        builder: (context, state) {
+          return Stack(
+            children: [
+              // Map
+              FlutterMap(
+                mapController: _mapController,
+                options: const MapOptions(
+                  // Center on Italy/Sicily area where the volcanic events are
+                  initialCenter: LatLng(
+                    37.7513,
+                    14.9934,
+                  ), // Mount Etna coordinates
+                  initialZoom: 8.0,
+                  minZoom: 3.0,
+                  maxZoom: 18.0,
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName:
+                        'com.example.cross_platform_development',
+                  ),
+                  if (state.status == MapStatus.loaded) ...[
+                    MarkerLayer(
+                      markers: _buildClusteredMarkers(context, state),
+                    ),
+                  ],
+                  if (state.status == MapStatus.loading) ...[
+                    const Center(child: CircularProgressIndicator()),
+                  ],
+                ],
+              ),
+
+              // Popup overlay
+              const EventPopup(),
+            ],
+          );
+        },
+      ),
     );
   }
 }

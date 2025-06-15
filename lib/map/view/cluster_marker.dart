@@ -11,6 +11,7 @@ class ClusterMarker extends StatelessWidget {
     super.key,
     required this.events,
     this.isSelected = false,
+    this.isHighlighted = false,
     this.onTap,
   });
 
@@ -20,6 +21,9 @@ class ClusterMarker extends StatelessWidget {
   /// Whether any event in this cluster is currently selected
   final bool isSelected;
 
+  /// Whether any event in this cluster is highlighted from timeline hover
+  final bool isHighlighted;
+
   /// Callback when cluster is tapped
   final VoidCallback? onTap;
 
@@ -27,20 +31,21 @@ class ClusterMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: isSelected ? 36 : 30,
-        height: isSelected ? 36 : 30,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: _getClusterSize(),
+        height: _getClusterSize(),
         decoration: BoxDecoration(
           color: Colors.red,
           shape: BoxShape.circle,
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.black26,
-            width: isSelected ? 3 : 1,
+            color: _getBorderColor(),
+            width: _getBorderWidth(),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 4,
+              color: Colors.black.withOpacity(isHighlighted ? 0.5 : 0.3),
+              blurRadius: isHighlighted ? 8 : 4,
               offset: const Offset(0, 2),
             ),
           ],
@@ -50,12 +55,40 @@ class ClusterMarker extends StatelessWidget {
             events.length.toString(),
             style: TextStyle(
               color: Colors.white,
-              fontSize: isSelected ? 14 : 12,
+              fontSize: _getFontSize(),
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
       ),
     );
+  }
+
+  /// Get the size for this cluster based on state
+  double _getClusterSize() {
+    if (isSelected) return 36;
+    if (isHighlighted) return 34;
+    return 30;
+  }
+
+  /// Get the border color based on state
+  Color _getBorderColor() {
+    if (isSelected) return Colors.white;
+    if (isHighlighted) return Colors.yellow;
+    return Colors.black26;
+  }
+
+  /// Get the border width based on state
+  double _getBorderWidth() {
+    if (isSelected) return 3;
+    if (isHighlighted) return 2;
+    return 1;
+  }
+
+  /// Get the font size based on state
+  double _getFontSize() {
+    if (isSelected) return 14;
+    if (isHighlighted) return 13;
+    return 12;
   }
 }

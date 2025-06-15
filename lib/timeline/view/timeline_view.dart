@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/shared/shared.dart';
+import 'package:cross_platform_development/map/map.dart';
 
 /// {@template timeline_view}
 /// A [StatelessWidget] which reacts to the provided
@@ -25,6 +26,15 @@ class _TimelineViewState extends State<TimelineView> {
   void dispose() {
     _transformationController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Load timeline events after widget is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TimelineCubit>().loadTimeline();
+    });
   }
 
   @override
@@ -593,7 +603,7 @@ class _TimelineRowWidgetState extends State<_TimelineRowWidget> {
 }
 
 /// Event display component
-class _EventBox extends StatelessWidget {
+class _EventBox extends StatefulWidget {
   final Event event;
   final _TimelineDimensions dimensions;
   final double rowHeight;
@@ -604,48 +614,62 @@ class _EventBox extends StatelessWidget {
     required this.rowHeight,
   });
 
+  @override
+  State<_EventBox> createState() => _EventBoxState();
+}
+
+class _EventBoxState extends State<_EventBox> {
+  bool _isHovered = false;
+
   /// Get the display height for this event based on row height
   double _getEventDisplayHeight() {
     // For compact rows (≤75px), use standard event height
-    if (rowHeight <= 75) {
-      return dimensions.eventHeight;
+    if (widget.rowHeight <= 75) {
+      return widget.dimensions.eventHeight;
     }
     // For taller rows, maintain symmetric padding (same as top padding)
     final topPadding =
-        (75.0 - dimensions.eventHeight) / 2; // Same as verticalTop calculation
+        (75.0 - widget.dimensions.eventHeight) /
+        2; // Same as verticalTop calculation
     final availableHeight =
-        rowHeight - (topPadding * 2); // Subtract top and bottom padding
-    return availableHeight.clamp(dimensions.eventHeight, double.infinity);
+        widget.rowHeight - (topPadding * 2); // Subtract top and bottom padding
+    return availableHeight.clamp(
+      widget.dimensions.eventHeight,
+      double.infinity,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = _getEventColor(event);
-    final isGrouped = event.type == EventType.grouped;
+    final color = _getEventColor(widget.event);
+    final isGrouped = widget.event.type == EventType.grouped;
 
     // Calculate positioning
     final leftOffset = _calculateLeftOffset();
     // Position events to look centered at default height, then grow down from there
     final verticalTop =
-        (75.0 - dimensions.eventHeight) / 2; // Centers at default 75px height
+        (75.0 - widget.dimensions.eventHeight) /
+        2; // Centers at default 75px height
 
     // Handle grouped events specially
     if (isGrouped) {
       return Transform.translate(
         offset: Offset(leftOffset, verticalTop),
-        child: _GroupedEventWidget(
-          event: event,
-          dimensions: dimensions,
-          color: color,
-          rowHeight: rowHeight,
+        child: _buildHoverableEvent(
+          child: _GroupedEventWidget(
+            event: widget.event,
+            dimensions: widget.dimensions,
+            color: color,
+            rowHeight: widget.rowHeight,
+          ),
         ),
       );
     }
 
-    final isPeriodic = event.hasDuration;
+    final isPeriodic = widget.event.hasDuration;
     final eventDuration = isPeriodic
-        ? event.duration!
-        : dimensions.defaultEventDuration;
+        ? widget.event.duration!
+        : widget.dimensions.defaultEventDuration;
 
     final textWidth = _computeEventTextWidth(eventDuration);
 
@@ -654,20 +678,82 @@ class _EventBox extends StatelessWidget {
       child: SizedBox(
         width: textWidth,
         height: _getEventDisplayHeight(),
-        child: isPeriodic
-            ? _PeriodEventWidget(
-                event: event,
-                color: color,
-                eventDuration: eventDuration,
-                dimensions: dimensions,
-                rowHeight: rowHeight,
-              )
-            : _PointEventWidget(
-                event: event,
-                color: color,
-                dimensions: dimensions,
-                rowHeight: rowHeight,
+        child: _buildHoverableEvent(
+          child: isPeriodic
+              ? _PeriodEventWidget(
+                  event: widget.event,
+                  color: color,
+                  eventDuration: eventDuration,
+                  dimensions: widget.dimensions,
+                  rowHeight: widget.rowHeight,
+                )
+              : _PointEventWidget(
+                  event: widget.event,
+                  color: color,
+                  dimensions: widget.dimensions,
+                  rowHeight: widget.rowHeight,
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHoverableEvent({required Widget child}) {
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() => _isHovered = true);
+        context.read<TimelineCubit>().setHoveredEvent(widget.event);
+      },
+      onExit: (_) {
+        setState(() => _isHovered = false);
+        context.read<TimelineCubit>().clearHoveredEvent();
+      },
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          child,
+          // "View on Map" button - only show when hovered and event has coordinates
+          if (_isHovered && widget.event.hasCoordinates)
+            Positioned(
+              right: -8,
+              top: -8,
+              child: GestureDetector(
+                onTap: () {
+                  // Navigate to event on map
+                  context.read<MapCubit>().navigateToEvent(widget.event);
+                },
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.map, size: 14, color: Colors.white),
+                        const SizedBox(width: 4),
+                        const Text(
+                          'View on Map',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
+            ),
+        ],
       ),
     );
   }
@@ -687,44 +773,46 @@ class _EventBox extends StatelessWidget {
   }
 
   double _computeEventTextWidth(Duration eventDuration) {
-    final maxTextSpan = eventDuration < dimensions.defaultEventDuration
-        ? dimensions.defaultEventDuration
+    final maxTextSpan = eventDuration < widget.dimensions.defaultEventDuration
+        ? widget.dimensions.defaultEventDuration
         : eventDuration;
     // Use the same calculation method as the grid: hours * pixelsPerHour
-    return maxTextSpan.inHours * dimensions.pixelsPerHour;
+    return maxTextSpan.inHours * widget.dimensions.pixelsPerHour;
   }
 
   double _calculateLeftOffset() {
-    final isGrouped = event.type == EventType.grouped;
+    final isGrouped = widget.event.type == EventType.grouped;
 
     // For grouped events, calculate the leftmost position based on all members
-    if (isGrouped && event.members != null && event.members!.isNotEmpty) {
-      final memberPositions = event.members!.map((member) {
+    if (isGrouped &&
+        widget.event.members != null &&
+        widget.event.members!.isNotEmpty) {
+      final memberPositions = widget.event.members!.map((member) {
         final memberOffset = member.timestamp.difference(
-          dimensions.visibleStart,
+          widget.dimensions.visibleStart,
         );
-        return memberOffset.inHours * dimensions.pixelsPerHour;
+        return memberOffset.inHours * widget.dimensions.pixelsPerHour;
       }).toList();
 
       final minMemberPos = memberPositions.reduce((a, b) => a < b ? a : b);
-      final circleRadius = dimensions.memberCircleSize / 2;
+      final circleRadius = widget.dimensions.memberCircleSize / 2;
       return minMemberPos - circleRadius; // Left edge of first circle
     }
 
     // For regular events
-    final eventOffset = event.effectiveStartTime.difference(
-      dimensions.visibleStart,
+    final eventOffset = widget.event.effectiveStartTime.difference(
+      widget.dimensions.visibleStart,
     );
     // Use the same calculation method as the grid: hours * pixelsPerHour
     final timestampPixelPosition =
-        eventOffset.inHours * dimensions.pixelsPerHour;
+        eventOffset.inHours * widget.dimensions.pixelsPerHour;
 
     // For point events, center the circle on the timestamp
-    final isPeriodic = event.hasDuration;
+    final isPeriodic = widget.event.hasDuration;
     return isPeriodic
         ? timestampPixelPosition
         : timestampPixelPosition -
-              (dimensions.eventHeight / 2); // Center the circle
+              (widget.dimensions.eventHeight / 2); // Center the circle
   }
 }
 
