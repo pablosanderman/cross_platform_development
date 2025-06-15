@@ -36,4 +36,68 @@ class MapCubit extends Cubit<MapState> {
   void clearSelection() {
     emit(state.copyWith(selectedEvent: null));
   }
+
+  /// Show popup for a single event
+  void showEventPopup(Event event) {
+    emit(
+      state.copyWith(
+        popupEvents: [event],
+        popupCurrentIndex: 0,
+        showPopup: true,
+        selectedEvent: event,
+      ),
+    );
+  }
+
+  /// Show popup for multiple events (cluster)
+  void showClusterPopup(List<Event> events) {
+    emit(
+      state.copyWith(
+        popupEvents: events,
+        popupCurrentIndex: 0,
+        showPopup: true,
+        selectedEvent: events.first,
+      ),
+    );
+  }
+
+  /// Navigate to next event in popup
+  void nextPopupEvent() {
+    if (state.popupEvents.isEmpty) return;
+
+    final nextIndex = (state.popupCurrentIndex + 1) % state.popupEvents.length;
+    emit(
+      state.copyWith(
+        popupCurrentIndex: nextIndex,
+        selectedEvent: state.popupEvents[nextIndex],
+      ),
+    );
+  }
+
+  /// Navigate to previous event in popup
+  void previousPopupEvent() {
+    if (state.popupEvents.isEmpty) return;
+
+    final prevIndex = state.popupCurrentIndex == 0
+        ? state.popupEvents.length - 1
+        : state.popupCurrentIndex - 1;
+    emit(
+      state.copyWith(
+        popupCurrentIndex: prevIndex,
+        selectedEvent: state.popupEvents[prevIndex],
+      ),
+    );
+  }
+
+  /// Close popup
+  void closePopup() {
+    emit(
+      state.copyWith(
+        showPopup: false,
+        popupEvents: <Event>[],
+        popupCurrentIndex: 0,
+        selectedEvent: null,
+      ),
+    );
+  }
 }

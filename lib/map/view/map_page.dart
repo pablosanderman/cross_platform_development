@@ -62,9 +62,7 @@ class _MapViewState extends State<MapView> {
               event: firstEvent,
               isSelected: state.selectedEvent?.id == firstEvent.id,
               onTap: () {
-                context.read<MapCubit>().selectEvent(firstEvent);
-                print('Selected event: ${firstEvent.title}');
-                print('Type: ${firstEvent.type}');
+                context.read<MapCubit>().showEventPopup(firstEvent);
               },
             ),
           ),
@@ -78,11 +76,7 @@ class _MapViewState extends State<MapView> {
               events: events,
               isSelected: events.any((e) => state.selectedEvent?.id == e.id),
               onTap: () {
-                // For now, just print cluster info
-                print('Cluster with ${events.length} events:');
-                for (final event in events) {
-                  print('  - ${event.title} (${event.type})');
-                }
+                context.read<MapCubit>().showClusterPopup(events);
               },
             ),
           ),
@@ -97,26 +91,38 @@ class _MapViewState extends State<MapView> {
   Widget build(BuildContext context) {
     return BlocBuilder<MapCubit, MapState>(
       builder: (context, state) {
-        return FlutterMap(
-          mapController: _mapController,
-          options: const MapOptions(
-            // Center on Italy/Sicily area where the volcanic events are
-            initialCenter: LatLng(37.7513, 14.9934), // Mount Etna coordinates
-            initialZoom: 8.0,
-            minZoom: 3.0,
-            maxZoom: 18.0,
-          ),
+        return Stack(
           children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.example.cross_platform_development',
+            // Map
+            FlutterMap(
+              mapController: _mapController,
+              options: const MapOptions(
+                // Center on Italy/Sicily area where the volcanic events are
+                initialCenter: LatLng(
+                  37.7513,
+                  14.9934,
+                ), // Mount Etna coordinates
+                initialZoom: 8.0,
+                minZoom: 3.0,
+                maxZoom: 18.0,
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName:
+                      'com.example.cross_platform_development',
+                ),
+                if (state.status == MapStatus.loaded) ...[
+                  MarkerLayer(markers: _buildClusteredMarkers(context, state)),
+                ],
+                if (state.status == MapStatus.loading) ...[
+                  const Center(child: CircularProgressIndicator()),
+                ],
+              ],
             ),
-            if (state.status == MapStatus.loaded) ...[
-              MarkerLayer(markers: _buildClusteredMarkers(context, state)),
-            ],
-            if (state.status == MapStatus.loading) ...[
-              const Center(child: CircularProgressIndicator()),
-            ],
+
+            // Popup overlay
+            const EventPopup(),
           ],
         );
       },

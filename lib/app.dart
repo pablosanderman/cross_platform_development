@@ -1,6 +1,5 @@
 import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/map/map.dart';
-import 'package:cross_platform_development/shared/shared.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
