@@ -35,6 +35,64 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   final MapController _mapController = MapController();
 
+  /// Build markers with manual clustering logic
+  List<Marker> _buildClusteredMarkers(BuildContext context, MapState state) {
+    // Group events by exact coordinates
+    final Map<String, List<Event>> groupedEvents = {};
+
+    for (final event in state.events) {
+      final key = '${event.latitude},${event.longitude}';
+      groupedEvents.putIfAbsent(key, () => []).add(event);
+    }
+
+    // Create markers for each location
+    final List<Marker> markers = [];
+
+    for (final entry in groupedEvents.entries) {
+      final events = entry.value;
+      final firstEvent = events.first;
+      final location = LatLng(firstEvent.latitude!, firstEvent.longitude!);
+
+      if (events.length == 1) {
+        // Single event - show individual marker
+        markers.add(
+          Marker(
+            point: location,
+            child: EventMarker(
+              event: firstEvent,
+              isSelected: state.selectedEvent?.id == firstEvent.id,
+              onTap: () {
+                context.read<MapCubit>().selectEvent(firstEvent);
+                print('Selected event: ${firstEvent.title}');
+                print('Type: ${firstEvent.type}');
+              },
+            ),
+          ),
+        );
+      } else {
+        // Multiple events - show cluster marker
+        markers.add(
+          Marker(
+            point: location,
+            child: ClusterMarker(
+              events: events,
+              isSelected: events.any((e) => state.selectedEvent?.id == e.id),
+              onTap: () {
+                // For now, just print cluster info
+                print('Cluster with ${events.length} events:');
+                for (final event in events) {
+                  print('  - ${event.title} (${event.type})');
+                }
+              },
+            ),
+          ),
+        );
+      }
+    }
+
+    return markers;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MapCubit, MapState>(
@@ -54,26 +112,7 @@ class _MapViewState extends State<MapView> {
               userAgentPackageName: 'com.example.cross_platform_development',
             ),
             if (state.status == MapStatus.loaded) ...[
-              MarkerLayer(
-                markers: state.events.map((event) {
-                  return Marker(
-                    point: LatLng(event.latitude!, event.longitude!),
-                    child: EventMarker(
-                      event: event,
-                      isSelected: state.selectedEvent?.id == event.id,
-                      onTap: () {
-                        context.read<MapCubit>().selectEvent(event);
-                        // Print event info to console for now
-                        print('Selected event: ${event.title}');
-                        print('Type: ${event.type}');
-                        print(
-                          'Coordinates: ${event.latitude}, ${event.longitude}',
-                        );
-                      },
-                    ),
-                  );
-                }).toList(),
-              ),
+              MarkerLayer(markers: _buildClusteredMarkers(context, state)),
             ],
             if (state.status == MapStatus.loading) ...[
               const Center(child: CircularProgressIndicator()),
