@@ -29,5 +29,10 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       // Always show the map, don't toggle
       emit(state.copyWith(showMap: true));
     });
+
+    on<ShowTimeline>((event, emit) {
+      // Always show the timeline, don't toggle
+      emit(state.copyWith(showTimeline: true));
+    });
   }
 }

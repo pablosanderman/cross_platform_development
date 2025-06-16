@@ -33,7 +33,7 @@ class TimelineCubit extends Cubit<TimelineState> {
       );
 
   final EventsRepository _eventsRepository;
-  final MapCubit? _mapCubit;
+  MapCubit? _mapCubit;
 
   Future<List<Event>> loadEvents() async {
     return _eventsRepository.loadEvents();
@@ -185,7 +185,30 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   /// Clear hovered event
   void clearHoveredEvent() {
-    emit(state.copyWith(hoveredEvent: null));
+    emit(state.copyWith(clearHoveredEvent: true));
     _mapCubit?.clearHighlight();
+  }
+
+  /// Scroll timeline to show a specific event
+  void scrollToEvent(Event event) {
+    // Use a reasonable fixed window duration for focused view (8 hours)
+    const focusedWindowDuration = Duration(hours: 8);
+    final eventStart = event.effectiveStartTime;
+
+    // Position the event at 30% from the left edge of the focused window
+    const offsetFromStart = Duration(hours: 2, minutes: 24); // 30% of 8 hours
+
+    // Calculate new window: event should appear 30% from the left
+    final newVisibleStart = eventStart.subtract(offsetFromStart);
+    final newVisibleEnd = newVisibleStart.add(focusedWindowDuration);
+
+    emit(
+      state.copyWith(visibleStart: newVisibleStart, visibleEnd: newVisibleEnd),
+    );
+  }
+
+  /// Set the MapCubit reference (used to resolve circular dependency)
+  void setMapCubit(MapCubit mapCubit) {
+    _mapCubit = mapCubit;
   }
 }

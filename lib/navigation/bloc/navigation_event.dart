@@ -8,3 +8,6 @@ class ToggleTimeline
 class ToggleMap extends NavigationEvent {}
 
 class ShowMap extends NavigationEvent {} // Ensure map is shown without toggling
+
+class ShowTimeline
+    extends NavigationEvent {} // Ensure timeline is shown without toggling

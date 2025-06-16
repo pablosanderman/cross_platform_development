@@ -203,6 +203,38 @@ class EventPopup extends StatelessWidget {
                                               color: Colors.grey[600],
                                             ),
                                           ),
+
+                                          const SizedBox(height: 16),
+
+                                          // View on Timeline button
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: ElevatedButton.icon(
+                                              onPressed: () {
+                                                context
+                                                    .read<MapCubit>()
+                                                    .navigateToTimeline(
+                                                      currentEvent,
+                                                    );
+                                              },
+                                              icon: const Icon(
+                                                Icons.timeline,
+                                                size: 16,
+                                              ),
+                                              label: const Text(
+                                                'View on Timeline',
+                                              ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.green,
+                                                foregroundColor: Colors.white,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 8,
+                                                    ),
+                                              ),
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),

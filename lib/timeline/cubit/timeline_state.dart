@@ -28,6 +28,7 @@ class TimelineState extends Equatable {
     bool? isLoading,
     String? error,
     Event? hoveredEvent,
+    bool clearHoveredEvent = false,
   }) {
     return TimelineState(
       visibleStart: visibleStart ?? this.visibleStart,
@@ -36,7 +37,9 @@ class TimelineState extends Equatable {
       rows: rows ?? this.rows,
       isLoading: isLoading ?? this.isLoading,
       error: error,
-      hoveredEvent: hoveredEvent ?? this.hoveredEvent,
+      hoveredEvent: clearHoveredEvent
+          ? null
+          : (hoveredEvent ?? this.hoveredEvent),
     );
   }
 

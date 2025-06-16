@@ -13,15 +13,24 @@ void main() {
   // Create NavigationBloc first
   final navigationBloc = NavigationBloc();
 
-  // Create MapCubit with NavigationBloc so it can show map view
-  final mapCubit = MapCubit(navigationBloc: navigationBloc);
+  // Create TimelineCubit first (without MapCubit dependency for now)
+  final timelineCubit = TimelineCubit();
+
+  // Create MapCubit with NavigationBloc and TimelineCubit
+  final mapCubit = MapCubit(
+    navigationBloc: navigationBloc,
+    timelineCubit: timelineCubit,
+  );
+
+  // Now set the MapCubit reference in TimelineCubit
+  timelineCubit.setMapCubit(mapCubit);
 
   runApp(
     MultiBlocProvider(
       providers: [
         BlocProvider.value(value: navigationBloc),
         BlocProvider.value(value: mapCubit),
-        BlocProvider(create: (_) => TimelineCubit(mapCubit: mapCubit)),
+        BlocProvider.value(value: timelineCubit),
       ],
       child: const MyApp(),
     ),

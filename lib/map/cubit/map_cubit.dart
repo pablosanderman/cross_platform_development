@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:cross_platform_development/shared/shared.dart';
 import 'package:cross_platform_development/navigation/navigation.dart';
+import 'package:cross_platform_development/timeline/timeline.dart';
 import 'map_state.dart';
 
 /// {@template map_cubit}
@@ -9,13 +10,18 @@ import 'map_state.dart';
 /// {@endtemplate}
 class MapCubit extends Cubit<MapState> {
   /// {@macro map_cubit}
-  MapCubit({EventsRepository? eventsRepository, NavigationBloc? navigationBloc})
-    : _eventsRepository = eventsRepository ?? const EventsRepository(),
-      _navigationBloc = navigationBloc,
-      super(const MapState());
+  MapCubit({
+    EventsRepository? eventsRepository,
+    NavigationBloc? navigationBloc,
+    TimelineCubit? timelineCubit,
+  }) : _eventsRepository = eventsRepository ?? const EventsRepository(),
+       _navigationBloc = navigationBloc,
+       _timelineCubit = timelineCubit,
+       super(const MapState());
 
   final EventsRepository _eventsRepository;
   final NavigationBloc? _navigationBloc;
+  final TimelineCubit? _timelineCubit;
 
   /// Load events that have geographic coordinates
   Future<void> loadMapEvents() async {
@@ -129,5 +135,14 @@ class MapCubit extends Cubit<MapState> {
   /// Clear the center on event flag (called after map has centered)
   void clearCenterOnEvent() {
     emit(state.copyWith(clearCenterOnEvent: true));
+  }
+
+  /// Navigate to event on timeline (scroll timeline and show timeline view)
+  void navigateToTimeline(Event event) {
+    // Ensure timeline view is visible (don't toggle, always show)
+    _navigationBloc?.add(ShowTimeline());
+
+    // Scroll timeline to show the event
+    _timelineCubit?.scrollToEvent(event);
   }
 }
