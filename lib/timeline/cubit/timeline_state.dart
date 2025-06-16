@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:cross_platform_development/shared/shared.dart';
 
 class TimelineState extends Equatable {
@@ -12,6 +13,7 @@ class TimelineState extends Equatable {
     this.hoveredEvent,
     this.selectedEvent,
     this.scrollToEvent,
+    this.transformationMatrix,
   });
 
   final DateTime visibleStart;
@@ -26,6 +28,9 @@ class TimelineState extends Equatable {
   /// Event to scroll to - triggers programmatic scrolling in the view
   final Event? scrollToEvent;
 
+  /// Transformation matrix for preserving scroll/zoom state on renavigating to the timeline
+  final Matrix4? transformationMatrix;
+
   TimelineState copyWith({
     DateTime? visibleStart,
     DateTime? visibleEnd,
@@ -39,6 +44,8 @@ class TimelineState extends Equatable {
     bool clearSelectedEvent = false,
     Event? scrollToEvent,
     bool clearScrollToEvent = false,
+    Matrix4? transformationMatrix,
+    bool clearTransformationMatrix = false,
   }) {
     return TimelineState(
       visibleStart: visibleStart ?? this.visibleStart,
@@ -56,6 +63,9 @@ class TimelineState extends Equatable {
       scrollToEvent: clearScrollToEvent
           ? null
           : (scrollToEvent ?? this.scrollToEvent),
+      transformationMatrix: clearTransformationMatrix
+          ? null
+          : (transformationMatrix ?? this.transformationMatrix),
     );
   }
 
@@ -72,6 +82,7 @@ class TimelineState extends Equatable {
     hoveredEvent,
     selectedEvent,
     scrollToEvent,
+    transformationMatrix,
   ];
 }
 

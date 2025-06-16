@@ -136,7 +136,9 @@ class _NavigationSearchBarState extends State<NavigationSearchBar> {
       suggestionsBuilder:
           (BuildContext context, SearchController controller) async {
             final String input = controller.text;
-            final List<Event> events = await TimelineCubit().loadEvents();
+            final List<Event> events = await context
+                .read<TimelineCubit>()
+                .loadEvents();
             final List<Event> filteredItems = events
                 .where(
                   (item) =>

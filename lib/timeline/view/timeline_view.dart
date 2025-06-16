@@ -18,14 +18,17 @@ class TimelineView extends StatefulWidget {
 
 class _TimelineViewState extends State<TimelineView>
     with TickerProviderStateMixin {
-  final TransformationController _transformationController =
-      TransformationController();
+  late final TransformationController _transformationController;
   int? _draggedRowIndex;
   int? _dragTargetIndex;
   AnimationController? _scrollAnimationController;
 
   @override
   void dispose() {
+    // Save the current transformation state before disposal
+    final cubit = context.read<TimelineCubit>();
+    cubit.saveTransformationMatrix(_transformationController.value);
+
     _transformationController.dispose();
     _scrollAnimationController?.dispose();
     super.dispose();
@@ -34,9 +37,27 @@ class _TimelineViewState extends State<TimelineView>
   @override
   void initState() {
     super.initState();
-    // Load timeline events after widget is initialized
+
+    // Initialize transformation controller with saved state or identity matrix
+    final cubit = context.read<TimelineCubit>();
+    final savedMatrix = cubit.getSavedTransformationMatrix();
+
+    if (savedMatrix != null) {
+      _transformationController = TransformationController(savedMatrix);
+    } else {
+      _transformationController = TransformationController(Matrix4.identity());
+    }
+
+    // Listen to transformation changes and save them to cubit
+    _transformationController.addListener(() {
+      cubit.saveTransformationMatrix(_transformationController.value);
+    });
+
+    // Load timeline events only if not already loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TimelineCubit>().loadTimeline();
+      if (cubit.state.events.isEmpty) {
+        cubit.loadTimeline();
+      } else {}
     });
   }
 

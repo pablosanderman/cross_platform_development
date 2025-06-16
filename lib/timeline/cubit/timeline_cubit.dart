@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:cross_platform_development/shared/shared.dart';
 import 'package:cross_platform_development/map/map.dart';
 import 'timeline_state.dart';
+import 'package:flutter/rendering.dart';
 
 /// Extension to add layout-specific properties to Event
 extension EventLayout on Event {
@@ -217,5 +218,24 @@ class TimelineCubit extends Cubit<TimelineState> {
     emit(state.copyWith(clearSelectedEvent: true));
     // Notify map to update its visual state
     _mapCubit?.updateSelectedEvent(null);
+  }
+
+  /// Save the current transformation matrix to preserve scroll/zoom state
+  void saveTransformationMatrix(Matrix4 matrix) {
+    emit(state.copyWith(transformationMatrix: Matrix4.copy(matrix)));
+  }
+
+  /// Get the saved transformation matrix, or null if none exists
+  Matrix4? getSavedTransformationMatrix() {
+    if (state.transformationMatrix != null) {
+      return Matrix4.copy(state.transformationMatrix!);
+    } else {
+      return null;
+    }
+  }
+
+  /// Clear the saved transformation matrix
+  void clearTransformationMatrix() {
+    emit(state.copyWith(clearTransformationMatrix: true));
   }
 }

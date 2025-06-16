@@ -55,7 +55,9 @@ class EventMarker extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(isHighlighted ? 0.5 : 0.3),
+                color: Colors.black.withValues(
+                  alpha: isHighlighted ? 0.5 : 0.3,
+                ),
                 blurRadius: isHighlighted ? 8 : 4,
                 offset: const Offset(0, 2),
               ),
