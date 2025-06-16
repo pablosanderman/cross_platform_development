@@ -22,6 +22,7 @@ class _TimelineViewState extends State<TimelineView>
   int? _draggedRowIndex;
   int? _dragTargetIndex;
   AnimationController? _scrollAnimationController;
+  double _actualTimelineWidth = 0.0;
 
   @override
   void dispose() {
@@ -88,53 +89,62 @@ class _TimelineViewState extends State<TimelineView>
               rows: state.rows,
             );
 
-            return Column(
-              children: [
-                // Sticky ruler header
-                _StickyRuler(
-                  dimensions: dimensions,
-                  transformationController: _transformationController,
-                ),
-                // Timeline content with drag and drop functionality
-                Expanded(
-                  child: _DraggableTimelineContent(
-                    rows: state.rows,
-                    dimensions: dimensions,
-                    transformationController: _transformationController,
-                    draggedRowIndex: _draggedRowIndex,
-                    dragTargetIndex: _dragTargetIndex,
-                    onDragStarted: (index) {
-                      setState(() {
-                        _draggedRowIndex = index;
-                      });
-                    },
-                    onDragEnded: () {
-                      setState(() {
-                        _draggedRowIndex = null;
-                        _dragTargetIndex = null;
-                      });
-                    },
-                    onDragAccepted: (draggedIndex, targetIndex) {
-                      // Only perform reorder if targetIndex is valid (not -1)
-                      if (targetIndex >= 0 && targetIndex != draggedIndex) {
-                        context.read<TimelineCubit>().reorderRows(
-                          draggedIndex,
-                          targetIndex,
-                        );
-                      }
-                      setState(() {
-                        _draggedRowIndex = null;
-                        _dragTargetIndex = null;
-                      });
-                    },
-                    onDragTargetChanged: (index) {
-                      setState(() {
-                        _dragTargetIndex = index;
-                      });
-                    },
-                  ),
-                ),
-              ],
+            // Use LayoutBuilder to get actual timeline dimensions for proper scroll calculations
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                // Store the actual timeline width for scroll calculations
+                _actualTimelineWidth = constraints.maxWidth;
+
+                return Column(
+                  children: [
+                    // Sticky ruler header
+                    _StickyRuler(
+                      dimensions: dimensions,
+                      transformationController: _transformationController,
+                    ),
+                    // Timeline content with drag and drop functionality
+                    Expanded(
+                      child: _DraggableTimelineContent(
+                        rows: state.rows,
+                        dimensions: dimensions,
+                        transformationController: _transformationController,
+                        draggedRowIndex: _draggedRowIndex,
+                        dragTargetIndex: _dragTargetIndex,
+                        actualTimelineWidth: _actualTimelineWidth,
+                        onDragStarted: (index) {
+                          setState(() {
+                            _draggedRowIndex = index;
+                          });
+                        },
+                        onDragEnded: () {
+                          setState(() {
+                            _draggedRowIndex = null;
+                            _dragTargetIndex = null;
+                          });
+                        },
+                        onDragAccepted: (draggedIndex, targetIndex) {
+                          // Only perform reorder if targetIndex is valid (not -1)
+                          if (targetIndex >= 0 && targetIndex != draggedIndex) {
+                            context.read<TimelineCubit>().reorderRows(
+                              draggedIndex,
+                              targetIndex,
+                            );
+                          }
+                          setState(() {
+                            _draggedRowIndex = null;
+                            _dragTargetIndex = null;
+                          });
+                        },
+                        onDragTargetChanged: (index) {
+                          setState(() {
+                            _dragTargetIndex = index;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
             );
           },
         ),
@@ -162,12 +172,15 @@ class _TimelineViewState extends State<TimelineView>
     final currentScale = currentMatrix.getMaxScaleOnAxis();
     final currentTranslation = currentMatrix.getTranslation();
 
-    // Calculate viewport width at current scale
-    final screenWidth = MediaQuery.of(context).size.width;
-    final viewportWidth = screenWidth / currentScale;
+    // Calculate viewport width at current scale using actual timeline width
+    // Fall back to MediaQuery if _actualTimelineWidth is not available (shouldn't happen)
+    final timelineWidth = _actualTimelineWidth > 0
+        ? _actualTimelineWidth
+        : MediaQuery.of(context).size.width;
+    final viewportWidth = timelineWidth / currentScale;
 
-    // Position event at 30% from left edge of viewport (consistent with original behavior)
-    final targetTranslationX = -(eventPixelPosition - viewportWidth * 0.3);
+    // Position event at 1/3 from left edge of viewport (33.3% for better visual balance)
+    final targetTranslationX = -(eventPixelPosition - viewportWidth * (1 / 3));
 
     // Create target transformation matrix preserving current scale and vertical position
     final targetMatrix = Matrix4.identity()
@@ -1444,6 +1457,7 @@ class _DraggableTimelineContent extends StatelessWidget {
   final VoidCallback onDragEnded;
   final Function(int, int) onDragAccepted;
   final Function(int) onDragTargetChanged;
+  final double actualTimelineWidth;
 
   const _DraggableTimelineContent({
     required this.rows,
@@ -1455,6 +1469,7 @@ class _DraggableTimelineContent extends StatelessWidget {
     required this.onDragEnded,
     required this.onDragAccepted,
     required this.onDragTargetChanged,
+    required this.actualTimelineWidth,
   });
 
   @override
@@ -1571,6 +1586,7 @@ class _DraggableTimelineContent extends StatelessWidget {
                       row: rows[index],
                       dimensions: dimensions,
                       transformationController: transformationController,
+                      actualTimelineWidth: actualTimelineWidth,
                     ),
                     childWhenDragging: Container(
                       width: 40,
@@ -1722,11 +1738,13 @@ class _DragFeedback extends StatelessWidget {
   final TimelineRow row;
   final _TimelineDimensions dimensions;
   final TransformationController transformationController;
+  final double actualTimelineWidth;
 
   const _DragFeedback({
     required this.row,
     required this.dimensions,
     required this.transformationController,
+    required this.actualTimelineWidth,
   });
 
   @override
@@ -1737,15 +1755,18 @@ class _DragFeedback extends StatelessWidget {
     final scale = matrix.getMaxScaleOnAxis();
 
     // Calculate what part of the timeline is currently visible on screen
-    final screenWidth = MediaQuery.of(context).size.width;
+    // Use actual timeline width instead of full screen width for accurate calculations
+    final timelineWidth = actualTimelineWidth > 0
+        ? actualTimelineWidth
+        : MediaQuery.of(context).size.width;
     final visibleTimelineStart =
         -translation.x / scale; // Left edge of visible area in timeline coords
     final visibleTimelineWidth =
-        screenWidth / scale; // Width of visible area in timeline coords
+        timelineWidth / scale; // Width of visible area in timeline coords
     final visibleTimelineEnd = visibleTimelineStart + visibleTimelineWidth;
 
     // Create a preview showing only the visible portion at current scale
-    final previewWidth = screenWidth * 0.8;
+    final previewWidth = timelineWidth * 0.8;
     final previewHeight = row.height * scale; // Scale the height to match zoom
 
     return Material(
