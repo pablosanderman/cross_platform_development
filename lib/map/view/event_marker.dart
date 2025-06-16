@@ -79,7 +79,7 @@ class EventMarker extends StatelessWidget {
   /// Get the border color based on state
   Color _getBorderColor() {
     if (isSelected) return Colors.white;
-    if (isHighlighted) return Colors.yellow;
+    if (isHighlighted) return Colors.deepPurpleAccent;
     return Colors.black26;
   }
 

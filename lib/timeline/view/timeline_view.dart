@@ -852,24 +852,35 @@ class _EventBoxState extends State<_EventBox> {
                 bottom: -8, // Extend 8px downward
                 child: Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.blue, width: 3),
+                    border: Border.all(
+                      color: Colors.deepPurpleAccent,
+                      width: 3,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
-            // Add highlight overlay when externally hovered (from map) - only if not selected
-            if (isEffectivelyHovered && !_isHovered && !isSelected)
-              Positioned.fill(
+            // Add highlight overlay when hovered (either directly or from map) - only if not selected
+            if (isEffectivelyHovered && !isSelected)
+              Positioned(
+                left:
+                    -6, // Extend 6px to the left (slightly smaller than selection)
+                right: -6, // Extend 6px to the right
+                top: -6, // Extend 6px upward
+                bottom: -6, // Extend 6px downward
                 child: Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.yellow, width: 2),
-                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: Colors.deepPurpleAccent,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                 ),
               ),
             child,
-            // "View on Map" button - only show when hovered and event has coordinates
-            if (isEffectivelyHovered && widget.event.hasCoordinates)
+            // "View on Map" button - only show when directly hovered (not from map) and event has coordinates
+            if (_isHovered && widget.event.hasCoordinates)
               Positioned(
                 right: -8,
                 top: -8,
