@@ -145,4 +145,14 @@ class MapCubit extends Cubit<MapState> {
     // Scroll timeline to show the event
     _timelineCubit?.scrollToEvent(event);
   }
+
+  /// Handle map marker hover - highlight event on timeline
+  void hoverMapEvent(Event event) {
+    _timelineCubit?.setHoveredEvent(event);
+  }
+
+  /// Handle map marker hover exit - clear timeline highlight
+  void exitMapEventHover() {
+    _timelineCubit?.clearHoveredEvent();
+  }
 }

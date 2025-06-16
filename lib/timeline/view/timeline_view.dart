@@ -641,64 +641,77 @@ class _EventBoxState extends State<_EventBox> {
 
   @override
   Widget build(BuildContext context) {
-    final color = _getEventColor(widget.event);
-    final isGrouped = widget.event.type == EventType.grouped;
+    return BlocBuilder<TimelineCubit, TimelineState>(
+      builder: (context, state) {
+        final color = _getEventColor(widget.event);
+        final isGrouped = widget.event.type == EventType.grouped;
 
-    // Calculate positioning
-    final leftOffset = _calculateLeftOffset();
-    // Position events to look centered at default height, then grow down from there
-    final verticalTop =
-        (75.0 - widget.dimensions.eventHeight) /
-        2; // Centers at default 75px height
+        // Check if this event is hovered from external source (like map)
+        final isExternallyHovered = state.hoveredEvent?.id == widget.event.id;
+        final isEffectivelyHovered = _isHovered || isExternallyHovered;
 
-    // Handle grouped events specially
-    if (isGrouped) {
-      return Transform.translate(
-        offset: Offset(leftOffset, verticalTop),
-        child: _buildHoverableEvent(
-          child: _GroupedEventWidget(
-            event: widget.event,
-            dimensions: widget.dimensions,
-            color: color,
-            rowHeight: widget.rowHeight,
+        // Calculate positioning
+        final leftOffset = _calculateLeftOffset();
+        // Position events to look centered at default height, then grow down from there
+        final verticalTop =
+            (75.0 - widget.dimensions.eventHeight) /
+            2; // Centers at default 75px height
+
+        // Handle grouped events specially
+        if (isGrouped) {
+          return Transform.translate(
+            offset: Offset(leftOffset, verticalTop),
+            child: _buildHoverableEvent(
+              isEffectivelyHovered: isEffectivelyHovered,
+              child: _GroupedEventWidget(
+                event: widget.event,
+                dimensions: widget.dimensions,
+                color: color,
+                rowHeight: widget.rowHeight,
+              ),
+            ),
+          );
+        }
+
+        final isPeriodic = widget.event.hasDuration;
+        final eventDuration = isPeriodic
+            ? widget.event.duration!
+            : widget.dimensions.defaultEventDuration;
+
+        final textWidth = _computeEventTextWidth(eventDuration);
+
+        return Transform.translate(
+          offset: Offset(leftOffset, verticalTop),
+          child: SizedBox(
+            width: textWidth,
+            height: _getEventDisplayHeight(),
+            child: _buildHoverableEvent(
+              isEffectivelyHovered: isEffectivelyHovered,
+              child: isPeriodic
+                  ? _PeriodEventWidget(
+                      event: widget.event,
+                      color: color,
+                      eventDuration: eventDuration,
+                      dimensions: widget.dimensions,
+                      rowHeight: widget.rowHeight,
+                    )
+                  : _PointEventWidget(
+                      event: widget.event,
+                      color: color,
+                      dimensions: widget.dimensions,
+                      rowHeight: widget.rowHeight,
+                    ),
+            ),
           ),
-        ),
-      );
-    }
-
-    final isPeriodic = widget.event.hasDuration;
-    final eventDuration = isPeriodic
-        ? widget.event.duration!
-        : widget.dimensions.defaultEventDuration;
-
-    final textWidth = _computeEventTextWidth(eventDuration);
-
-    return Transform.translate(
-      offset: Offset(leftOffset, verticalTop),
-      child: SizedBox(
-        width: textWidth,
-        height: _getEventDisplayHeight(),
-        child: _buildHoverableEvent(
-          child: isPeriodic
-              ? _PeriodEventWidget(
-                  event: widget.event,
-                  color: color,
-                  eventDuration: eventDuration,
-                  dimensions: widget.dimensions,
-                  rowHeight: widget.rowHeight,
-                )
-              : _PointEventWidget(
-                  event: widget.event,
-                  color: color,
-                  dimensions: widget.dimensions,
-                  rowHeight: widget.rowHeight,
-                ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildHoverableEvent({required Widget child}) {
+  Widget _buildHoverableEvent({
+    required Widget child,
+    required bool isEffectivelyHovered,
+  }) {
     return MouseRegion(
       onEnter: (_) {
         setState(() => _isHovered = true);
@@ -711,9 +724,19 @@ class _EventBoxState extends State<_EventBox> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // Add highlight overlay when externally hovered (from map)
+          if (isEffectivelyHovered && !_isHovered)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.yellow, width: 2),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
           child,
           // "View on Map" button - only show when hovered and event has coordinates
-          if (_isHovered && widget.event.hasCoordinates)
+          if (isEffectivelyHovered && widget.event.hasCoordinates)
             Positioned(
               right: -8,
               top: -8,

@@ -71,6 +71,12 @@ class _MapViewState extends State<MapView> {
               onTap: () {
                 context.read<MapCubit>().showEventPopup(firstEvent);
               },
+              onHover: () {
+                context.read<MapCubit>().hoverMapEvent(firstEvent);
+              },
+              onHoverExit: () {
+                context.read<MapCubit>().exitMapEventHover();
+              },
             ),
           ),
         );
@@ -87,6 +93,13 @@ class _MapViewState extends State<MapView> {
               ),
               onTap: () {
                 context.read<MapCubit>().showClusterPopup(events);
+              },
+              onHover: () {
+                // For clusters, don't highlight any specific timeline event
+                // Just provide visual feedback on the cluster itself
+              },
+              onHoverExit: () {
+                // No timeline highlighting to clear for clusters
               },
             ),
           ),

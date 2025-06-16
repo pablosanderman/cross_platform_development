@@ -13,6 +13,8 @@ class ClusterMarker extends StatelessWidget {
     this.isSelected = false,
     this.isHighlighted = false,
     this.onTap,
+    this.onHover,
+    this.onHoverExit,
   });
 
   /// The events clustered at this location
@@ -27,36 +29,46 @@ class ClusterMarker extends StatelessWidget {
   /// Callback when cluster is tapped
   final VoidCallback? onTap;
 
+  /// Callback when cluster is hovered
+  final VoidCallback? onHover;
+
+  /// Callback when cluster hover exits
+  final VoidCallback? onHoverExit;
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: _getClusterSize(),
-        height: _getClusterSize(),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: _getBorderColor(),
-            width: _getBorderWidth(),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(isHighlighted ? 0.5 : 0.3),
-              blurRadius: isHighlighted ? 8 : 4,
-              offset: const Offset(0, 2),
+    return MouseRegion(
+      onEnter: (_) => onHover?.call(),
+      onExit: (_) => onHoverExit?.call(),
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: _getClusterSize(),
+          height: _getClusterSize(),
+          decoration: BoxDecoration(
+            color: Colors.red,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: _getBorderColor(),
+              width: _getBorderWidth(),
             ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            events.length.toString(),
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: _getFontSize(),
-              fontWeight: FontWeight.bold,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isHighlighted ? 0.5 : 0.3),
+                blurRadius: isHighlighted ? 8 : 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              events.length.toString(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: _getFontSize(),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),

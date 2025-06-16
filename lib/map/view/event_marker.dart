@@ -13,6 +13,8 @@ class EventMarker extends StatelessWidget {
     this.isSelected = false,
     this.isHighlighted = false,
     this.onTap,
+    this.onHover,
+    this.onHoverExit,
   });
 
   /// The event to display
@@ -27,30 +29,40 @@ class EventMarker extends StatelessWidget {
   /// Callback when marker is tapped
   final VoidCallback? onTap;
 
+  /// Callback when marker is hovered
+  final VoidCallback? onHover;
+
+  /// Callback when marker hover exits
+  final VoidCallback? onHoverExit;
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: _getMarkerSize(),
-        height: _getMarkerSize(),
-        decoration: BoxDecoration(
-          color: _getMarkerColor(),
-          shape: _getMarkerShape(),
-          border: Border.all(
-            color: _getBorderColor(),
-            width: _getBorderWidth(),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(isHighlighted ? 0.5 : 0.3),
-              blurRadius: isHighlighted ? 8 : 4,
-              offset: const Offset(0, 2),
+    return MouseRegion(
+      onEnter: (_) => onHover?.call(),
+      onExit: (_) => onHoverExit?.call(),
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: _getMarkerSize(),
+          height: _getMarkerSize(),
+          decoration: BoxDecoration(
+            color: _getMarkerColor(),
+            shape: _getMarkerShape(),
+            border: Border.all(
+              color: _getBorderColor(),
+              width: _getBorderWidth(),
             ),
-          ],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isHighlighted ? 0.5 : 0.3),
+                blurRadius: isHighlighted ? 8 : 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(child: _buildMarkerContent()),
         ),
-        child: Center(child: _buildMarkerContent()),
       ),
     );
   }
