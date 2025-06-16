@@ -46,21 +46,27 @@ class MapState extends Equatable {
     MapStatus? status,
     List<Event>? events,
     Event? selectedEvent,
+    bool clearSelectedEvent = false,
     List<Event>? popupEvents,
     int? popupCurrentIndex,
     bool? showPopup,
     Event? highlightedEvent,
+    bool clearHighlightedEvent = false,
     Event? centerOnEvent,
     bool clearCenterOnEvent = false,
   }) {
     return MapState(
       status: status ?? this.status,
       events: events ?? this.events,
-      selectedEvent: selectedEvent ?? this.selectedEvent,
+      selectedEvent: clearSelectedEvent
+          ? null
+          : (selectedEvent ?? this.selectedEvent),
       popupEvents: popupEvents ?? this.popupEvents,
       popupCurrentIndex: popupCurrentIndex ?? this.popupCurrentIndex,
       showPopup: showPopup ?? this.showPopup,
-      highlightedEvent: highlightedEvent ?? this.highlightedEvent,
+      highlightedEvent: clearHighlightedEvent
+          ? null
+          : (highlightedEvent ?? this.highlightedEvent),
       centerOnEvent: clearCenterOnEvent
           ? null
           : (centerOnEvent ?? this.centerOnEvent),

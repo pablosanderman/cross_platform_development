@@ -37,7 +37,7 @@ class MapCubit extends Cubit<MapState> {
 
   /// Clear event selection
   void clearSelection() {
-    emit(state.copyWith(selectedEvent: null));
+    emit(state.copyWith(clearSelectedEvent: true));
   }
 
   /// Show popup for a single event
@@ -99,7 +99,7 @@ class MapCubit extends Cubit<MapState> {
         showPopup: false,
         popupEvents: <Event>[],
         popupCurrentIndex: 0,
-        selectedEvent: null,
+        clearSelectedEvent: true,
       ),
     );
   }
@@ -111,13 +111,13 @@ class MapCubit extends Cubit<MapState> {
 
   /// Clear event highlight
   void clearHighlight() {
-    emit(state.copyWith(highlightedEvent: null));
+    emit(state.copyWith(clearHighlightedEvent: true));
   }
 
   /// Navigate to event on map (center map and show popup)
   void navigateToEvent(Event event) {
-    // Ensure map view is visible
-    _navigationBloc?.add(ToggleMap());
+    // Ensure map view is visible (don't toggle, always show)
+    _navigationBloc?.add(ShowMap());
 
     // First select and show popup for the event
     showEventPopup(event);

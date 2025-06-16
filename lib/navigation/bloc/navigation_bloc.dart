@@ -8,7 +8,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<ToggleTimeline>((event, emit) {
       final newtimelineState = !state.showTimeline;
 
-      if(!newtimelineState && !state.showMap) { return; }
+      if (!newtimelineState && !state.showMap) {
+        return;
+      }
 
       emit(state.copyWith(showTimeline: newtimelineState));
     });
@@ -16,9 +18,16 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<ToggleMap>((event, emit) {
       final newMapState = !state.showMap;
 
-      if (!newMapState && !state.showTimeline) { return; }
+      if (!newMapState && !state.showTimeline) {
+        return;
+      }
 
       emit(state.copyWith(showMap: newMapState));
+    });
+
+    on<ShowMap>((event, emit) {
+      // Always show the map, don't toggle
+      emit(state.copyWith(showMap: true));
     });
   }
 }
