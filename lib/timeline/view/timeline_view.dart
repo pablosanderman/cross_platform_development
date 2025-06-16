@@ -830,13 +830,17 @@ class _EventBoxState extends State<_EventBox> {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // Add selection overlay when selected
+            // Add selection overlay when selected - larger border that overlays adjacent events
             if (isSelected)
-              Positioned.fill(
+              Positioned(
+                left: -8, // Extend 8px to the left
+                right: -8, // Extend 8px to the right
+                top: -8, // Extend 8px upward
+                bottom: -8, // Extend 8px downward
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.blue, width: 3),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
