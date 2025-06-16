@@ -48,24 +48,28 @@ class MapCubit extends Cubit<MapState> {
 
   /// Show popup for a single event
   void showEventPopup(Event event) {
+    // Select the event using shared selection state
+    _timelineCubit?.selectEvent(event);
+
     emit(
       state.copyWith(
         popupEvents: [event],
         popupCurrentIndex: 0,
         showPopup: true,
-        selectedEvent: event,
       ),
     );
   }
 
   /// Show popup for multiple events (cluster)
   void showClusterPopup(List<Event> events) {
+    // Select the first event using shared selection state
+    _timelineCubit?.selectEvent(events.first);
+
     emit(
       state.copyWith(
         popupEvents: events,
         popupCurrentIndex: 0,
         showPopup: true,
-        selectedEvent: events.first,
       ),
     );
   }
@@ -75,12 +79,12 @@ class MapCubit extends Cubit<MapState> {
     if (state.popupEvents.isEmpty) return;
 
     final nextIndex = (state.popupCurrentIndex + 1) % state.popupEvents.length;
-    emit(
-      state.copyWith(
-        popupCurrentIndex: nextIndex,
-        selectedEvent: state.popupEvents[nextIndex],
-      ),
-    );
+    final nextEvent = state.popupEvents[nextIndex];
+
+    // Select the next event using shared selection state
+    _timelineCubit?.selectEvent(nextEvent);
+
+    emit(state.copyWith(popupCurrentIndex: nextIndex));
   }
 
   /// Navigate to previous event in popup
@@ -90,22 +94,24 @@ class MapCubit extends Cubit<MapState> {
     final prevIndex = state.popupCurrentIndex == 0
         ? state.popupEvents.length - 1
         : state.popupCurrentIndex - 1;
-    emit(
-      state.copyWith(
-        popupCurrentIndex: prevIndex,
-        selectedEvent: state.popupEvents[prevIndex],
-      ),
-    );
+    final prevEvent = state.popupEvents[prevIndex];
+
+    // Select the previous event using shared selection state
+    _timelineCubit?.selectEvent(prevEvent);
+
+    emit(state.copyWith(popupCurrentIndex: prevIndex));
   }
 
   /// Close popup
   void closePopup() {
+    // Clear selection using shared selection state
+    _timelineCubit?.clearSelection();
+
     emit(
       state.copyWith(
         showPopup: false,
         popupEvents: <Event>[],
         popupCurrentIndex: 0,
-        clearSelectedEvent: true,
       ),
     );
   }
@@ -154,5 +160,12 @@ class MapCubit extends Cubit<MapState> {
   /// Handle map marker hover exit - clear timeline highlight
   void exitMapEventHover() {
     _timelineCubit?.clearHoveredEvent();
+  }
+
+  /// Update selected event from timeline (for shared selection state)
+  void updateSelectedEvent(Event? event) {
+    emit(
+      state.copyWith(selectedEvent: event, clearSelectedEvent: event == null),
+    );
   }
 }

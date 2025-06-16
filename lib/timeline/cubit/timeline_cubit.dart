@@ -211,4 +211,18 @@ class TimelineCubit extends Cubit<TimelineState> {
   void setMapCubit(MapCubit mapCubit) {
     _mapCubit = mapCubit;
   }
+
+  /// Select an event (shared between map and timeline)
+  void selectEvent(Event? event) {
+    emit(state.copyWith(selectedEvent: event));
+    // Notify map to update its visual state
+    _mapCubit?.updateSelectedEvent(event);
+  }
+
+  /// Clear selected event
+  void clearSelection() {
+    emit(state.copyWith(clearSelectedEvent: true));
+    // Notify map to update its visual state
+    _mapCubit?.updateSelectedEvent(null);
+  }
 }

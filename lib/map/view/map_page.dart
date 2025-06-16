@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cross_platform_development/map/map.dart';
+import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/shared/shared.dart';
 
 /// {@template map_page}
@@ -42,11 +43,15 @@ class _MapViewState extends State<MapView> {
   }
 
   /// Build markers with manual clustering logic
-  List<Marker> _buildClusteredMarkers(BuildContext context, MapState state) {
+  List<Marker> _buildClusteredMarkers(
+    BuildContext context,
+    MapState mapState,
+    TimelineState timelineState,
+  ) {
     // Group events by exact coordinates
     final Map<String, List<Event>> groupedEvents = {};
 
-    for (final event in state.events) {
+    for (final event in mapState.events) {
       final key = '${event.latitude},${event.longitude}';
       groupedEvents.putIfAbsent(key, () => []).add(event);
     }
@@ -66,8 +71,8 @@ class _MapViewState extends State<MapView> {
             point: location,
             child: EventMarker(
               event: firstEvent,
-              isSelected: state.selectedEvent?.id == firstEvent.id,
-              isHighlighted: state.highlightedEvent?.id == firstEvent.id,
+              isSelected: timelineState.selectedEvent?.id == firstEvent.id,
+              isHighlighted: mapState.highlightedEvent?.id == firstEvent.id,
               onTap: () {
                 context.read<MapCubit>().showEventPopup(firstEvent);
               },
@@ -87,9 +92,11 @@ class _MapViewState extends State<MapView> {
             point: location,
             child: ClusterMarker(
               events: events,
-              isSelected: events.any((e) => state.selectedEvent?.id == e.id),
+              isSelected: events.any(
+                (e) => timelineState.selectedEvent?.id == e.id,
+              ),
               isHighlighted: events.any(
-                (e) => state.highlightedEvent?.id == e.id,
+                (e) => mapState.highlightedEvent?.id == e.id,
               ),
               onTap: () {
                 context.read<MapCubit>().showClusterPopup(events);
@@ -130,43 +137,51 @@ class _MapViewState extends State<MapView> {
         }
       },
       child: BlocBuilder<MapCubit, MapState>(
-        builder: (context, state) {
-          return Stack(
-            children: [
-              // Map
-              FlutterMap(
-                mapController: _mapController,
-                options: const MapOptions(
-                  // Center on Italy/Sicily area where the volcanic events are
-                  initialCenter: LatLng(
-                    37.7513,
-                    14.9934,
-                  ), // Mount Etna coordinates
-                  initialZoom: 8.0,
-                  minZoom: 3.0,
-                  maxZoom: 18.0,
-                ),
+        builder: (context, mapState) {
+          return BlocBuilder<TimelineCubit, TimelineState>(
+            builder: (context, timelineState) {
+              return Stack(
                 children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName:
-                        'com.example.cross_platform_development',
-                  ),
-                  if (state.status == MapStatus.loaded) ...[
-                    MarkerLayer(
-                      markers: _buildClusteredMarkers(context, state),
+                  // Map
+                  FlutterMap(
+                    mapController: _mapController,
+                    options: const MapOptions(
+                      // Center on Italy/Sicily area where the volcanic events are
+                      initialCenter: LatLng(
+                        37.7513,
+                        14.9934,
+                      ), // Mount Etna coordinates
+                      initialZoom: 8.0,
+                      minZoom: 3.0,
+                      maxZoom: 18.0,
                     ),
-                  ],
-                  if (state.status == MapStatus.loading) ...[
-                    const Center(child: CircularProgressIndicator()),
-                  ],
-                ],
-              ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName:
+                            'com.example.cross_platform_development',
+                      ),
+                      if (mapState.status == MapStatus.loaded) ...[
+                        MarkerLayer(
+                          markers: _buildClusteredMarkers(
+                            context,
+                            mapState,
+                            timelineState,
+                          ),
+                        ),
+                      ],
+                      if (mapState.status == MapStatus.loading) ...[
+                        const Center(child: CircularProgressIndicator()),
+                      ],
+                    ],
+                  ),
 
-              // Popup overlay
-              const EventPopup(),
-            ],
+                  // Popup overlay
+                  const EventPopup(),
+                ],
+              );
+            },
           );
         },
       ),

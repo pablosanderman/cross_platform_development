@@ -10,6 +10,7 @@ class TimelineState extends Equatable {
     this.isLoading = false,
     this.error,
     this.hoveredEvent,
+    this.selectedEvent,
   });
 
   final DateTime visibleStart;
@@ -19,6 +20,7 @@ class TimelineState extends Equatable {
   final bool isLoading;
   final String? error;
   final Event? hoveredEvent;
+  final Event? selectedEvent;
 
   TimelineState copyWith({
     DateTime? visibleStart,
@@ -29,6 +31,8 @@ class TimelineState extends Equatable {
     String? error,
     Event? hoveredEvent,
     bool clearHoveredEvent = false,
+    Event? selectedEvent,
+    bool clearSelectedEvent = false,
   }) {
     return TimelineState(
       visibleStart: visibleStart ?? this.visibleStart,
@@ -40,6 +44,9 @@ class TimelineState extends Equatable {
       hoveredEvent: clearHoveredEvent
           ? null
           : (hoveredEvent ?? this.hoveredEvent),
+      selectedEvent: clearSelectedEvent
+          ? null
+          : (selectedEvent ?? this.selectedEvent),
     );
   }
 
@@ -54,6 +61,7 @@ class TimelineState extends Equatable {
     isLoading,
     error,
     hoveredEvent,
+    selectedEvent,
   ];
 }
 

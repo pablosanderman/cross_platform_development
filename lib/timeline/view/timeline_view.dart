@@ -650,6 +650,9 @@ class _EventBoxState extends State<_EventBox> {
         final isExternallyHovered = state.hoveredEvent?.id == widget.event.id;
         final isEffectivelyHovered = _isHovered || isExternallyHovered;
 
+        // Check if this event is selected
+        final isSelected = state.selectedEvent?.id == widget.event.id;
+
         // Calculate positioning
         final leftOffset = _calculateLeftOffset();
         // Position events to look centered at default height, then grow down from there
@@ -663,6 +666,7 @@ class _EventBoxState extends State<_EventBox> {
             offset: Offset(leftOffset, verticalTop),
             child: _buildHoverableEvent(
               isEffectivelyHovered: isEffectivelyHovered,
+              isSelected: isSelected,
               child: _GroupedEventWidget(
                 event: widget.event,
                 dimensions: widget.dimensions,
@@ -687,6 +691,7 @@ class _EventBoxState extends State<_EventBox> {
             height: _getEventDisplayHeight(),
             child: _buildHoverableEvent(
               isEffectivelyHovered: isEffectivelyHovered,
+              isSelected: isSelected,
               child: isPeriodic
                   ? _PeriodEventWidget(
                       event: widget.event,
@@ -711,6 +716,7 @@ class _EventBoxState extends State<_EventBox> {
   Widget _buildHoverableEvent({
     required Widget child,
     required bool isEffectivelyHovered,
+    required bool isSelected,
   }) {
     return MouseRegion(
       onEnter: (_) {
@@ -721,62 +727,78 @@ class _EventBoxState extends State<_EventBox> {
         setState(() => _isHovered = false);
         context.read<TimelineCubit>().clearHoveredEvent();
       },
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // Add highlight overlay when externally hovered (from map)
-          if (isEffectivelyHovered && !_isHovered)
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.yellow, width: 2),
-                  borderRadius: BorderRadius.circular(4),
+      child: GestureDetector(
+        onTap: () {
+          // Select the event when clicked
+          context.read<TimelineCubit>().selectEvent(widget.event);
+        },
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Add selection overlay when selected
+            if (isSelected)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue, width: 3),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ),
-            ),
-          child,
-          // "View on Map" button - only show when hovered and event has coordinates
-          if (isEffectivelyHovered && widget.event.hasCoordinates)
-            Positioned(
-              right: -8,
-              top: -8,
-              child: GestureDetector(
-                onTap: () {
-                  // Navigate to event on map
-                  context.read<MapCubit>().navigateToEvent(widget.event);
-                },
-                child: Material(
-                  elevation: 4,
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.map, size: 14, color: Colors.white),
-                        const SizedBox(width: 4),
-                        const Text(
-                          'View on Map',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+            // Add highlight overlay when externally hovered (from map) - only if not selected
+            if (isEffectivelyHovered && !_isHovered && !isSelected)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.yellow, width: 2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            child,
+            // "View on Map" button - only show when hovered and event has coordinates
+            if (isEffectivelyHovered && widget.event.hasCoordinates)
+              Positioned(
+                right: -8,
+                top: -8,
+                child: GestureDetector(
+                  onTap: () {
+                    // Navigate to event on map
+                    context.read<MapCubit>().navigateToEvent(widget.event);
+                  },
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.map, size: 14, color: Colors.white),
+                          const SizedBox(width: 4),
+                          const Text(
+                            'View on Map',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
