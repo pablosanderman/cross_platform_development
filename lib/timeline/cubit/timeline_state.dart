@@ -11,6 +11,7 @@ class TimelineState extends Equatable {
     this.error,
     this.hoveredEvent,
     this.selectedEvent,
+    this.scrollToEvent,
   });
 
   final DateTime visibleStart;
@@ -21,6 +22,9 @@ class TimelineState extends Equatable {
   final String? error;
   final Event? hoveredEvent;
   final Event? selectedEvent;
+
+  /// Event to scroll to - triggers programmatic scrolling in the view
+  final Event? scrollToEvent;
 
   TimelineState copyWith({
     DateTime? visibleStart,
@@ -33,6 +37,8 @@ class TimelineState extends Equatable {
     bool clearHoveredEvent = false,
     Event? selectedEvent,
     bool clearSelectedEvent = false,
+    Event? scrollToEvent,
+    bool clearScrollToEvent = false,
   }) {
     return TimelineState(
       visibleStart: visibleStart ?? this.visibleStart,
@@ -47,6 +53,9 @@ class TimelineState extends Equatable {
       selectedEvent: clearSelectedEvent
           ? null
           : (selectedEvent ?? this.selectedEvent),
+      scrollToEvent: clearScrollToEvent
+          ? null
+          : (scrollToEvent ?? this.scrollToEvent),
     );
   }
 
@@ -62,6 +71,7 @@ class TimelineState extends Equatable {
     error,
     hoveredEvent,
     selectedEvent,
+    scrollToEvent,
   ];
 }
 

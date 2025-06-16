@@ -16,15 +16,18 @@ class TimelineView extends StatefulWidget {
   State<TimelineView> createState() => _TimelineViewState();
 }
 
-class _TimelineViewState extends State<TimelineView> {
+class _TimelineViewState extends State<TimelineView>
+    with TickerProviderStateMixin {
   final TransformationController _transformationController =
       TransformationController();
   int? _draggedRowIndex;
   int? _dragTargetIndex;
+  AnimationController? _scrollAnimationController;
 
   @override
   void dispose() {
     _transformationController.dispose();
+    _scrollAnimationController?.dispose();
     super.dispose();
   }
 
@@ -40,70 +43,141 @@ class _TimelineViewState extends State<TimelineView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<TimelineCubit, TimelineState>(
-        builder: (context, state) {
-          if (state.rows.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+      body: BlocListener<TimelineCubit, TimelineState>(
+        listenWhen: (previous, current) =>
+            current.scrollToEvent != null &&
+            previous.scrollToEvent != current.scrollToEvent,
+        listener: (context, state) {
+          if (state.scrollToEvent != null) {
+            _scrollToEventAnimated(state.scrollToEvent!, state);
+            // Clear the scroll event after handling
+            context.read<TimelineCubit>().clearScrollToEvent();
           }
+        },
+        child: BlocBuilder<TimelineCubit, TimelineState>(
+          builder: (context, state) {
+            if (state.rows.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          // Calculate consistent dimensions based on time and content
-          final dimensions = _TimelineDimensions.calculate(
-            visibleStart: state.visibleStart,
-            visibleEnd: state.visibleEnd,
-            rows: state.rows,
-          );
+            // Calculate consistent dimensions based on time and content
+            final dimensions = _TimelineDimensions.calculate(
+              visibleStart: state.visibleStart,
+              visibleEnd: state.visibleEnd,
+              rows: state.rows,
+            );
 
-          return Column(
-            children: [
-              // Sticky ruler header
-              _StickyRuler(
-                dimensions: dimensions,
-                transformationController: _transformationController,
-              ),
-              // Timeline content with drag and drop functionality
-              Expanded(
-                child: _DraggableTimelineContent(
-                  rows: state.rows,
+            return Column(
+              children: [
+                // Sticky ruler header
+                _StickyRuler(
                   dimensions: dimensions,
                   transformationController: _transformationController,
-                  draggedRowIndex: _draggedRowIndex,
-                  dragTargetIndex: _dragTargetIndex,
-                  onDragStarted: (index) {
-                    setState(() {
-                      _draggedRowIndex = index;
-                    });
-                  },
-                  onDragEnded: () {
-                    setState(() {
-                      _draggedRowIndex = null;
-                      _dragTargetIndex = null;
-                    });
-                  },
-                  onDragAccepted: (draggedIndex, targetIndex) {
-                    // Only perform reorder if targetIndex is valid (not -1)
-                    if (targetIndex >= 0 && targetIndex != draggedIndex) {
-                      context.read<TimelineCubit>().reorderRows(
-                        draggedIndex,
-                        targetIndex,
-                      );
-                    }
-                    setState(() {
-                      _draggedRowIndex = null;
-                      _dragTargetIndex = null;
-                    });
-                  },
-                  onDragTargetChanged: (index) {
-                    setState(() {
-                      _dragTargetIndex = index;
-                    });
-                  },
                 ),
-              ),
-            ],
-          );
-        },
+                // Timeline content with drag and drop functionality
+                Expanded(
+                  child: _DraggableTimelineContent(
+                    rows: state.rows,
+                    dimensions: dimensions,
+                    transformationController: _transformationController,
+                    draggedRowIndex: _draggedRowIndex,
+                    dragTargetIndex: _dragTargetIndex,
+                    onDragStarted: (index) {
+                      setState(() {
+                        _draggedRowIndex = index;
+                      });
+                    },
+                    onDragEnded: () {
+                      setState(() {
+                        _draggedRowIndex = null;
+                        _dragTargetIndex = null;
+                      });
+                    },
+                    onDragAccepted: (draggedIndex, targetIndex) {
+                      // Only perform reorder if targetIndex is valid (not -1)
+                      if (targetIndex >= 0 && targetIndex != draggedIndex) {
+                        context.read<TimelineCubit>().reorderRows(
+                          draggedIndex,
+                          targetIndex,
+                        );
+                      }
+                      setState(() {
+                        _draggedRowIndex = null;
+                        _dragTargetIndex = null;
+                      });
+                    },
+                    onDragTargetChanged: (index) {
+                      setState(() {
+                        _dragTargetIndex = index;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
+  }
+
+  /// Animate the timeline to show a specific event
+  void _scrollToEventAnimated(Event event, TimelineState state) {
+    // Calculate dimensions to get pixel positions
+    final dimensions = _TimelineDimensions.calculate(
+      visibleStart: state.visibleStart,
+      visibleEnd: state.visibleEnd,
+      rows: state.rows,
+    );
+
+    // Calculate event position in timeline coordinates
+    final eventOffset = event.effectiveStartTime.difference(
+      dimensions.visibleStart,
+    );
+    final eventPixelPosition = eventOffset.inHours * dimensions.pixelsPerHour;
+
+    // Get current transformation values
+    final currentMatrix = _transformationController.value;
+    final currentScale = currentMatrix.getMaxScaleOnAxis();
+    final currentTranslation = currentMatrix.getTranslation();
+
+    // Calculate viewport width at current scale
+    final screenWidth = MediaQuery.of(context).size.width;
+    final viewportWidth = screenWidth / currentScale;
+
+    // Position event at 30% from left edge of viewport (consistent with original behavior)
+    final targetTranslationX = -(eventPixelPosition - viewportWidth * 0.3);
+
+    // Create target transformation matrix preserving current scale and vertical position
+    final targetMatrix = Matrix4.identity()
+      ..translate(targetTranslationX, currentTranslation.y)
+      ..scale(currentScale);
+
+    // Dispose previous animation controller if it exists
+    _scrollAnimationController?.dispose();
+
+    // Create new animation controller
+    _scrollAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    // Create animation that interpolates between current and target matrix
+    final animation = Matrix4Tween(begin: currentMatrix, end: targetMatrix)
+        .animate(
+          CurvedAnimation(
+            parent: _scrollAnimationController!,
+            curve: Curves.easeInOut,
+          ),
+        );
+
+    // Listen to animation updates
+    animation.addListener(() {
+      _transformationController.value = animation.value;
+    });
+
+    // Start the animation
+    _scrollAnimationController!.forward();
   }
 }
 

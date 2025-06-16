@@ -191,20 +191,13 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   /// Scroll timeline to show a specific event
   void scrollToEvent(Event event) {
-    // Use a reasonable fixed window duration for focused view (8 hours)
-    const focusedWindowDuration = Duration(hours: 8);
-    final eventStart = event.effectiveStartTime;
+    // Trigger programmatic scrolling in the view without changing timeline bounds
+    emit(state.copyWith(scrollToEvent: event));
+  }
 
-    // Position the event at 30% from the left edge of the focused window
-    const offsetFromStart = Duration(hours: 2, minutes: 24); // 30% of 8 hours
-
-    // Calculate new window: event should appear 30% from the left
-    final newVisibleStart = eventStart.subtract(offsetFromStart);
-    final newVisibleEnd = newVisibleStart.add(focusedWindowDuration);
-
-    emit(
-      state.copyWith(visibleStart: newVisibleStart, visibleEnd: newVisibleEnd),
-    );
+  /// Clear the scroll to event flag (called after scrolling is complete)
+  void clearScrollToEvent() {
+    emit(state.copyWith(clearScrollToEvent: true));
   }
 
   /// Set the MapCubit reference (used to resolve circular dependency)
