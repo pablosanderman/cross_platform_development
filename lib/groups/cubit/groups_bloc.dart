@@ -6,54 +6,77 @@ import '../models/models.dart';
 import 'groups_event.dart';
 import 'groups_state.dart';
 
-class GroupsBloc extends Bloc<GroupsEvent, GroupsState>{
+class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
   GroupsBloc()
-    : super(GroupsState(
-      chosenGroup: null,
-      groups: _testGroups,
-      groupMembers: const {}
-    )) {
-  on<ChooseGroup>(_setChosenGroup);
+    : super(
+        GroupsState(
+          chosenGroup: null,
+          groups: const [],
+          users: const [],
+        ),
+      ) {
+    on<ChooseGroup>(_setChosenGroup);
+    on<LoadGroups>(_loadGroups);
+    on<LoadUsers>(_loadUsers);
   }
 
-  void _setChosenGroup(
-    ChooseGroup event,
-    Emitter<GroupsState> emit,
-    ) {
+  Future<void> _loadUsers(LoadUsers event, Emitter<GroupsState> emit) async {
+    try {
+      final users = await User.loadPersonsFromFile();
+      emit(state.copyWith(users: users));
+    } catch (e) {
+      // Handle error appropriately
+      print('Error loading users: $e');
+      emit(state.copyWith(users: []));
+    }
+  }
+
+  Future<void> _loadGroups(LoadGroups event, Emitter<GroupsState> emit) async {
+    try {
+      final groups = await Group.loadGroupsFromFile();
+      emit(state.copyWith(groups: groups));
+    } catch (e) {
+      // Handle error appropriately
+      print('Error loading groups: $e');
+      emit(state.copyWith(groups: []));
+    }
+  }
+
+  void _setChosenGroup(ChooseGroup event, Emitter<GroupsState> emit) {
     emit(state.copyWith(chosenGroup: event.chosenGroup));
   }
 
-  static final List<Group> _testGroups = [
-    Group(name: "TestGroup1", owner: FakeAccount().people[0], groupMembers: {
-      FakeAccount().people[0]: GroupRoles.administrator,
-      FakeAccount().people[1]: GroupRoles.member,
-      FakeAccount().people[2]: GroupRoles.member,
-    }, id: "testid1"),
-    Group(name: "TestGroup2", owner: FakeAccount().people[1], groupMembers: {
-      FakeAccount().people[1]: GroupRoles.administrator,
-      FakeAccount().people[0]: GroupRoles.member,
-      FakeAccount().people[2]: GroupRoles.member,
-    }, id: "testid2"),
-    Group(name: "TestGroup3",owner: FakeAccount().people[2], groupMembers: {
-      FakeAccount().people[2]: GroupRoles.administrator,
-      FakeAccount().people[1]: GroupRoles.member,
-      FakeAccount().people[0]: GroupRoles.member,
-    }, id: "testid3"),
-  ];
-
-
+  // TODO: Delete or change
+  // static final List<Group> _testGroups = [
+  //   Group(name: "TestGroup1", id: , ownerId: FakeAccount().people[0].id, groupMemberIds: {
+  //     FakeAccount().people[0].id: GroupRoles.administrator,
+  //     FakeAccount().people[1].id: GroupRoles.member,
+  //     FakeAccount().people[2].id: GroupRoles.member,
+  //   }, id: "testid1"),
+  //   Group(name: "TestGroup2", id: , ownerId: FakeAccount().people[1].id, groupMemberIds: {
+  //     FakeAccount().people[1].id: GroupRoles.administrator,
+  //     FakeAccount().people[0].id: GroupRoles.member,
+  //     FakeAccount().people[2].id: GroupRoles.member,
+  //   }, id: "testid2"),
+  //   Group(name: "TestGroup3", id: , ownerId: FakeAccount().people[2].id, groupMemberIds: {
+  //     FakeAccount().people[2].id: GroupRoles.administrator,
+  //     FakeAccount().people[1].id: GroupRoles.member,
+  //     FakeAccount().people[0].id: GroupRoles.member,
+  //   }, id: "testid3"),
+  // ];
 
   void createGroup(String gName) {
     final currentGroups = List<Group>.from(state.groups);
     var uuid = Uuid();
     Group group = Group(
-        name: gName,
-        owner: FakeAccount().loggedInUser,
-        id: uuid.v4(),
+      id: uuid.v4(),
+      name: gName,
+      ownerId: FakeAccount.loggedInUser!.id,
     );
-    // group.addMember(FakeAccount().loggedInUser); TODO: change or delete
-
+    group.addMember(FakeAccount.loggedInUser!.id);
+    FakeAccount.loggedInUser!.groupIds.add(group.id);
     currentGroups.add(group);
+
     emit(state.copyWith(groups: currentGroups));
   }
 

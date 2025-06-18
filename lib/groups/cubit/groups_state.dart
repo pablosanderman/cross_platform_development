@@ -5,26 +5,27 @@ import '../models/models.dart';
 class GroupsState extends Equatable {
   final Group? chosenGroup;
   final List<Group> groups;
-  final Map<Person, GroupRoles> groupMembers;
+  final List<User> users;
 
   const GroupsState({
     required this.chosenGroup,
     required this.groups,
-    required this.groupMembers
+    required this.users,
   });
 
   GroupsState copyWith({
     Group? chosenGroup,
     List<Group>? groups,
-    Map<Person, GroupRoles>? groupMembers,
+    List<User>? users,
+    Map<User, GroupRoles>? groupMembers,
   }) {
     return GroupsState(
       chosenGroup: chosenGroup?? this.chosenGroup,
       groups: groups ?? this.groups,
-      groupMembers: groupMembers ?? this.groupMembers,
+      users: users ?? this.users,
     );
   }
 
   @override
-  List<Object?> get props => [chosenGroup, groups, groupMembers];
+  List<Object?> get props => [chosenGroup, groups, users];
 }

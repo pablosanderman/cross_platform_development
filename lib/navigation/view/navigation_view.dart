@@ -1,4 +1,5 @@
 ﻿import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:cross_platform_development/search/search.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -75,7 +76,7 @@ class NavigationView extends StatelessWidget {
                       horizontal: 10.0,
                       vertical: 3.0,
                     ),
-                    child: NavigationSearchBar(),
+                    child: EventSearchView(),
                   ),
                 ),
 
@@ -117,65 +118,6 @@ class NavigationView extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class NavigationSearchBar extends StatefulWidget {
-  const NavigationSearchBar({super.key});
-
-  @override
-  State<NavigationSearchBar> createState() => _NavigationSearchBarState();
-}
-
-class _NavigationSearchBarState extends State<NavigationSearchBar> {
-  @override
-  Widget build(BuildContext context) {
-    return SearchAnchor(
-      builder: (BuildContext context, SearchController controller) {
-        return SearchBar(
-          controller: controller,
-          padding: const WidgetStatePropertyAll<EdgeInsets>(
-            EdgeInsets.symmetric(horizontal: 12.0),
-          ),
-          onTap: () {
-            controller.openView();
-          },
-          onChanged: (_) {
-            controller.openView();
-          },
-          leading: const Icon(Icons.search),
-        );
-      },
-      suggestionsBuilder:
-          (BuildContext context, SearchController controller) async {
-            final String input = controller.text;
-            final List<Event> events = await TimelineCubit().loadEvents();
-            final List<Event> filteredItems = events
-                .where(
-                  (item) =>
-                      item.title.toLowerCase().contains(input.toLowerCase()),
-                )
-                .toList();
-
-            return List<ListTile>.generate(filteredItems.length, (int index) {
-              final Event item = filteredItems[index];
-              final startTime = item.startTime != null
-                  ? DateFormat('HH:mm:ss').format(item.startTime as DateTime)
-                  : "No StartTime";
-
-              final endTime = item.endTime != null
-                  ? DateFormat('HH:mm:ss').format(item.endTime as DateTime)
-                  : "No EndTime";
-
-              return ListTile(
-                title: Text("${item.title}   Date: $startTime --- $endTime"),
-                onTap: () {
-                  controller.closeView(item.title);
-                },
-              );
-            });
-          },
     );
   }
 }

@@ -1,3 +1,30 @@
-﻿[
-
+[
+  {
+    "id": "a08ac3b6-1215-456d-bce0-2a3692a202e9",
+    "firstName": "Henk",
+    "lastName": "Henkies",
+    "role": "member",
+    "groupIds": [ ]
+  },
+  {
+    "id": "c8e0d793-1532-4607-960a-dbe4d5039103",
+    "firstName": "Elise",
+    "lastName": "Morrinson",
+    "role": "member",
+    "groupIds": [ ]
+  },
+  {
+    "id": "ff050580-81f0-4e34-97cd-e4ad08fbb8df",
+    "firstName": "Peter",
+    "lastName": "Pan",
+    "role": "member",
+    "groupIds": [ ]
+  },
+  {
+    "id": "8ea32e5f-0808-45fe-b678-49ad87d4b9f3",
+    "firstName": "Andrew",
+    "lastName": "Ryan",
+    "role": "member",
+    "groupIds": [ ]
+  }
 ]

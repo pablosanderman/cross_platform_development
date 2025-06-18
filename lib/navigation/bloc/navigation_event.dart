@@ -1,4 +1,5 @@
-﻿abstract class NavigationEvent {
+﻿
+abstract class NavigationEvent {
   final bool forceNavigate;
   NavigationEvent({this.forceNavigate = false});
 }
@@ -17,6 +18,5 @@ class ToggleMap extends NavigationEvent {
 
 class ChangePage extends NavigationEvent {
   final int pageIndex;
-
   ChangePage(this.pageIndex) : super(forceNavigate: true);
 }
