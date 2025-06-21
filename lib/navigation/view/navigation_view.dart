@@ -1,4 +1,5 @@
-﻿import 'package:bitsdojo_window/bitsdojo_window.dart';
+﻿import 'package:cross_platform_development/navigation/navigation.dart';
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:cross_platform_development/search/search.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +83,6 @@ class NavigationView extends StatelessWidget {
                   create: (_) => UtcTimeCubit(),
                   child: const UtcTimerView(),
                 ),
-
                 const WindowButtons(),
               ],
             ),
