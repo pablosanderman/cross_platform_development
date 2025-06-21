@@ -17,7 +17,6 @@ class GroupsState extends Equatable {
     Group? chosenGroup,
     List<Group>? groups,
     List<User>? users,
-    Map<User, GroupRoles>? groupMembers,
   }) {
     return GroupsState(
       chosenGroup: chosenGroup?? this.chosenGroup,

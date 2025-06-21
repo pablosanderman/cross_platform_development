@@ -10,12 +10,7 @@ class GenericSearchBloc<T> extends Bloc<dynamic, GenericSearchState<T>> {
   GenericSearchBloc({
     required this.loadItems,
     required this.filter,
-  }) : super(GenericSearchState<T>(filteredItems: [])) {
-    on<SearchQueryChanged<T>>((event, emit) {
-      final allItems = loadItems();
-      final filtered = allItems.where((item) => filter(item, event.query)).toList();
-      emit(state.copyWith(filteredItems: filtered));
-    });
+  }) : super(GenericSearchState<T>()) {
 
     on<SearchItemSelected<T>>((event, emit) {
       emit(state.copyWith(selectedItem: event.selectedItem));

@@ -2,10 +2,8 @@
 import 'package:cross_platform_development/search/search.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../utc_timer/utc_timer.dart';
-import '../../timeline/timeline.dart';
 import '../nav_item/nav_item.dart';
 import '../navigation.dart';
 

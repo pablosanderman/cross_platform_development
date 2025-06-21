@@ -29,9 +29,11 @@ class EventSearchView extends StatelessWidget {
                 : "No End";
             return Text("${event.title}   Date: $start --- $end");
           },
+          itemTitle: (event) => event.title,
           onItemSelected: (event) {
-            // Do something
+            // TODO: goto/show the event in timeline
           },
+          leadingIcon: const Icon(Icons.search),
         );
       },
     );

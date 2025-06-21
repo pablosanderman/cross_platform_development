@@ -7,6 +7,8 @@ class FakeAccount {
 
   static FakeAccount? _instance;
   static User? loggedInUser;
+
+  // //TODO: Can add people through here.
   // static List<User> people = [
   //   _createDefaultUser("Henk", "Henkies"),
   //   _createDefaultUser("Elise", "Morrinson"),

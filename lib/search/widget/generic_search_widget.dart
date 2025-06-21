@@ -10,6 +10,7 @@ class GenericSearchBar<T> extends StatelessWidget {
   final List<T> Function() loadItems;
   final bool Function(T item, String query) filter;
   final Widget Function(T item) itemBuilder;
+  final String Function(T item) itemTitle;
   final void Function(T item)? onItemSelected;
   final Widget? leadingIcon;
   final EdgeInsets padding;
@@ -19,6 +20,7 @@ class GenericSearchBar<T> extends StatelessWidget {
     required this.loadItems,
     required this.filter,
     required this.itemBuilder,
+    required this.itemTitle,
     this.onItemSelected,
     this.leadingIcon,
     this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
@@ -36,26 +38,28 @@ class GenericSearchBar<T> extends StatelessWidget {
         builder: (searchbloc, searchState) {
 
           return SearchAnchor(
-            builder: (context, controller) {
+            builder: (BuildContext context, SearchController controller) {
               return SearchBar(
                 controller: controller,
                 padding: WidgetStatePropertyAll(padding),
                 onTap: controller.openView,
                 onChanged: (value) {
                   controller.openView();
-                  searchbloc.read<GenericSearchBloc<T>>().add(SearchQueryChanged<T>(value));
                 },
                 leading: leadingIcon,
               );
             },
-            suggestionsBuilder: (context, controller) async {
-              final results = searchState.filteredItems;
+            suggestionsBuilder: (
+                BuildContext context, SearchController controller) async {
+              final String input = controller.text;
+              final filteredItems = this.loadItems()
+                  .where((item) => filter(item, input)).toList();
 
-              return results.map((item) {
+              return filteredItems.map((item) {
                 return ListTile(
                   title: itemBuilder(item),
                   onTap: () {
-                    controller.closeView(item.toString());
+                    controller.closeView(itemTitle(item));
                     searchbloc.read<GenericSearchBloc<T>>().add(SearchItemSelected<T>(item));
                     onItemSelected?.call(item);
                   },
