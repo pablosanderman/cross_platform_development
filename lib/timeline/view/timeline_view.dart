@@ -172,15 +172,19 @@ class _TimelineViewState extends State<TimelineView>
     final currentScale = currentMatrix.getMaxScaleOnAxis();
     final currentTranslation = currentMatrix.getTranslation();
 
-    // Calculate viewport width at current scale using actual timeline width
-    // Fall back to MediaQuery if _actualTimelineWidth is not available (shouldn't happen)
-    final timelineWidth = _actualTimelineWidth > 0
+    // Get the actual viewport width available to the timeline (accounts for split screen)
+    final currentViewportWidth = _actualTimelineWidth > 0
         ? _actualTimelineWidth
         : MediaQuery.of(context).size.width;
-    final viewportWidth = timelineWidth / currentScale;
 
-    // Position event at 1/3 from left edge of viewport (33.3% for better visual balance)
-    final targetTranslationX = -(eventPixelPosition - viewportWidth * (1 / 3));
+    // Calculate target screen position (1/3 from left edge for visual balance)
+    final targetScreenPosition = currentViewportWidth * (1 / 3);
+
+    // Calculate correct translation using transformation matrix mathematics:
+    // screen_x = (timeline_x × scale) + translation_x
+    // Therefore: translation_x = screen_x - (timeline_x × scale)
+    final targetTranslationX =
+        targetScreenPosition - (eventPixelPosition * currentScale);
 
     // Create target transformation matrix preserving current scale and vertical position
     final targetMatrix = Matrix4.identity()
@@ -305,11 +309,16 @@ class _TimelineDimensions {
     const periodEventFontWeight = FontWeight.w500;
     const groupEventFontWeight = FontWeight.w500;
 
-    // Timeline height based on actual row heights
-    final timelineHeight = rows.fold<double>(
+    // Timeline height based on actual row heights with extra padding for zoom-out
+    final baseTimelineHeight = rows.fold<double>(
       0.0,
       (sum, row) => sum + row.height,
     );
+
+    // Add significant padding to allow for more zoom-out flexibility
+    // This ensures users can always zoom out beyond the content bounds
+    final timelineHeight =
+        baseTimelineHeight * 2.0; // Double the height for zoom-out room
 
     return _TimelineDimensions._(
       visibleStart: visibleStart,
@@ -328,7 +337,7 @@ class _TimelineDimensions {
       eventPadding: eventPadding,
       eventBorderRadius: eventBorderRadius,
       eventOpacity: 0.9,
-      minScale: 0.2,
+      minScale: 0.1, // Allow more zoom-out
       maxScale: 4.0,
       defaultEventDuration: const Duration(hours: 2),
       memberCircleSize: memberCircleSize,
