@@ -1,5 +1,22 @@
-﻿abstract class NavigationEvent {}
+﻿
+abstract class NavigationEvent {
+  final bool forceNavigate;
+  NavigationEvent({this.forceNavigate = false});
+}
 
-class PlaceHolder extends NavigationEvent {}
-class ToggleTimeline extends NavigationEvent {} // These will be used to toggle the map/timeline
-class ToggleMap extends NavigationEvent {}
+class PlaceHolder extends NavigationEvent {
+  PlaceHolder() : super(forceNavigate: false);
+}
+
+class ToggleTimeline extends NavigationEvent {
+  ToggleTimeline({bool forceNavigate = false}) : super(forceNavigate: forceNavigate);
+}
+
+class ToggleMap extends NavigationEvent {
+  ToggleMap({bool forceNavigate = false}) : super(forceNavigate: forceNavigate);
+}
+
+class ChangePage extends NavigationEvent {
+  final int pageIndex;
+  ChangePage(this.pageIndex) : super(forceNavigate: true);
+}

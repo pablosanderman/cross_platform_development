@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
 
 /// {@template timeline_page}
@@ -12,9 +11,6 @@ class TimelinePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => TimelineCubit(),
-      child: const TimelineView(),
-    );
+    return const TimelineView();
   }
 }
