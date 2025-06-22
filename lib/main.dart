@@ -37,11 +37,7 @@ void main() {
   );
   doWhenWindowReady(() {
     final win = appWindow;
-    const initialSize = Size(750, 500);
-    win.minSize = initialSize;
-    win.size = initialSize;
-    win.alignment = Alignment.center;
-    win.title = "Custom window with Flutter";
+    win.title = "Volcano Monitoring Dashboard";
     win.show();
   });
 }
