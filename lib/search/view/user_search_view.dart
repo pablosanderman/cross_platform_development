@@ -24,7 +24,7 @@ class UserSearchView extends StatelessWidget {
 
         return GenericSearchBar<User>(
           loadItems: () => nonMembers,
-          filter: (user, query) => "${user.firstName} ${user.lastName}}".contains(query),
+          filter: (user, query) => "${user.firstName} ${user.lastName}".contains(query),
           itemBuilder: (user) {
             return Text("${user.firstName} ${user.lastName}");
           },
