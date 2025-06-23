@@ -1,6 +1,8 @@
 ﻿import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 enum GroupRoles { member, moderator, administrator, owner }
 
@@ -27,16 +29,18 @@ class Group {
     groupMemberIds[userID] = role;
   }
 
-  static List<User> getGroupMembers(Iterable<String> groupMemberIds, List<User> users) {
-    return users
-        .where((p) => groupMemberIds.contains(p.id))
-        .toList();
+  static List<User> getGroupMembers(
+    Iterable<String> groupMemberIds,
+    List<User> users,
+  ) {
+    return users.where((p) => groupMemberIds.contains(p.id)).toList();
   }
 
-  static List<User> getNonGroupMembers(Iterable<String> groupMemberIds, List<User> users) {
-    return users
-        .where((p) => !groupMemberIds.contains(p.id))
-        .toList();
+  static List<User> getNonGroupMembers(
+    Iterable<String> groupMemberIds,
+    List<User> users,
+  ) {
+    return users.where((p) => !groupMemberIds.contains(p.id)).toList();
   }
 
   void removeMember(String personId) {
@@ -63,7 +67,7 @@ class Group {
   // JSON deserialization
   factory Group.fromJson(Map<String, dynamic> json) {
     final groupMemberIds = <String, GroupRoles>{};
-    
+
     if (json['groupMemberIds'] != null) {
       final membersMap = Map<String, String>.from(json['groupMemberIds']);
       for (final entry in membersMap.entries) {
@@ -83,13 +87,17 @@ class Group {
     );
   }
 
-  // Get Groups.json file path
-  static String get _groupsFilePath => path.join(Directory.current.path, 'Groups.json');
+  // Get writable path for groups.json in app documents directory
+  static Future<String> get _groupsFilePath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return path.join(directory.path, 'groups.json');
+  }
 
   // Save single group to Groups.json
   static Future<void> saveGroupToFile(Group group) async {
     try {
-      final file = File(_groupsFilePath);
+      final filePath = await _groupsFilePath;
+      final file = File(filePath);
       final jsonString = jsonEncode(group.toJson());
       await file.writeAsString(jsonString);
     } catch (e) {
@@ -100,7 +108,8 @@ class Group {
   // Load single group from Groups.json - no personLookup needed!
   static Future<Group> loadGroupFromFile() async {
     try {
-      final file = File(_groupsFilePath);
+      final filePath = await _groupsFilePath;
+      final file = File(filePath);
       final jsonString = await file.readAsString();
       final json = jsonDecode(jsonString);
       return Group.fromJson(json);
@@ -112,7 +121,8 @@ class Group {
   // Save multiple groups to Groups.json
   static Future<void> saveGroupsToFile(List<Group> groups) async {
     try {
-      final file = File(_groupsFilePath);
+      final filePath = await _groupsFilePath;
+      final file = File(filePath);
       final jsonList = groups.map((group) => group.toJson()).toList();
       final jsonString = jsonEncode(jsonList);
       await file.writeAsString(jsonString);
@@ -121,21 +131,41 @@ class Group {
     }
   }
 
-  // Load multiple groups from Groups.json
+  // Load multiple groups (hybrid: writable file first, then assets)
   static Future<List<Group>> loadGroupsFromFile() async {
     try {
-      final file = File(_groupsFilePath);
-      if (!await file.exists()) {
-        return [];
+      // First try to load from writable location
+      final filePath = await _groupsFilePath;
+      final file = File(filePath);
+
+      if (await file.exists()) {
+        print("Loading groups from documents directory...");
+        final jsonString = await file.readAsString();
+        if (jsonString.isNotEmpty) {
+          final jsonList = List<dynamic>.from(jsonDecode(jsonString));
+          print("Loaded ${jsonList.length} groups from documents directory");
+          return jsonList.map((json) => Group.fromJson(json)).toList();
+        }
       }
-      final jsonString = await file.readAsString();
+
+      // Fall back to loading from assets
+      print("Loading groups from assets...");
+      final jsonString = await rootBundle.loadString('groups.json');
+      print(
+        "Loaded groups.json from assets, content length: ${jsonString.length}",
+      );
+
       if (jsonString.isEmpty) {
+        print("Groups file is empty, returning empty list");
         return [];
       }
+
       final jsonList = List<dynamic>.from(jsonDecode(jsonString));
+      print("Parsed ${jsonList.length} groups from JSON assets");
       return jsonList.map((json) => Group.fromJson(json)).toList();
     } catch (e) {
-      throw Exception('Failed to load groups from file: $e');
+      print("Exception in loadGroupsFromFile: $e");
+      throw Exception('Failed to load groups: $e');
     }
   }
 
@@ -143,7 +173,7 @@ class Group {
   static Future<void> addGroupToFile(Group group) async {
     try {
       List<Group> existingGroups = await loadGroupsFromFile();
-      
+
       if (!existingGroups.any((g) => g.id == group.id)) {
         existingGroups.add(group);
         await saveGroupsToFile(existingGroups);
@@ -214,12 +244,17 @@ class User {
     );
   }
 
-  static String get _usersFilePath => path.join(Directory.current.path, 'Users.json');
+  // Get writable path for users.json in app documents directory
+  static Future<String> get _usersFilePath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return path.join(directory.path, 'users.json');
+  }
 
   // Save single person to Users.json
   static Future<void> savePersonToFile(User person) async {
     try {
-      final file = File(_usersFilePath);
+      final filePath = await _usersFilePath;
+      final file = File(filePath);
       final jsonString = jsonEncode(person.toJson());
       await file.writeAsString(jsonString);
     } catch (e) {
@@ -230,7 +265,8 @@ class User {
   // Load single person from Users.json
   static Future<User> loadPersonFromFile() async {
     try {
-      final file = File(_usersFilePath);
+      final filePath = await _usersFilePath;
+      final file = File(filePath);
       final jsonString = await file.readAsString();
       final json = jsonDecode(jsonString);
       return User.fromJson(json);
@@ -242,7 +278,8 @@ class User {
   // Save multiple users to Users.json
   static Future<void> saveUsersToFile(List<User> users) async {
     try {
-      final file = File(_usersFilePath);
+      final filePath = await _usersFilePath;
+      final file = File(filePath);
       final jsonList = users.map((person) => person.toJson()).toList();
       final jsonString = jsonEncode(jsonList);
       await file.writeAsString(jsonString);
@@ -251,21 +288,41 @@ class User {
     }
   }
 
-  // Load multiple users from Users.json
+  // Load multiple users (hybrid: writable file first, then assets)
   static Future<List<User>> loadUsersFromFile() async {
     try {
-      final file = File(_usersFilePath);
-      if (!await file.exists()) {
-        return [];
+      // First try to load from writable location
+      final filePath = await _usersFilePath;
+      final file = File(filePath);
+
+      if (await file.exists()) {
+        print("Loading users from documents directory...");
+        final jsonString = await file.readAsString();
+        if (jsonString.isNotEmpty) {
+          final jsonList = List<dynamic>.from(jsonDecode(jsonString));
+          print("Loaded ${jsonList.length} users from documents directory");
+          return jsonList.map((json) => User.fromJson(json)).toList();
+        }
       }
-      final jsonString = await file.readAsString();
+
+      // Fall back to loading from assets
+      print("Loading users from assets...");
+      final jsonString = await rootBundle.loadString('users.json');
+      print(
+        "Loaded users.json from assets, content length: ${jsonString.length}",
+      );
+
       if (jsonString.isEmpty) {
+        print("Users file is empty, returning empty list");
         return [];
       }
+
       final jsonList = List<dynamic>.from(jsonDecode(jsonString));
+      print("Parsed ${jsonList.length} users from JSON assets");
       return jsonList.map((json) => User.fromJson(json)).toList();
     } catch (e) {
-      throw Exception('Failed to load users from file: $e');
+      print("Exception in loadUsersFromFile: $e");
+      throw Exception('Failed to load users: $e');
     }
   }
 
@@ -273,7 +330,7 @@ class User {
   static Future<void> addUserToFile(User person) async {
     try {
       List<User> existingusers = await loadUsersFromFile();
-      
+
       // Add new person (check for duplicates by ID)
       if (!existingusers.any((p) => p.id == person.id)) {
         existingusers.add(person);
@@ -286,7 +343,6 @@ class User {
 }
 
 class DataManager {
-
   static Future<void> saveAllData(List<User> users, List<Group> groups) async {
     try {
       await User.saveUsersToFile(users);
@@ -312,6 +368,13 @@ class DataManager {
     }
   }
 
-  static String get groupsFilePath => path.join(Directory.current.path, 'Groups.json');
-  static String get usersFilePath => path.join(Directory.current.path, 'Users.json');
+  static Future<String> get groupsFilePath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return path.join(directory.path, 'groups.json');
+  }
+
+  static Future<String> get usersFilePath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return path.join(directory.path, 'users.json');
+  }
 }

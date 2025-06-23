@@ -22,23 +22,12 @@ class GroupsView extends StatefulWidget {
 class _GroupsViewState extends State<GroupsView> {
   @override
   Widget build(BuildContext context) {
-    return BlocListener<GroupsBloc, GroupsState>(
-      listenWhen: (previous, current) =>
-          previous.users != current.users && current.users.isNotEmpty,
-      listener: (context, state) {
-        // //TODO: Needed to set loggedInUser hardcoded
-        final loggedInUser = state.users.firstWhere(
-          (p) => p.firstName == "Andrew",
-        );
-        FakeAccount.loggedInUser = loggedInUser;
-            },
-      child: Expanded(
-        child: Row(
-          children: [
-            Expanded(flex: 1, child: LeftSide()),
-            Expanded(flex: 3, child: RightSide()),
-          ],
-        ),
+    return Expanded(
+      child: Row(
+        children: [
+          Expanded(flex: 1, child: LeftSide()),
+          Expanded(flex: 3, child: RightSide()),
+        ],
       ),
     );
   }
@@ -79,51 +68,61 @@ class LeftSide extends StatelessWidget {
               builder: (context, groupState) {
                 return ListView(
                   children: groupState.groups
-                      .where((group) =>
-                          FakeAccount.loggedInUser != null &&
-                          group.groupMemberIds.keys
-                              .contains(FakeAccount.loggedInUser?.id))
+                      .where(
+                        (group) =>
+                            FakeAccount.loggedInUser != null &&
+                            group.groupMemberIds.keys.contains(
+                              FakeAccount.loggedInUser?.id,
+                            ),
+                      )
                       .map((group) {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: ListTile(
-                            title: Text(group.name),
-                            onTap: () {
-                              context.read<GroupsBloc>().add(
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: ListTile(
+                                title: Text(group.name),
+                                onTap: () {
+                                  context.read<GroupsBloc>().add(
                                     ChooseGroup(group),
                                   );
-                            },
-                          ),
-                        ),
-                        Column(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.logout),
-                              onPressed: () {
-                                if (FakeAccount.loggedInUser != null) {
-                                  context.read<GroupsBloc>().add(RemoveMember(
-                                      group.id, FakeAccount.loggedInUser!));
-                                }
-                              },
+                                },
+                              ),
                             ),
-                            const Text("Leave"),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                context.read<GroupsBloc>().add(DeleteGroup(group.id));
-                              },
+                            Column(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.logout),
+                                  onPressed: () {
+                                    if (FakeAccount.loggedInUser != null) {
+                                      context.read<GroupsBloc>().add(
+                                        RemoveMember(
+                                          group.id,
+                                          FakeAccount.loggedInUser!,
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                                const Text("Leave"),
+                              ],
                             ),
-                            const Text("Delete"),
+                            Column(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    context.read<GroupsBloc>().add(
+                                      DeleteGroup(group.id),
+                                    );
+                                  },
+                                ),
+                                const Text("Delete"),
+                              ],
+                            ),
                           ],
-                        )
-                      ],
-                    );
-                  }).toList(),
+                        );
+                      })
+                      .toList(),
                 );
               },
             ),
@@ -237,9 +236,9 @@ class RightSide extends StatelessWidget {
                                       newRole: value,
                                     ),
                                   );
-                                  print("Changing role From: ${groupState
-                                      .chosenGroup
-                                      ?.groupMemberIds[user.id]?.name} To: ${value.name}");
+                                  print(
+                                    "Changing role From: ${groupState.chosenGroup?.groupMemberIds[user.id]?.name} To: ${value.name}",
+                                  );
                                 }
                               },
                             ),
@@ -247,7 +246,10 @@ class RightSide extends StatelessWidget {
                               icon: Icon(Icons.person_remove),
                               onPressed: () => {
                                 context.read<GroupsBloc>().add(
-                                  RemoveMember(groupState.chosenGroup!.id, user),
+                                  RemoveMember(
+                                    groupState.chosenGroup!.id,
+                                    user,
+                                  ),
                                 ),
                               },
                             ),
@@ -305,7 +307,9 @@ class RightSide extends StatelessWidget {
                     print(
                       'Adding member: ${selectedUser?.firstName} ${selectedUser?.lastName} To: ${currentGroup?.name}',
                     );
-                    context.read<GroupsBloc>().add(AddMember(currentGroup!, selectedUser!));
+                    context.read<GroupsBloc>().add(
+                      AddMember(currentGroup!, selectedUser!),
+                    );
                   }
 
                   Group.saveGroupsToFile(
