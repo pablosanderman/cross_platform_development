@@ -93,14 +93,8 @@ class EventDetailsPanel extends StatelessWidget {
                     color: Colors.black87,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatEventTime(event),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
+                                 const SizedBox(height: 4),
+                 _buildEventTimeDisplay(event),
               ],
             ),
           ),
@@ -587,6 +581,168 @@ class EventDetailsPanel extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildEventTimeDisplay(Event event) {
+    switch (event.type) {
+      case EventType.point:
+        return Text(
+          _formatEventTime(event),
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade600,
+          ),
+        );
+      case EventType.period:
+        return _buildMiniTimeline(event);
+      case EventType.grouped:
+        return Text(
+          _formatEventTime(event),
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade600,
+          ),
+        );
+    }
+  }
+
+  Widget _buildMiniTimeline(Event event) {
+    final startTime = event.effectiveStartTime;
+    final endTime = event.effectiveEndTime;
+    
+    final startFormatter = DateFormat('MMM dd, HH:mm');
+    final endFormatter = DateFormat('MMM dd, HH:mm');
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.schedule, size: 16, color: Colors.blue.shade700),
+              const SizedBox(width: 6),
+              Text(
+                'Event Duration',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue.shade700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              // Start time
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'START',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    startFormatter.format(startTime),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(width: 12),
+              
+              // Timeline visualization
+              Expanded(
+                child: Column(
+                  children: [
+                    // Timeline bar
+                    Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.green.shade400, Colors.red.shade400],
+                          stops: const [0.0, 1.0],
+                        ),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Duration text
+                    Text(
+                      _formatDuration(event.duration),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade600,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(width: 12),
+              
+              // End time
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    endTime != null ? 'END' : 'ONGOING',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    endTime != null 
+                        ? endFormatter.format(endTime)
+                        : 'Active',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: endTime != null ? Colors.black87 : Colors.orange.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDuration(Duration? duration) {
+    if (duration == null) return 'Ongoing';
+    
+    final days = duration.inDays;
+    final hours = duration.inHours % 24;
+    final minutes = duration.inMinutes % 60;
+    
+    if (days > 0) {
+      return '${days}d ${hours}h';
+    } else if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    } else {
+      return '${minutes}m';
+    }
   }
 
   String _formatEventTime(Event event) {

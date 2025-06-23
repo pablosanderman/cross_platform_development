@@ -77,10 +77,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     final previousShowTimeline = state.showTimeline;
     final previousShowMap = state.showMap;
     
-    // Ensure we're on the timeline/map page and both views are visible for overlay
+    // Preserve current layout - don't force both views to be visible
     emit(state.copyWith(
-      showTimeline: true,
-      showMap: true,
       currentPageIndex: 0,
       selectedEventForDetails: event.event,
       detailsSource: event.source,

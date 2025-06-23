@@ -131,49 +131,57 @@ class MyApp extends StatelessWidget {
     double availableWidth,
     double availableHeight,
   ) {
-    final halfWidth = availableWidth / 2;
+    // Handle different layout scenarios
+    final bothVisible = navState.showTimeline && navState.showMap;
+    final timelineOnly = navState.showTimeline && !navState.showMap;
+    final mapOnly = !navState.showTimeline && navState.showMap;
     
-    // Determine overlay position based on details source
-    if (navState.detailsSource == EventDetailsSource.timeline) {
-      // Timeline source: Show event details on right side (over map area)
-      return Positioned(
-        left: halfWidth,
-        top: 0,
-        width: halfWidth,
-        height: availableHeight,
-        child: Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 10,
-                offset: const Offset(-2, 0),
-              ),
-            ],
-          ),
-          child: const EventDetailsPanel(),
-        ),
-      );
+    double overlayLeft;
+    double overlayWidth;
+    
+    if (bothVisible) {
+      // Split screen mode
+      final halfWidth = availableWidth / 2;
+      if (navState.detailsSource == EventDetailsSource.timeline) {
+        // Timeline source: Show event details on right side (over map area)
+        overlayLeft = halfWidth;
+        overlayWidth = halfWidth;
+      } else {
+        // Map source: Show event details on left side (over timeline area)
+        overlayLeft = 0;
+        overlayWidth = halfWidth;
+      }
+    } else if (timelineOnly) {
+      // Full screen timeline
+      overlayLeft = availableWidth * 0.4; // Start at 40% from left
+      overlayWidth = availableWidth * 0.6; // Take 60% of width
+    } else if (mapOnly) {
+      // Full screen map
+      overlayLeft = 0;
+      overlayWidth = availableWidth * 0.6; // Take 60% of width
     } else {
-      // Map source: Show event details on left side (over timeline area)
-      return Positioned(
-        left: 0,
-        top: 0,
-        width: halfWidth,
-        height: availableHeight,
-        child: Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 10,
-                offset: const Offset(2, 0),
-              ),
-            ],
-          ),
-          child: const EventDetailsPanel(),
-        ),
-      );
+      // Fallback - shouldn't happen
+      overlayLeft = availableWidth * 0.3;
+      overlayWidth = availableWidth * 0.7;
     }
+    
+    return Positioned(
+      left: overlayLeft,
+      top: 0,
+      width: overlayWidth,
+      height: availableHeight,
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: Offset(overlayLeft > 0 ? -2 : 2, 0),
+            ),
+          ],
+        ),
+        child: const EventDetailsPanel(),
+      ),
+    );
   }
 }
