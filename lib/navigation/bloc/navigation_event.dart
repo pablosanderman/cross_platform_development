@@ -1,4 +1,4 @@
-﻿abstract class NavigationEvent {
+abstract class NavigationEvent {
   final bool forceNavigate;
   NavigationEvent({this.forceNavigate = false});
 }

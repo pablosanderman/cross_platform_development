@@ -1,6 +1,7 @@
 ﻿import 'package:cross_platform_development/navigation/navigation.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:cross_platform_development/search/search.dart';
+import 'package:cross_platform_development/search/search.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
@@ -92,6 +93,32 @@ class NavigationView extends StatelessWidget {
     );
   }
 
+  Widget buildNavButton(
+    BuildContext context,
+    String label, {
+    required VoidCallback onPressed,
+    bool isSelected = false,
+  }) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.grey[300] : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.black : Colors.grey[600],
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ),
+      ),
   Widget buildNavButton(
     BuildContext context,
     String label, {

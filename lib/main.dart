@@ -1,11 +1,15 @@
 import 'package:cross_platform_development/app_observer.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
+import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'groups/bloc/groups_bloc.dart';
 import 'groups/groups.dart';
+import 'groups/bloc/groups_bloc.dart';
+import 'groups/groups.dart';
 import 'navigation/navigation.dart';
+import 'navigation/nav_item/nav_item.dart';
 import 'navigation/nav_item/nav_item.dart';
 import 'app.dart';
 import 'map/map.dart';
