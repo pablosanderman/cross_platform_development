@@ -32,14 +32,8 @@ class MyApp extends StatelessWidget {
                         builder: (context, constraints) {
                           final availableWidth = constraints.maxWidth;
                           
-                          // Handle event details mode
-                          if (navState.showEventDetails) {
-                            return _buildEventDetailsLayout(
-                              navState, 
-                              availableWidth, 
-                              constraints.maxHeight,
-                            );
-                          }
+                          // Always build the standard timeline/map layout
+                          // Event details will be shown as overlay if needed
                           
                           // Standard timeline/map layout
                           final bothVisible = navState.showTimeline && navState.showMap;
@@ -98,6 +92,13 @@ class MyApp extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                              // Event details overlay
+                              if (navState.showEventDetails)
+                                _buildEventDetailsOverlay(
+                                  navState,
+                                  availableWidth,
+                                  constraints.maxHeight,
+                                ),
                             ],
                           );
                         },
@@ -124,58 +125,54 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  /// Build the layout for event details mode
-  Widget _buildEventDetailsLayout(
+  /// Build the event details overlay
+  Widget _buildEventDetailsOverlay(
     NavigationState navState,
     double availableWidth,
     double availableHeight,
   ) {
     final halfWidth = availableWidth / 2;
     
-    // Determine layout based on details source
+    // Determine overlay position based on details source
     if (navState.detailsSource == EventDetailsSource.timeline) {
-      // Timeline source: Show timeline on left, event details on right
-      return Stack(
-        children: [
-          // Timeline on the left
-          Positioned(
-            left: 0,
-            top: 0,
-            width: halfWidth,
-            height: availableHeight,
-            child: const TimelinePage(),
+      // Timeline source: Show event details on right side (over map area)
+      return Positioned(
+        left: halfWidth,
+        top: 0,
+        width: halfWidth,
+        height: availableHeight,
+        child: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 10,
+                offset: const Offset(-2, 0),
+              ),
+            ],
           ),
-          // Event details on the right
-          Positioned(
-            left: halfWidth,
-            top: 0,
-            width: halfWidth,
-            height: availableHeight,
-            child: const EventDetailsPanel(),
-          ),
-        ],
+          child: const EventDetailsPanel(),
+        ),
       );
     } else {
-      // Map source: Show event details on left, map on right
-      return Stack(
-        children: [
-          // Event details on the left
-          Positioned(
-            left: 0,
-            top: 0,
-            width: halfWidth,
-            height: availableHeight,
-            child: const EventDetailsPanel(),
+      // Map source: Show event details on left side (over timeline area)
+      return Positioned(
+        left: 0,
+        top: 0,
+        width: halfWidth,
+        height: availableHeight,
+        child: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 10,
+                offset: const Offset(2, 0),
+              ),
+            ],
           ),
-          // Map on the right
-          Positioned(
-            left: halfWidth,
-            top: 0,
-            width: halfWidth,
-            height: availableHeight,
-            child: const MapPage(),
-          ),
-        ],
+          child: const EventDetailsPanel(),
+        ),
       );
     }
   }

@@ -74,10 +74,7 @@ class _MapViewState extends State<MapView> {
               isSelected: timelineState.selectedEvent?.id == firstEvent.id,
               isHighlighted: mapState.highlightedEvent?.id == firstEvent.id,
               onTap: () {
-                // Show event details panel
-                context.read<NavigationBloc>().add(
-                  ShowEventDetails(firstEvent, EventDetailsSource.map),
-                );
+                context.read<MapCubit>().showEventPopup(firstEvent);
               },
               onHover: () {
                 context.read<MapCubit>().hoverMapEvent(firstEvent);
@@ -102,10 +99,7 @@ class _MapViewState extends State<MapView> {
                 (e) => mapState.highlightedEvent?.id == e.id,
               ),
               onTap: () {
-                // For clusters, show details of the first event
-                context.read<NavigationBloc>().add(
-                  ShowEventDetails(events.first, EventDetailsSource.map),
-                );
+                context.read<MapCubit>().showClusterPopup(events);
               },
               onHover: () {
                 // For clusters, don't highlight any specific timeline event

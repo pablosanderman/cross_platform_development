@@ -8,6 +8,10 @@ class NavigationState {
   final int currentPageIndex;
   final Event? selectedEventForDetails;
   final EventDetailsSource? detailsSource;
+  
+  // Store the previous state before showing event details
+  final bool? previousShowTimeline;
+  final bool? previousShowMap;
 
   NavigationState({
     required this.showTimeline,
@@ -15,6 +19,8 @@ class NavigationState {
     required this.currentPageIndex,
     this.selectedEventForDetails,
     this.detailsSource,
+    this.previousShowTimeline,
+    this.previousShowMap,
   });
 
   /// Checks if event details panel should be shown
@@ -29,6 +35,8 @@ class NavigationState {
     int? currentPageIndex,
     Event? selectedEventForDetails,
     EventDetailsSource? detailsSource,
+    bool? previousShowTimeline,
+    bool? previousShowMap,
     bool clearEventDetails = false,
   }) {
     return NavigationState(
@@ -37,6 +45,8 @@ class NavigationState {
       currentPageIndex: currentPageIndex ?? this.currentPageIndex,
       selectedEventForDetails: clearEventDetails ? null : (selectedEventForDetails ?? this.selectedEventForDetails),
       detailsSource: clearEventDetails ? null : (detailsSource ?? this.detailsSource),
+      previousShowTimeline: clearEventDetails ? null : (previousShowTimeline ?? this.previousShowTimeline),
+      previousShowMap: clearEventDetails ? null : (previousShowMap ?? this.previousShowMap),
     );
   }
 }

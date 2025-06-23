@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:cross_platform_development/map/map.dart';
 import 'package:cross_platform_development/shared/shared.dart';
+import 'package:cross_platform_development/navigation/navigation.dart';
 
 /// {@template event_popup}
 /// A popup widget that displays event details in a bottom-centered floating overlay.
@@ -136,21 +137,30 @@ class EventPopup extends StatelessWidget {
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Image placeholder
-                                    Container(
-                                      width: 120,
-                                      height: 80,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[200],
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: Colors.grey[300]!,
+                                    // Clickable image placeholder
+                                    GestureDetector(
+                                      onTap: () {
+                                        // Close popup and show event details
+                                        context.read<MapCubit>().closePopup();
+                                        context.read<NavigationBloc>().add(
+                                          ShowEventDetails(currentEvent, EventDetailsSource.map),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 120,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: Colors.grey[300]!,
+                                          ),
                                         ),
-                                      ),
-                                      child: const Icon(
-                                        Icons.image,
-                                        size: 40,
-                                        color: Colors.grey,
+                                        child: const Icon(
+                                          Icons.image,
+                                          size: 40,
+                                          color: Colors.grey,
+                                        ),
                                       ),
                                     ),
 
@@ -162,12 +172,23 @@ class EventPopup extends StatelessWidget {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          // Title
-                                          Text(
-                                            currentEvent.title,
-                                            style: const TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold,
+                                          // Clickable title
+                                          GestureDetector(
+                                            onTap: () {
+                                              // Close popup and show event details
+                                              context.read<MapCubit>().closePopup();
+                                              context.read<NavigationBloc>().add(
+                                                ShowEventDetails(currentEvent, EventDetailsSource.map),
+                                              );
+                                            },
+                                            child: Text(
+                                              currentEvent.title,
+                                              style: const TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.blue,
+                                                decoration: TextDecoration.underline,
+                                              ),
                                             ),
                                           ),
 

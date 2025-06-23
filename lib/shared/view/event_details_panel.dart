@@ -76,21 +76,6 @@ class EventDetailsPanel extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Close button
-          IconButton(
-            onPressed: () {
-              context.read<NavigationBloc>().add(CloseEventDetails());
-            },
-            icon: const Icon(Icons.close),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.grey.shade200,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          
           // Event type badge
           _buildEventTypeBadge(event.type),
           const SizedBox(width: 12),
@@ -117,6 +102,21 @@ class EventDetailsPanel extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+          
+          const SizedBox(width: 12),
+          // Close button on the right
+          IconButton(
+            onPressed: () {
+              context.read<NavigationBloc>().add(CloseEventDetails());
+            },
+            icon: const Icon(Icons.close),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.grey.shade200,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
         ],
