@@ -75,8 +75,8 @@ class _EventVisibilityPanelState extends State<EventVisibilityPanel> {
         child: Stack(
           children: [
             Positioned(
-              top: 80,
-              right: 16,
+              bottom: 72, // FAB height (56) + FAB bottom margin (16) = 72
+              right: 72,  // FAB width (56) + FAB right margin (16) = 72 (positions panel to left of FAB)
               child: GestureDetector(
                 onTap: () {}, // Prevent closing when tapping on the panel
                 child: _buildPanel(context),
