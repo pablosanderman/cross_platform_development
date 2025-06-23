@@ -15,6 +15,7 @@ class ComparisonResultsPage extends StatelessWidget {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
+        automaticallyImplyLeading: false, // Remove back button
         actions: [
           IconButton(
             onPressed: () => Navigator.of(context).pop(),

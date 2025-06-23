@@ -951,17 +951,10 @@ class _EventBoxState extends State<_EventBox> {
                     final isInComparison = comparisonState.isEventInComparison(widget.event.id);
                     final isAtMaxCapacity = comparisonState.isAtMaxCapacity;
                     
-                    return GestureDetector(
-                      onTap: isInComparison || isAtMaxCapacity ? null : () {
-                        context.read<ComparisonBloc>().add(AddEventToComparison(widget.event));
-                        // Show brief feedback
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added "${widget.event.title}" to comparison'),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      },
+                                         return GestureDetector(
+                       onTap: isInComparison || isAtMaxCapacity ? null : () {
+                         context.read<ComparisonBloc>().add(AddEventToComparison(widget.event));
+                       },
                       child: Material(
                         elevation: 4,
                         borderRadius: BorderRadius.circular(16),
@@ -1062,12 +1055,6 @@ class _EventBoxState extends State<_EventBox> {
             
             if (!state.isEventInComparison(widget.event.id) && !state.isAtMaxCapacity) {
               comparisonBloc.add(AddEventToComparison(widget.event));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Added "${widget.event.title}" to comparison'),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
             }
           },
         ),

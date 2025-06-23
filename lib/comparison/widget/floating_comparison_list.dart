@@ -75,50 +75,48 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Header
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.compare_arrows,
-                          color: Colors.blue.shade700,
-                          size: 20,
+                  GestureDetector(
+                    onTap: _toggleExpanded,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            state.isEmpty
-                                ? 'Compare list'
-                                : '${state.comparisonCount} Items - Compare list',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.blue.shade700,
-                              fontSize: 14,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.compare_arrows,
+                            color: Colors.blue.shade700,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              state.isEmpty
+                                  ? 'Compare list'
+                                  : '${state.comparisonCount} Items - Compare list',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue.shade700,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
-                        ),
-                        IconButton(
-                          icon: AnimatedRotation(
+                          AnimatedRotation(
                             duration: const Duration(milliseconds: 300),
                             turns: _isExpanded ? 0.5 : 0,
-                            child: const Icon(Icons.expand_more),
+                            child: Icon(
+                              Icons.expand_more,
+                              color: Colors.blue.shade700,
+                              size: 20,
+                            ),
                           ),
-                          onPressed: _toggleExpanded,
-                          iconSize: 20,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 24,
-                            minHeight: 24,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   // Expandable content
