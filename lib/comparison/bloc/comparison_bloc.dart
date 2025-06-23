@@ -148,12 +148,7 @@ class ComparisonBloc extends Bloc<ComparisonEvent, ComparisonState> {
   ) {
     final query = event.query.toLowerCase().trim();
     
-    // Update search query regardless
-    emit(state.copyWith(
-      searchQuery: query,
-      searchResults: query.isEmpty ? [] : state.searchResults,
-    ));
-    
+    // If query is empty, just clear results
     if (query.isEmpty) {
       emit(state.copyWith(
         searchQuery: query,
@@ -162,8 +157,9 @@ class ComparisonBloc extends Bloc<ComparisonEvent, ComparisonState> {
       return;
     }
     
-    // If allEvents is empty, try to load them first
+    // If allEvents is empty, try to load them first then search
     if (state.allEvents.isEmpty) {
+      emit(state.copyWith(searchQuery: query)); // Update query first
       add(const LoadEventsForComparison());
       return;
     }

@@ -138,7 +138,7 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
                         ],
                       ),
                       // Search results dropdown (positioned absolutely)
-                      if (state.searchQuery.isNotEmpty && state.searchResults.isNotEmpty)
+                      if (state.searchQuery.isNotEmpty && state.searchResults.isNotEmpty) ...[
                         Positioned(
                           top: 52, // Just below the search field
                           left: 0,
@@ -173,6 +173,7 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
                             ),
                           ),
                         ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 40),
