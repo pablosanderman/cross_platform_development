@@ -119,32 +119,6 @@ class NavigationView extends StatelessWidget {
           ),
         ),
       ),
-  Widget buildNavButton(
-    BuildContext context,
-    String label, {
-    required VoidCallback onPressed,
-    bool isSelected = false,
-  }) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.grey[300] : Colors.transparent,
-            borderRadius: BorderRadius.circular(9),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.black : Colors.grey[600],
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

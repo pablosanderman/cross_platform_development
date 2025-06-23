@@ -1,4 +1,6 @@
-﻿import 'package:cross_platform_development/HandleFakeAccount.dart';
+﻿import 'dart:io';
+
+import 'package:cross_platform_development/HandleFakeAccount.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
@@ -83,6 +85,19 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     try {
       final users = await User.loadUsersFromFile();
       emit(state.copyWith(users: users));
+
+      // Set the logged-in user after users are loaded
+      if (users.isNotEmpty && FakeAccount.loggedInUser == null) {
+        final loggedInUser = users.firstWhere(
+          (p) => p.firstName == "Andrew",
+          orElse: () =>
+              users.first, // Fallback to first user if Andrew not found
+        );
+        FakeAccount.loggedInUser = loggedInUser;
+        print(
+          'Logged in user set to: ${loggedInUser.firstName} ${loggedInUser.lastName}',
+        );
+      }
     } catch (e) {
       // Handle error appropriately
       print('Error loading users: $e');
@@ -105,7 +120,21 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     emit(state.copyWith(chosenGroup: event.chosenGroup));
   }
 
-  void _handleCreateGroup(CreateGroup event, Emitter<GroupsState> emit) {
+  Future<void> _handleCreateGroup(
+    CreateGroup event,
+    Emitter<GroupsState> emit,
+  ) async {
+    // If no logged in user and no users loaded, try to load users first
+    if (FakeAccount.loggedInUser == null && state.users.isEmpty) {
+      print("No users loaded, loading users first...");
+      await _loadUsers(LoadUsers(), emit);
+    }
+
+    if (FakeAccount.loggedInUser == null) {
+      print("No LoggedInUser found, cannot create group");
+      return;
+    }
+
     var uuid = Uuid();
     Group group = Group(
       id: uuid.v4(),
