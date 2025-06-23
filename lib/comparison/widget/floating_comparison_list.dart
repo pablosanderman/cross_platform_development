@@ -62,14 +62,14 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
           bottom: 20,
           right: 20,
           child: Material(
-            elevation: 8,
-            borderRadius: BorderRadius.circular(12),
+            elevation: 2,
+            borderRadius: BorderRadius.circular(4),
             child: Container(
               width: 320,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.grey.shade300, width: 1),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -79,29 +79,16 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
                     onTap: _toggleExpanded,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                      ),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.compare_arrows,
-                            color: Colors.blue.shade700,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               state.isEmpty
                                   ? 'Compare list'
-                                  : '${state.comparisonCount} Items - Compare list',
+                                  : '${state.comparisonCount} Items – Compare list',
                               style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blue.shade700,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade800,
                                 fontSize: 14,
                               ),
                             ),
@@ -110,8 +97,8 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
                             duration: const Duration(milliseconds: 300),
                             turns: _isExpanded ? 0.5 : 0,
                             child: Icon(
-                              Icons.expand_more,
-                              color: Colors.blue.shade700,
+                              Icons.keyboard_arrow_down,
+                              color: Colors.grey.shade600,
                               size: 20,
                             ),
                           ),
@@ -136,69 +123,30 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (state.isEmpty) ...[
-                            // Empty state
-                            Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.compare_arrows_outlined,
-                                    size: 48,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'No events to compare',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Add events to start comparing',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade500,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      context.read<ComparisonBloc>().add(
-                                            const ShowComparisonSelectionOverlay(),
-                                          );
-                                    },
-                                    icon: const Icon(Icons.add, size: 16),
-                                    label: const Text('Add Events'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.blue,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 8,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          // Events list (always show, even if empty)
+                          if (state.comparisonList.isNotEmpty) ...[
+                            // Divider after header
+                            Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: Colors.grey.shade300,
                             ),
-                          ] else ...[
-                            // Events list
+                            // Events
                             Flexible(
                               child: ListView.separated(
                                 shrinkWrap: true,
-                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                padding: EdgeInsets.zero,
                                 itemCount: state.comparisonList.length,
                                 separatorBuilder: (context, index) => Divider(
                                   height: 1,
-                                  color: Colors.grey.shade200,
+                                  thickness: 1,
+                                  color: Colors.grey.shade300,
+                                  indent: 16,
+                                  endIndent: 16,
                                 ),
                                 itemBuilder: (context, index) {
                                   final item = state.comparisonList[index];
-                                  return _ComparisonListItem(
+                                  return _FlatComparisonListItem(
                                     item: item,
                                     onRemove: () {
                                       context.read<ComparisonBloc>().add(
@@ -209,45 +157,67 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
                                 },
                               ),
                             ),
-                            // Action buttons
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: OutlinedButton.icon(
-                                      onPressed: () {
-                                        context.read<ComparisonBloc>().add(
-                                              const ShowComparisonSelectionOverlay(),
-                                            );
-                                      },
-                                      icon: const Icon(Icons.add, size: 16),
-                                      label: const Text('Add More'),
-                                      style: OutlinedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(vertical: 8),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: state.canCompare
-                                          ? () {
-                                              Navigator.of(context).pushNamed('/comparison');
-                                            }
-                                          : null,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blue,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(vertical: 8),
-                                      ),
-                                      child: const Text('Compare'),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ],
+                          
+                          // Action buttons (always show at bottom)
+                          if (state.comparisonList.isNotEmpty) 
+                            Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: Colors.grey.shade300,
+                            ),
+                          Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () {
+                                      context.read<ComparisonBloc>().add(
+                                            const ShowComparisonSelectionOverlay(),
+                                          );
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                      side: BorderSide(color: Colors.grey.shade400),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Add More',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade700,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: state.canCompare
+                                        ? () {
+                                            Navigator.of(context).pushNamed('/comparison');
+                                          }
+                                        : null,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: state.canCompare ? Colors.blue : Colors.grey.shade400,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Compare',
+                                      style: TextStyle(fontSize: 13),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -262,11 +232,11 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
   }
 }
 
-class _ComparisonListItem extends StatelessWidget {
+class _FlatComparisonListItem extends StatelessWidget {
   final ComparisonEventItem item;
   final VoidCallback onRemove;
 
-  const _ComparisonListItem({
+  const _FlatComparisonListItem({
     required this.item,
     required this.onRemove,
   });
@@ -274,16 +244,16 @@ class _ComparisonListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          // Event type indicator
+          // Small colored dot
           Container(
-            width: 6,
-            height: 40,
+            width: 8,
+            height: 8,
             decoration: BoxDecoration(
               color: _getEventTypeColor(item.event.type),
-              borderRadius: BorderRadius.circular(3),
+              shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 12),
@@ -294,11 +264,12 @@ class _ComparisonListItem extends StatelessWidget {
               children: [
                 Text(
                   item.event.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 13,
+                    color: Colors.grey.shade800,
                   ),
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
@@ -314,17 +285,17 @@ class _ComparisonListItem extends StatelessWidget {
               ],
             ),
           ),
-          // Remove button
-          IconButton(
-            onPressed: onRemove,
-            icon: const Icon(Icons.close),
-            iconSize: 16,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 24,
-              minHeight: 24,
+          // Remove button (right-aligned)
+          GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              child: Icon(
+                Icons.close,
+                size: 16,
+                color: Colors.grey.shade500,
+              ),
             ),
-            color: Colors.grey.shade600,
           ),
         ],
       ),

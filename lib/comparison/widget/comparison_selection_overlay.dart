@@ -447,65 +447,65 @@ class _RecentlyViewedCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(8), // Reduced padding
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min, // Important: don't take more space than needed
+        padding: const EdgeInsets.all(8),
+        child: Stack(
           children: [
-            // Event title at top
-            Flexible(
-              child: Text(
-                event.title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12, // Reduced font size
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(height: 8), // Fixed spacing instead of Spacer
-            // Placeholder image in center
-            Center(
-              child: Container(
-                width: 50, // Reduced size
-                height: 30, // Reduced size
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade600,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Icon(
-                  Icons.image,
-                  color: Colors.grey.shade400,
-                  size: 20, // Reduced icon size
-                ),
-              ),
-            ),
-            const SizedBox(height: 8), // Fixed spacing instead of Spacer
-            // + button at bottom right
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Event title at top left
+                Text(
+                  event.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const Spacer(),
-                GestureDetector(
-                  onTap: isInComparison || isAtMaxCapacity ? null : onAdd,
+                // Placeholder image in center
+                Center(
                   child: Container(
-                    width: 24,
-                    height: 24,
+                    width: 50,
+                    height: 30,
                     decoration: BoxDecoration(
-                      color: isInComparison 
-                          ? Colors.green 
-                          : (isAtMaxCapacity ? Colors.grey : const Color(0xFF69A8F8)),
-                      shape: BoxShape.circle,
+                      color: Colors.grey.shade600,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Icon(
-                      isInComparison ? Icons.check : Icons.add,
-                      color: Colors.white,
-                      size: 16,
+                      Icons.image,
+                      color: Colors.grey.shade400,
+                      size: 20,
                     ),
                   ),
                 ),
+                const Spacer(),
               ],
+            ),
+            // + button at bottom right (positioned absolutely)
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: isInComparison || isAtMaxCapacity ? null : onAdd,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: isInComparison 
+                        ? Colors.green 
+                        : (isAtMaxCapacity ? Colors.grey : const Color(0xFF69A8F8)),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isInComparison ? Icons.check : Icons.add,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

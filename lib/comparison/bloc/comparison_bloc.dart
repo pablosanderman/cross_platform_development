@@ -111,6 +111,11 @@ class ComparisonBloc extends Bloc<ComparisonEvent, ComparisonState> {
       searchResults: [],
       recentlyViewedEvents: _recentlyViewedService.recentEvents,
     ));
+    
+    // Ensure events are loaded when overlay is shown
+    if (state.allEvents.isEmpty) {
+      add(const LoadEventsForComparison());
+    }
   }
   
   void _onHideComparisonSelectionOverlay(
@@ -143,11 +148,23 @@ class ComparisonBloc extends Bloc<ComparisonEvent, ComparisonState> {
   ) {
     final query = event.query.toLowerCase().trim();
     
+    // Update search query regardless
+    emit(state.copyWith(
+      searchQuery: query,
+      searchResults: query.isEmpty ? [] : state.searchResults,
+    ));
+    
     if (query.isEmpty) {
       emit(state.copyWith(
         searchQuery: query,
         searchResults: [],
       ));
+      return;
+    }
+    
+    // If allEvents is empty, try to load them first
+    if (state.allEvents.isEmpty) {
+      add(const LoadEventsForComparison());
       return;
     }
     
@@ -184,6 +201,11 @@ class ComparisonBloc extends Bloc<ComparisonEvent, ComparisonState> {
         allEvents: events,
         recentlyViewedEvents: _recentlyViewedService.recentEvents,
       ));
+      
+      // If there's an active search query, re-run the search with loaded events
+      if (state.searchQuery.isNotEmpty) {
+        add(SearchEventsForComparison(state.searchQuery));
+      }
     } catch (error) {
       emit(state.copyWith(
         status: ComparisonStatus.error,
