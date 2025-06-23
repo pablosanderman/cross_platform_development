@@ -1,5 +1,4 @@
-﻿import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/generic_search_bloc.dart';
@@ -36,7 +35,6 @@ class GenericSearchBar<T> extends StatelessWidget {
       },
       child: BlocBuilder<GenericSearchBloc<T>, GenericSearchState<T>>(
         builder: (searchbloc, searchState) {
-
           return SearchAnchor(
             builder: (BuildContext context, SearchController controller) {
               return SearchBar(
@@ -49,23 +47,27 @@ class GenericSearchBar<T> extends StatelessWidget {
                 leading: leadingIcon,
               );
             },
-            suggestionsBuilder: (
-                BuildContext context, SearchController controller) async {
-              final String input = controller.text;
-              final filteredItems = this.loadItems()
-                  .where((item) => filter(item, input)).toList();
+            suggestionsBuilder:
+                (BuildContext context, SearchController controller) async {
+                  final String input = controller.text;
+                  final filteredItems = this
+                      .loadItems()
+                      .where((item) => filter(item, input))
+                      .toList();
 
-              return filteredItems.map((item) {
-                return ListTile(
-                  title: itemBuilder(item),
-                  onTap: () {
-                    controller.closeView(itemTitle(item));
-                    searchbloc.read<GenericSearchBloc<T>>().add(SearchItemSelected<T>(item));
-                    onItemSelected?.call(item);
-                  },
-                );
-              }).toList();
-            },
+                  return filteredItems.map((item) {
+                    return ListTile(
+                      title: itemBuilder(item),
+                      onTap: () {
+                        controller.closeView(itemTitle(item));
+                        searchbloc.read<GenericSearchBloc<T>>().add(
+                          SearchItemSelected<T>(item),
+                        );
+                        onItemSelected?.call(item);
+                      },
+                    );
+                  }).toList();
+                },
           );
         },
       ),

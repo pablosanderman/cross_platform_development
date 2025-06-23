@@ -4,7 +4,7 @@ import 'package:cross_platform_development/search/view/user_search_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../HandleFakeAccount.dart';
+import '../../handle_fake_account.dart';
 import '../bloc/groups_bloc.dart';
 import '../bloc/groups_event.dart';
 import '../bloc/groups_state.dart';
@@ -169,7 +169,6 @@ class LeftSide extends StatelessWidget {
                     CreateGroup(_textFieldController.text),
                   );
                   // TODO: Still need a logging system
-                  print('Creating group: ${_textFieldController.text}');
                   Group.saveGroupsToFile(
                     context.read<GroupsBloc>().getGroups(),
                   );
@@ -236,9 +235,6 @@ class RightSide extends StatelessWidget {
                                       newRole: value,
                                     ),
                                   );
-                                  print(
-                                    "Changing role From: ${groupState.chosenGroup?.groupMemberIds[user.id]?.name} To: ${value.name}",
-                                  );
                                 }
                               },
                             ),
@@ -304,9 +300,6 @@ class RightSide extends StatelessWidget {
                   if (selectedUser != null) {
                     final groupsBloc = context.read<GroupsBloc>();
                     Group? currentGroup = groupsBloc.state.chosenGroup;
-                    print(
-                      'Adding member: ${selectedUser?.firstName} ${selectedUser?.lastName} To: ${currentGroup?.name}',
-                    );
                     context.read<GroupsBloc>().add(
                       AddMember(currentGroup!, selectedUser!),
                     );

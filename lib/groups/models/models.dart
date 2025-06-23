@@ -139,32 +139,23 @@ class Group {
       final file = File(filePath);
 
       if (await file.exists()) {
-        print("Loading groups from documents directory...");
         final jsonString = await file.readAsString();
         if (jsonString.isNotEmpty) {
           final jsonList = List<dynamic>.from(jsonDecode(jsonString));
-          print("Loaded ${jsonList.length} groups from documents directory");
           return jsonList.map((json) => Group.fromJson(json)).toList();
         }
       }
 
       // Fall back to loading from assets
-      print("Loading groups from assets...");
       final jsonString = await rootBundle.loadString('groups.json');
-      print(
-        "Loaded groups.json from assets, content length: ${jsonString.length}",
-      );
 
       if (jsonString.isEmpty) {
-        print("Groups file is empty, returning empty list");
         return [];
       }
 
       final jsonList = List<dynamic>.from(jsonDecode(jsonString));
-      print("Parsed ${jsonList.length} groups from JSON assets");
       return jsonList.map((json) => Group.fromJson(json)).toList();
     } catch (e) {
-      print("Exception in loadGroupsFromFile: $e");
       throw Exception('Failed to load groups: $e');
     }
   }
@@ -296,32 +287,23 @@ class User {
       final file = File(filePath);
 
       if (await file.exists()) {
-        print("Loading users from documents directory...");
         final jsonString = await file.readAsString();
         if (jsonString.isNotEmpty) {
           final jsonList = List<dynamic>.from(jsonDecode(jsonString));
-          print("Loaded ${jsonList.length} users from documents directory");
           return jsonList.map((json) => User.fromJson(json)).toList();
         }
       }
 
       // Fall back to loading from assets
-      print("Loading users from assets...");
       final jsonString = await rootBundle.loadString('users.json');
-      print(
-        "Loaded users.json from assets, content length: ${jsonString.length}",
-      );
 
       if (jsonString.isEmpty) {
-        print("Users file is empty, returning empty list");
         return [];
       }
 
       final jsonList = List<dynamic>.from(jsonDecode(jsonString));
-      print("Parsed ${jsonList.length} users from JSON assets");
       return jsonList.map((json) => User.fromJson(json)).toList();
     } catch (e) {
-      print("Exception in loadUsersFromFile: $e");
       throw Exception('Failed to load users: $e');
     }
   }

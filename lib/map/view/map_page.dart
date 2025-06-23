@@ -4,7 +4,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cross_platform_development/map/map.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
-import 'package:cross_platform_development/shared/shared.dart';
 
 /// {@template map_page}
 /// A page that displays an interactive map using OpenStreetMap.

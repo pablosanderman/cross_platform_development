@@ -48,7 +48,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   }
 
   void _handleChangePage(ChangePage event, Emitter<NavigationState> emit) {
-    print("Changing page index to: ${event.pageIndex}");
     emit(
       state.copyWith(
         showTimeline: false,

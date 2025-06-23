@@ -8,12 +8,11 @@ class PlaceHolder extends NavigationEvent {
 }
 
 class ToggleTimeline extends NavigationEvent {
-  ToggleTimeline({bool forceNavigate = false})
-    : super(forceNavigate: forceNavigate);
+  ToggleTimeline({super.forceNavigate});
 }
 
 class ToggleMap extends NavigationEvent {
-  ToggleMap({bool forceNavigate = false}) : super(forceNavigate: forceNavigate);
+  ToggleMap({super.forceNavigate});
 }
 
 class ChangePage extends NavigationEvent {

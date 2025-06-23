@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
-import 'package:cross_platform_development/shared/shared.dart';
 import 'package:cross_platform_development/map/map.dart';
 
 /// {@template timeline_view}
