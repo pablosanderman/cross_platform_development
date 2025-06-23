@@ -1,11 +1,11 @@
 ﻿import 'package:cross_platform_development/navigation/navigation.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:cross_platform_development/shared/shared.dart';
+import 'package:cross_platform_development/search/search.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:cross_platform_development/utc_timer/utc_timer.dart';
-import 'package:cross_platform_development/timeline/timeline.dart';
-import 'package:intl/intl.dart';
+
+import '../../utc_timer/utc_timer.dart';
+import '../nav_item/nav_item.dart';
 import 'dart:io';
 
 class NavigationView extends StatelessWidget {
@@ -13,17 +13,15 @@ class NavigationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navigationBloc = context.read<NavigationBloc>();
-
     return Container(
       color: Color.fromARGB(100, 120, 70, 1),
-      child: Column(
-        children: [
-          WindowTitleBarBox(
-            child: Row(
-              children: [
-                BlocBuilder<NavigationBloc, NavigationState>(
-                  builder: (context, state) {
+      child: WindowTitleBarBox(
+        child: Row(
+          children: [
+            BlocBuilder<NavigationBloc, NavigationState>(
+              builder: (context, navState) {
+                return BlocBuilder<NavItemsCubit, NavItemsState>(
+                  builder: (context, itemsState) {
                     return Padding(
                       padding: EdgeInsets.only(
                         left: Platform.isMacOS ? 60.0 : 8.0,
@@ -31,139 +29,95 @@ class NavigationView extends StatelessWidget {
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // building a navButton like this is a bit cleaner and easier to alter the button placements
-                          buildNavButton(
-                            navigationBloc,
-                            "History",
-                            PlaceHolder(),
-                          ),
-                          buildNavButton(
-                            navigationBloc,
-                            "Notifications",
-                            PlaceHolder(),
-                          ),
-                          buildNavButton(
-                            navigationBloc,
-                            "Group",
-                            PlaceHolder(),
-                          ),
-                          buildNavButton(
-                            navigationBloc,
-                            "Timeline",
-                            ToggleTimeline(),
-                          ),
-                          buildNavButton(navigationBloc, "Map", ToggleMap()),
-                        ],
+                        children: itemsState.items.reversed.map((item) {
+                          return buildNavButton(
+                            context,
+                            item.label,
+                            onPressed: () {
+                              if (item.requiresToggle) {
+                                if (item.label == 'Timeline') {
+                                  context.read<NavigationBloc>().add(
+                                    ToggleTimeline(),
+                                  );
+                                } else if (item.label == 'Map') {
+                                  context.read<NavigationBloc>().add(
+                                    ToggleMap(),
+                                  );
+                                }
+                              } else {
+                                context.read<NavigationBloc>().add(
+                                  ChangePage(item.pageIndex),
+                                );
+                              }
+                            },
+                            isSelected: item.requiresToggle
+                                ? (item.label == 'Timeline' &&
+                                          navState.showTimeline &&
+                                          navState.currentPageIndex == 0) ||
+                                      (item.label == 'Map' &&
+                                          navState.showMap &&
+                                          navState.currentPageIndex == 0)
+                                : navState.currentPageIndex == item.pageIndex,
+                          );
+                        }).toList(),
                       ),
                     );
                   },
-                ),
-
-                Expanded(child: MoveWindow()),
-
-                // Navigation Search Bar Wrapped in Expanded to make it flexible.
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0,
-                      vertical: 3.0,
-                    ),
-                    child: NavigationSearchBar(),
-                  ),
-                ),
-
-                BlocProvider(
-                  create: (_) => UtcTimeCubit(),
-                  child: const UtcTimerView(),
-                ),
-                const WindowButtons(),
-              ],
+                );
+              },
             ),
-          ),
-        ],
+
+            Expanded(child: MoveWindow()),
+
+            // Navigation Search Bar Wrapped in Expanded to make it flexible.
+            Expanded(
+              flex: 3,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10.0,
+                  vertical: 3.0,
+                ),
+                child: EventSearchView(),
+              ),
+            ),
+
+            BlocProvider(
+              create: (_) => UtcTimeCubit(),
+              child: const UtcTimerView(),
+            ),
+            const WindowButtons(),
+          ],
+        ),
       ),
     );
   }
 
-  TextButton buildNavButton(
-    NavigationBloc navigationBloc,
-    String title,
-    NavigationEvent event,
-  ) {
-    return TextButton(
-      child: Text(title, style: TextStyle(color: Colors.white)),
-      onPressed: () {
-        navigationBloc.add(event);
-      },
-    );
-  }
-}
-
-class NavigationSearchBar extends StatefulWidget {
-  const NavigationSearchBar({super.key});
-
-  @override
-  State<NavigationSearchBar> createState() => _NavigationSearchBarState();
-}
-
-class _NavigationSearchBarState extends State<NavigationSearchBar> {
-  // This is an example list, here we can put a list of all the events from the timeline. Or just further beneath.
-  // final List<String> allItems = List<String>.generate(
-  //   20,
-  //   (index) => 'item $index',
-  // );
-
-  @override
-  Widget build(BuildContext context) {
-    return SearchAnchor(
-      builder: (BuildContext context, SearchController controller) {
-        return SearchBar(
-          controller: controller,
-          padding: const WidgetStatePropertyAll<EdgeInsets>(
-            EdgeInsets.symmetric(horizontal: 12.0),
+  Widget buildNavButton(
+    BuildContext context,
+    String label, {
+    required VoidCallback onPressed,
+    bool isSelected = false,
+  }) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.grey[300] : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
           ),
-          onTap: () {
-            controller.openView();
-          },
-          onChanged: (_) {
-            controller.openView();
-          },
-          leading: const Icon(Icons.search),
-        );
-      },
-      suggestionsBuilder:
-          (BuildContext context, SearchController controller) async {
-            final String input = controller.text;
-            final List<Event> events = await context
-                .read<TimelineCubit>()
-                .loadEvents();
-            final List<Event> filteredItems = events
-                .where(
-                  (item) =>
-                      item.title.toLowerCase().contains(input.toLowerCase()),
-                )
-                .toList();
-
-            return List<ListTile>.generate(filteredItems.length, (int index) {
-              final Event item = filteredItems[index];
-              final startTime = item.startTime != null
-                  ? DateFormat('HH:mm:ss').format(item.startTime as DateTime)
-                  : "No StartTime";
-
-              final endTime = item.endTime != null
-                  ? DateFormat('HH:mm:ss').format(item.endTime as DateTime)
-                  : "No EndTime";
-
-              return ListTile(
-                title: Text("${item.title}   Date: $startTime --- $endTime"),
-                onTap: () {
-                  controller.closeView(item.title);
-                },
-              );
-            });
-          },
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.black : Colors.grey[600],
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -23,12 +23,13 @@ class _TimelineViewState extends State<TimelineView>
   int? _dragTargetIndex;
   AnimationController? _scrollAnimationController;
   double _actualTimelineWidth = 0.0;
+  TimelineCubit?
+  _timelineCubit; // Store reference to avoid unsafe context access
 
   @override
   void dispose() {
-    // Save the current transformation state before disposal
-    final cubit = context.read<TimelineCubit>();
-    cubit.saveTransformationMatrix(_transformationController.value);
+    // Save the current transformation state before disposal using stored reference
+    _timelineCubit?.saveTransformationMatrix(_transformationController.value);
 
     _transformationController.dispose();
     _scrollAnimationController?.dispose();
@@ -39,9 +40,11 @@ class _TimelineViewState extends State<TimelineView>
   void initState() {
     super.initState();
 
+    // Store reference to cubit to avoid unsafe context access in dispose
+    _timelineCubit = context.read<TimelineCubit>();
+
     // Initialize transformation controller with saved state or identity matrix
-    final cubit = context.read<TimelineCubit>();
-    final savedMatrix = cubit.getSavedTransformationMatrix();
+    final savedMatrix = _timelineCubit!.getSavedTransformationMatrix();
 
     if (savedMatrix != null) {
       _transformationController = TransformationController(savedMatrix);
@@ -51,13 +54,13 @@ class _TimelineViewState extends State<TimelineView>
 
     // Listen to transformation changes and save them to cubit
     _transformationController.addListener(() {
-      cubit.saveTransformationMatrix(_transformationController.value);
+      _timelineCubit!.saveTransformationMatrix(_transformationController.value);
     });
 
     // Load timeline events only if not already loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (cubit.state.events.isEmpty) {
-        cubit.loadTimeline();
+      if (_timelineCubit!.state.events.isEmpty) {
+        _timelineCubit!.loadTimeline();
       } else {}
     });
   }

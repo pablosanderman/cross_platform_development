@@ -128,7 +128,7 @@ class MapCubit extends Cubit<MapState> {
 
   /// Navigate to event on map (center map and show popup)
   void navigateToEvent(Event event) {
-    // Ensure map view is visible (don't toggle, always show)
+    // Ensure map view is visible
     _navigationBloc?.add(ShowMap());
 
     // First select and show popup for the event
@@ -145,7 +145,7 @@ class MapCubit extends Cubit<MapState> {
 
   /// Navigate to event on timeline (scroll timeline and show timeline view)
   void navigateToTimeline(Event event) {
-    // Ensure timeline view is visible (don't toggle, always show)
+    // Ensure timeline view is visible
     _navigationBloc?.add(ShowTimeline());
 
     // Scroll timeline to show the event

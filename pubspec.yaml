@@ -41,6 +41,8 @@ dependencies:
   # State management with BLoC pattern
   bloc: ^9.0.0
   equatable: ^2.0.5
+  uuid: ^4.5.1
+  path_provider: ^2.1.5
 
   # Map functionality
   flutter_map: ^8.1.1
