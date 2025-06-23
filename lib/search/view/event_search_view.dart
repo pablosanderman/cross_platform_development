@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:cross_platform_development/navigation/navigation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
@@ -31,7 +32,9 @@ class EventSearchView extends StatelessWidget {
           },
           itemTitle: (event) => event.title,
           onItemSelected: (event) {
-            // TODO: goto/show the event in timeline
+            context.read<NavigationBloc>().add(ToggleTimeline());
+            context.read<TimelineCubit>().scrollToEvent(event);
+            context.read<TimelineCubit>().selectEvent(event);
           },
           leadingIcon: const Icon(Icons.search),
         );
