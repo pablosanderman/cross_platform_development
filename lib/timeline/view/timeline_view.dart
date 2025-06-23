@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/map/map.dart';
+import 'package:cross_platform_development/shared/shared.dart';
 
 /// {@template timeline_view}
 /// A [StatelessWidget] which reacts to the provided
@@ -760,8 +761,15 @@ class _EventBoxState extends State<_EventBox> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TimelineCubit, TimelineState>(
-      builder: (context, state) {
+    return BlocBuilder<EventVisibilityCubit, EventVisibilityState>(
+      builder: (context, visibilityState) {
+        // Check if this event should be hidden
+        if (visibilityState.hiddenIds.contains(widget.event.id)) {
+          return const SizedBox.shrink();
+        }
+
+        return BlocBuilder<TimelineCubit, TimelineState>(
+          builder: (context, state) {
         final color = _getEventColor(widget.event);
         final isGrouped = widget.event.type == EventType.grouped;
 
@@ -827,6 +835,8 @@ class _EventBoxState extends State<_EventBox> {
                     ),
             ),
           ),
+        );
+          },
         );
       },
     );
