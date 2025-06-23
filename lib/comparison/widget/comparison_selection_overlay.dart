@@ -31,12 +31,15 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
 
         return Material(
           color: Colors.black.withOpacity(0.8),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          child: Center(
+            child: Container(
+              width: 500, // Fixed width (approximately 1/3 of 1440px screen)
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   // Close button (top-right)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -57,60 +60,138 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
                   ),
                   const SizedBox(height: 40),
                   
-                  // Event comparison inputs (stacked vertically)
-                  _EventInputField(
-                    label: 'Event 1',
-                    event: state.comparisonList.isNotEmpty ? state.comparisonList[0].event : null,
-                    onClear: state.comparisonList.isNotEmpty ? () {
-                      context.read<ComparisonBloc>().add(
-                            RemoveEventFromComparison(state.comparisonList[0].event.id),
-                          );
-                    } : null,
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  _EventInputField(
-                    label: 'Event 2',
-                    event: state.comparisonList.length > 1 ? state.comparisonList[1].event : null,
-                    onClear: state.comparisonList.length > 1 ? () {
-                      context.read<ComparisonBloc>().add(
-                            RemoveEventFromComparison(state.comparisonList[1].event.id),
-                          );
-                    } : null,
-                  ),
-                  const SizedBox(height: 16),
+                  // Selected events (growing list)
+                  ...state.comparisonList.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final item = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _EventInputField(
+                        label: 'Event ${index + 1}',
+                        event: item.event,
+                        onClear: () {
+                          context.read<ComparisonBloc>().add(
+                                RemoveEventFromComparison(item.event.id),
+                              );
+                        },
+                      ),
+                    );
+                  }).toList(),
                   
                   // Search field with Compare button
                   Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.white, width: 1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: TextField(
-                            controller: _searchController,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
-                              hintText: 'Type here to compare',
-                              hintStyle: TextStyle(color: Colors.white70),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 48,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.white, width: 1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: TextField(
+                                controller: _searchController,
+                                style: const TextStyle(color: Colors.white),
+                                decoration: const InputDecoration(
+                                  hintText: 'Type here to compare',
+                                  hintStyle: TextStyle(color: Colors.white70),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                ),
+                                onChanged: (query) {
+                                  context.read<ComparisonBloc>().add(
+                                        SearchEventsForComparison(query),
+                                      );
+                                },
+                              ),
                             ),
-                            onChanged: (query) {
-                              context.read<ComparisonBloc>().add(
-                                    SearchEventsForComparison(query),
-                                  );
-                            },
-                          ),
+                            // Search results dropdown
+                            if (state.searchQuery.isNotEmpty && state.searchResults.isNotEmpty)
+                              Container(
+                                margin: const EdgeInsets.only(top: 4),
+                                constraints: const BoxConstraints(maxHeight: 200),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(color: Colors.grey.shade300),
+                                ),
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: state.searchResults.take(5).length, // Limit to 5 results
+                                  itemBuilder: (context, index) {
+                                    final event = state.searchResults[index];
+                                    final isInComparison = state.isEventInComparison(event.id);
+                                    final isAtMaxCapacity = state.isAtMaxCapacity;
+                                    
+                                    return InkWell(
+                                      onTap: isInComparison || isAtMaxCapacity ? null : () {
+                                        context.read<ComparisonBloc>().add(AddEventToComparison(event));
+                                        _searchController.clear();
+                                        context.read<ComparisonBloc>().add(const SearchEventsForComparison(''));
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: index < state.searchResults.take(5).length - 1
+                                                ? BorderSide(color: Colors.grey.shade200)
+                                                : BorderSide.none,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    event.title,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.w500,
+                                                      fontSize: 14,
+                                                      color: isInComparison || isAtMaxCapacity 
+                                                          ? Colors.grey 
+                                                          : Colors.black,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    _getEventLocation(event),
+                                                    style: TextStyle(
+                                                      color: Colors.grey.shade600,
+                                                      fontSize: 12,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            if (isInComparison)
+                                              const Icon(Icons.check, color: Colors.green, size: 20)
+                                            else if (isAtMaxCapacity)
+                                              Icon(Icons.block, color: Colors.grey.shade400, size: 20)
+                                            else
+                                              const Icon(Icons.add, color: Color(0xFF69A8F8), size: 20),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                       const SizedBox(width: 16),
                       GestureDetector(
                         onTap: state.comparisonList.length >= 2 ? () {
                           Navigator.of(context).pushNamed('/comparison');
+                          // Close the overlay after navigating
+                          context.read<ComparisonBloc>().add(const HideComparisonSelectionOverlay());
                         } : null,
                         child: Container(
                           height: 48,
@@ -148,11 +229,13 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
                   ),
                   const SizedBox(height: 16),
                   
-                  // Grid of 6 cards (3x2)
-                  Expanded(
-                    child: _buildRecentlyViewedGrid(context, state),
+                      // Grid of 6 cards (3x2)
+                      Expanded(
+                        child: _buildRecentlyViewedGrid(context, state),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -168,43 +251,8 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
       );
     }
 
-    // Show search results if there's a search query
-    if (state.searchQuery.isNotEmpty) {
-      if (state.searchResults.isEmpty) {
-        return const Center(
-          child: Text(
-            'No events found',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 16,
-            ),
-          ),
-        );
-      }
-
-      return GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          childAspectRatio: 1.5,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-        ),
-        itemCount: state.searchResults.take(6).length, // Limit to 6 items
-        itemBuilder: (context, index) {
-          final event = state.searchResults[index];
-          return _RecentlyViewedCard(
-            event: event,
-            isInComparison: state.isEventInComparison(event.id),
-            isAtMaxCapacity: state.isAtMaxCapacity,
-            onAdd: () {
-              context.read<ComparisonBloc>().add(AddEventToComparison(event));
-            },
-          );
-        },
-      );
-    }
-
     // Show recently viewed events (limit to 6 items in 3x2 grid)
+    // When searching, don't show search results in the grid anymore - they're in the dropdown
     if (state.recentlyViewedEvents.isEmpty) {
       return const Center(
         child: Text(
@@ -237,6 +285,21 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
         );
       },
     );
+  }
+
+  String _getEventLocation(Event event) {
+    final location = event.properties?['location']?.toString();
+    final region = event.properties?['region']?.toString();
+    
+    if (location != null && region != null) {
+      return '$location, $region';
+    } else if (location != null) {
+      return location;
+    } else if (region != null) {
+      return region;
+    } else {
+      return 'Unknown location';
+    }
   }
 }
 
@@ -325,26 +388,36 @@ class _RecentlyViewedCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Recently viewed event',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const Spacer(),
+            // Event title at top
             Text(
               event.title,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 13,
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.w500,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             const Spacer(),
+            // Placeholder image in center
+            Center(
+              child: Container(
+                width: 60,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade600,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Icon(
+                  Icons.image,
+                  color: Colors.grey.shade400,
+                  size: 24,
+                ),
+              ),
+            ),
+            const Spacer(),
+            // + button at bottom right
             Row(
               children: [
                 const Spacer(),
