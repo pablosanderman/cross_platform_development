@@ -80,21 +80,23 @@ class EventDetailsPanel extends StatelessWidget {
           _buildEventTypeBadge(event.type),
           const SizedBox(width: 12),
           
-          // Event title and time
+                    // Event title and time
           Expanded(
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  event.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                Expanded(
+                  child: Text(
+                    event.title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
-                                 const SizedBox(height: 4),
-                 _buildEventTimeDisplay(event),
+                const SizedBox(width: 16),
+                _buildEventTimeDisplay(event),
               ],
             ),
           ),
@@ -610,122 +612,59 @@ class EventDetailsPanel extends StatelessWidget {
     final startTime = event.effectiveStartTime;
     final endTime = event.effectiveEndTime;
     
-    final startFormatter = DateFormat('MMM dd, HH:mm');
-    final endFormatter = DateFormat('MMM dd, HH:mm');
+    final formatter = DateFormat('MMM dd');
     
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.schedule, size: 16, color: Colors.blue.shade700),
-              const SizedBox(width: 6),
-              Text(
-                'Event Duration',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blue.shade700,
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Horizontal timeline: start date - bar - end date
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Start date
+            Text(
+              formatter.format(startTime),
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black,
               ),
-            ],
+            ),
+            
+            const SizedBox(width: 8),
+            
+            // Timeline bar
+            Container(
+              width: 40,
+              height: 2,
+              color: Colors.grey.shade600,
+            ),
+            
+            const SizedBox(width: 8),
+            
+            // End date
+            Text(
+              endTime != null 
+                  ? formatter.format(endTime)
+                  : 'Ongoing',
+              style: TextStyle(
+                fontSize: 12,
+                color: endTime != null ? Colors.black : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 4),
+        
+        // Duration underneath
+        Text(
+          _formatDuration(event.duration),
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade600,
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              // Start time
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'START',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    startFormatter.format(startTime),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(width: 12),
-              
-              // Timeline visualization
-              Expanded(
-                child: Column(
-                  children: [
-                    // Timeline bar
-                    Container(
-                      height: 4,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.green.shade400, Colors.red.shade400],
-                          stops: const [0.0, 1.0],
-                        ),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    // Duration text
-                    Text(
-                      _formatDuration(event.duration),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey.shade600,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(width: 12),
-              
-              // End time
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    endTime != null ? 'END' : 'ONGOING',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    endTime != null 
-                        ? endFormatter.format(endTime)
-                        : 'Active',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: endTime != null ? Colors.black87 : Colors.orange.shade700,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

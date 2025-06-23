@@ -77,8 +77,10 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     final previousShowTimeline = state.showTimeline;
     final previousShowMap = state.showMap;
     
-    // Preserve current layout - don't force both views to be visible
+    // Force split-screen mode when showing event details
     emit(state.copyWith(
+      showTimeline: true,
+      showMap: true,
       currentPageIndex: 0,
       selectedEventForDetails: event.event,
       detailsSource: event.source,
