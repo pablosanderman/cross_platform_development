@@ -36,12 +36,13 @@ class TimelineCubit extends Cubit<TimelineState> {
   final EventsRepository _eventsRepository;
   MapCubit? _mapCubit;
 
-  Future<List<Event>> loadEvents() async {
-    return _eventsRepository.loadEvents();
+  Future<void> loadEvents() async {
+    emit(state.copyWith(events: await _eventsRepository.loadEvents()));
   }
 
   Future<void> loadTimeline() async {
-    final List<Event> events = await loadEvents();
+    await loadEvents();
+    final List<Event> events = state.events;
     // Calculate visible window based on events
     DateTime visibleStart;
     DateTime visibleEnd;
