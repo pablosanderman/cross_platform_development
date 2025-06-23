@@ -4,6 +4,8 @@ import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/shared/shared.dart';
 import 'package:cross_platform_development/map/map.dart';
 
+import '../../widgets/add_event/add_event_overlay.dart';
+
 /// {@template timeline_view}
 /// A [StatelessWidget] which reacts to the provided
 /// [TimelineCubit] state and notifies it in response to user input.
@@ -23,18 +25,8 @@ class _TimelineViewState extends State<TimelineView>
   int? _dragTargetIndex;
   AnimationController? _scrollAnimationController;
   double _actualTimelineWidth = 0.0;
-  TimelineCubit?
-  _timelineCubit; // Store reference to avoid unsafe context access
-
-  @override
-  void dispose() {
-    // Save the current transformation state before disposal using stored reference
-    _timelineCubit?.saveTransformationMatrix(_transformationController.value);
-
-    _transformationController.dispose();
-    _scrollAnimationController?.dispose();
-    super.dispose();
-  }
+  TimelineCubit? _timelineCubit;
+  bool _showAddEventOverlay = false; // Controls visibility of the add-event widget
 
   @override
   void initState() {
@@ -45,12 +37,9 @@ class _TimelineViewState extends State<TimelineView>
 
     // Initialize transformation controller with saved state or identity matrix
     final savedMatrix = _timelineCubit!.getSavedTransformationMatrix();
-
-    if (savedMatrix != null) {
-      _transformationController = TransformationController(savedMatrix);
-    } else {
-      _transformationController = TransformationController(Matrix4.identity());
-    }
+    _transformationController = TransformationController(
+      savedMatrix ?? Matrix4.identity(),
+    );
 
     // Listen to transformation changes and save them to cubit
     _transformationController.addListener(() {
@@ -61,151 +50,112 @@ class _TimelineViewState extends State<TimelineView>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_timelineCubit!.state.events.isEmpty) {
         _timelineCubit!.loadTimeline();
-      } else {}
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocListener<TimelineCubit, TimelineState>(
-        listenWhen: (previous, current) =>
-            current.scrollToEvent != null &&
-            previous.scrollToEvent != current.scrollToEvent,
-        listener: (context, state) {
-          if (state.scrollToEvent != null) {
-            _scrollToEventAnimated(state.scrollToEvent!, state);
+      body: Stack(
+        children: [
+          BlocListener<TimelineCubit, TimelineState>(
+            listenWhen: (previous, current) =>
+                current.scrollToEvent != null &&
+                previous.scrollToEvent != current.scrollToEvent,
+            listener: (context, state) {
+              if (state.scrollToEvent != null) {
+                _scrollToEventAnimated(state.scrollToEvent!, state);
             // Clear the scroll event after handling
-            context.read<TimelineCubit>().clearScrollToEvent();
-          }
-        },
-        child: BlocBuilder<TimelineCubit, TimelineState>(
-          builder: (context, state) {
-            if (state.rows.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
+                _timelineCubit!.clearScrollToEvent();
+              }
+            },
+            child: BlocBuilder<TimelineCubit, TimelineState>(
+              builder: (context, state) {
+                if (state.rows.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
             // Calculate consistent dimensions based on time and content
-            final dimensions = _TimelineDimensions.calculate(
-              visibleStart: state.visibleStart,
-              visibleEnd: state.visibleEnd,
-              rows: state.rows,
-            );
-            return Stack(
-              children: [
-                // Use LayoutBuilder to get actual timeline dimensions for proper scroll calculations
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    // Store the actual timeline width for scroll calculations
-                    _actualTimelineWidth = constraints.maxWidth;
-
-                    return Column(
-                      children: [
+                final dimensions = _TimelineDimensions.calculate(
+                  visibleStart: state.visibleStart,
+                  visibleEnd: state.visibleEnd,
+                  rows: state.rows,
+                );
+                return Column(
+                  children: [
                         // Sticky ruler header
-                        _StickyRuler(
-                          dimensions: dimensions,
-                          transformationController: _transformationController,
-                        ),
+                    _StickyRuler(
+                      dimensions: dimensions,
+                      transformationController: _transformationController,
+                    ),
                         // Timeline content with drag and drop functionality
-                        Expanded(
-                          child: _DraggableTimelineContent(
-                            rows: state.rows,
-                            dimensions: dimensions,
-                            transformationController: _transformationController,
-                            draggedRowIndex: _draggedRowIndex,
-                            dragTargetIndex: _dragTargetIndex,
-                            actualTimelineWidth: _actualTimelineWidth,
-                            onDragStarted: (index) {
-                              setState(() {
-                                _draggedRowIndex = index;
-                              });
-                            },
-                            onDragEnded: () {
-                              setState(() {
-                                _draggedRowIndex = null;
-                                _dragTargetIndex = null;
-                              });
-                            },
-                            onDragAccepted: (draggedIndex, targetIndex) {
-                              // Only perform reorder if targetIndex is valid (not -1)
-                              if (targetIndex >= 0 &&
-                                  targetIndex != draggedIndex) {
-                                context.read<TimelineCubit>().reorderRows(
-                                  draggedIndex,
-                                  targetIndex,
-                                );
-                              }
-                              setState(() {
-                                _draggedRowIndex = null;
-                                _dragTargetIndex = null;
-                              });
-                            },
-                            onDragTargetChanged: (index) {
-                              setState(() {
-                                _dragTargetIndex = index;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: FloatingActionButton(
-                    child: Icon(Icons.add),
-                    onPressed: () {
-                      _displayTextInputDialog(context);
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+                    Expanded(
+                      child: _DraggableTimelineContent(
+                        rows: state.rows,
+                        dimensions: dimensions,
+                        transformationController: _transformationController,
+                        draggedRowIndex: _draggedRowIndex,
+                        dragTargetIndex: _dragTargetIndex,
+                        actualTimelineWidth: _actualTimelineWidth,
+                        onDragStarted: (index) {
+                          setState(() => _draggedRowIndex = index);
+                        },
+                        onDragEnded: () {
+                          setState(() {
+                            _draggedRowIndex = null;
+                            _dragTargetIndex = null;
+                          });
+                        },
+                        onDragAccepted: (draggedIndex, targetIndex) {
+                          if (targetIndex >= 0 && targetIndex != draggedIndex) {
+                            _timelineCubit!.reorderRows(draggedIndex, targetIndex);
+                          }
+                          setState(() {
+                            _draggedRowIndex = null;
+                            _dragTargetIndex = null;
+                          });
+                        },
+                        onDragTargetChanged: (index) {
+                          setState(() => _dragTargetIndex = index);
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          // Overlay Add Event Form
+          if (_showAddEventOverlay)
+            AddEventOverlay(
+              onSubmitted: (eventData) {
+                setState(() => _showAddEventOverlay = false);
+                if (eventData != null) {
+                  _timelineCubit!.addEvent(
+                    eventData['title'],
+                    eventData['description'],
+                    eventData['startTime'],
+                    eventData['endTime'],
+                    eventData['latitude'],
+                    eventData['longitude'],
+                  );
+                  // Pass other data if extending `addEvent` in the cubit.
+                }
+              },
+              onCancel: () => setState(() => _showAddEventOverlay = false),
+            ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () => setState(() => _showAddEventOverlay = true),
+            ),
+          ),
+        ],
       ),
     );
   }
-
-  Future<void> _displayTextInputDialog(BuildContext context) async {
-    final TextEditingController _textFieldController = TextEditingController();
-    return showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return BlocProvider.value(
-          value: context.read<TimelineCubit>(),
-          child: AlertDialog(
-            title: Text('Add Event'),
-            content: TextField(
-              controller: _textFieldController,
-              decoration: InputDecoration(hintText: "event name"),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('CANCEL'),
-                onPressed: () {
-                  Navigator.pop(dialogContext);
-                },
-              ),
-              TextButton(
-                child: Text('OK'),
-                onPressed: () {
-                  if (_textFieldController.text.isNotEmpty) {
-                    context.read<TimelineCubit>()
-                        .addEvent(_textFieldController.text);
-
-                    Navigator.pop(dialogContext);
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   /// Animate the timeline to show a specific event
   void _scrollToEventAnimated(Event event, TimelineState state) {
     // Calculate dimensions to get pixel positions
@@ -257,11 +207,11 @@ class _TimelineViewState extends State<TimelineView>
     // Create animation that interpolates between current and target matrix
     final animation = Matrix4Tween(begin: currentMatrix, end: targetMatrix)
         .animate(
-          CurvedAnimation(
-            parent: _scrollAnimationController!,
-            curve: Curves.easeInOut,
-          ),
-        );
+      CurvedAnimation(
+        parent: _scrollAnimationController!,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     // Listen to animation updates
     animation.addListener(() {
@@ -272,6 +222,8 @@ class _TimelineViewState extends State<TimelineView>
     _scrollAnimationController!.forward();
   }
 }
+
+
 
 /// Responsive dimensions calculator for timeline
 class _TimelineDimensions {

@@ -38,12 +38,15 @@ class TimelineCubit extends Cubit<TimelineState> {
   final EventsRepository _eventsRepository;
   MapCubit? _mapCubit;
 
-  Future<void> loadEvents() async {
-    emit(state.copyWith(events: await _eventsRepository.loadEvents()));
-  }
-
-  Future<void> addEvent(String eventTitle) async {
-    var random = new Random();
+  Future<void> addEvent(
+      String title,
+      String description,
+      DateTime? startTime,
+      DateTime? endTime,
+      double? latitude,
+      double? longitude,
+      ) async {
+    var random = Random();
     var maxInt = 9;
     final List<Event> newEvents = [...state.events];
     String eventId = "evt-"
@@ -54,14 +57,26 @@ class TimelineCubit extends Cubit<TimelineState> {
     newEvents.add(Event(
         id: eventId,
         type: EventType.period,
-        title: eventTitle)
+        title: title,
+        description: description,
+        startTime: startTime,
+        endTime: endTime,
+        latitude: latitude,
+        longitude: longitude
+    )
     );
 
     emit(state.copyWith(events: newEvents));
+    await loadTimeline();
+  }
+
+  Future<void> loadEvents() async {
+    emit(state.copyWith(events: await _eventsRepository.loadEvents()));
   }
 
   Future<void> loadTimeline() async {
-    await loadEvents();
+    if(state.events.isEmpty) { await loadEvents(); }
+
     final List<Event> events = state.events;
     // Calculate visible window based on events
     DateTime visibleStart;
