@@ -79,102 +79,110 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
                   }).toList(),
                   
                   // Search field with Compare button
-                  Stack(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 48,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.white, width: 1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: TextField(
-                                controller: _searchController,
-                                style: const TextStyle(color: Colors.white),
-                                decoration: const InputDecoration(
-                                  hintText: 'Type here to compare',
-                                  hintStyle: TextStyle(color: Colors.white70),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  SizedBox(
+                    height: state.searchQuery.isNotEmpty && state.searchResults.isNotEmpty ? 260 : 48, // Give space for dropdown
+                    child: Stack(
+                      clipBehavior: Clip.none, // Allow overflow
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.white, width: 1),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
-                                onChanged: (query) {
-                                  context.read<ComparisonBloc>().add(
-                                        SearchEventsForComparison(query),
-                                      );
-                                },
+                                child: TextField(
+                                  controller: _searchController,
+                                  style: const TextStyle(color: Colors.white),
+                                  decoration: const InputDecoration(
+                                    hintText: 'Type here to compare',
+                                    hintStyle: TextStyle(color: Colors.white70),
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  ),
+                                  onChanged: (query) {
+                                    context.read<ComparisonBloc>().add(
+                                          SearchEventsForComparison(query),
+                                        );
+                                  },
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          GestureDetector(
-                            onTap: state.comparisonList.length >= 2 ? () {
-                              Navigator.of(context).pushNamed('/comparison');
-                              // Close the overlay after navigating
-                              context.read<ComparisonBloc>().add(const HideComparisonSelectionOverlay());
-                            } : null,
-                            child: Container(
-                              height: 48,
-                              padding: const EdgeInsets.symmetric(horizontal: 24),
-                              decoration: BoxDecoration(
-                                color: state.comparisonList.length >= 2 
-                                    ? const Color(0xFF69A8F8) 
-                                    : Colors.grey,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  'COMPARE',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
+                            const SizedBox(width: 16),
+                            GestureDetector(
+                              onTap: state.comparisonList.length >= 2 ? () {
+                                Navigator.of(context).pushNamed('/comparison');
+                                // Close the overlay after navigating
+                                context.read<ComparisonBloc>().add(const HideComparisonSelectionOverlay());
+                              } : null,
+                              child: Container(
+                                height: 48,
+                                padding: const EdgeInsets.symmetric(horizontal: 24),
+                                decoration: BoxDecoration(
+                                  color: state.comparisonList.length >= 2 
+                                      ? const Color(0xFF69A8F8) 
+                                      : Colors.grey,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    'COMPARE',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
                                   ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Search results dropdown (positioned absolutely)
+                        if (state.searchQuery.isNotEmpty && state.searchResults.isNotEmpty) ...[
+                          Positioned(
+                            top: 52, // Just below the search field
+                            left: 0,
+                            right: 136, // Leave space for the compare button
+                            child: Material(
+                              elevation: 8,
+                              borderRadius: BorderRadius.circular(4),
+                              child: Container(
+                                constraints: const BoxConstraints(maxHeight: 200),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade900,
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(color: Colors.grey.shade700),
+                                ),
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: state.searchResults.take(5).length, // Limit to 5 results
+                                  itemBuilder: (context, index) {
+                                    final event = state.searchResults[index];
+                                    final isInComparison = state.isEventInComparison(event.id);
+                                    final isAtMaxCapacity = state.isAtMaxCapacity;
+                                    
+                                    return _SearchResultItem(
+                                      event: event,
+                                      isInComparison: isInComparison,
+                                      isAtMaxCapacity: isAtMaxCapacity,
+                                      isLast: index == state.searchResults.take(5).length - 1,
+                                      onTap: isInComparison || isAtMaxCapacity ? null : () {
+                                        context.read<ComparisonBloc>().add(AddEventToComparison(event));
+                                        _searchController.clear();
+                                        context.read<ComparisonBloc>().add(const SearchEventsForComparison(''));
+                                      },
+                                    );
+                                  },
                                 ),
                               ),
                             ),
                           ),
                         ],
-                      ),
-                      // Search results dropdown (positioned absolutely)
-                      if (state.searchQuery.isNotEmpty && state.searchResults.isNotEmpty) ...[
-                        Positioned(
-                          top: 52, // Just below the search field
-                          left: 0,
-                          right: 136, // Leave space for the compare button
-                          child: Container(
-                            constraints: const BoxConstraints(maxHeight: 200),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade900,
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: Colors.grey.shade700),
-                            ),
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: state.searchResults.take(5).length, // Limit to 5 results
-                              itemBuilder: (context, index) {
-                                final event = state.searchResults[index];
-                                final isInComparison = state.isEventInComparison(event.id);
-                                final isAtMaxCapacity = state.isAtMaxCapacity;
-                                
-                                return _SearchResultItem(
-                                  event: event,
-                                  isInComparison: isInComparison,
-                                  isAtMaxCapacity: isAtMaxCapacity,
-                                  isLast: index == state.searchResults.take(5).length - 1,
-                                  onTap: isInComparison || isAtMaxCapacity ? null : () {
-                                    context.read<ComparisonBloc>().add(AddEventToComparison(event));
-                                    _searchController.clear();
-                                    context.read<ComparisonBloc>().add(const SearchEventsForComparison(''));
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ),
                       ],
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 40),
                   
