@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
-import 'package:cross_platform_development/timeline/models/models.dart';
+import 'package:cross_platform_development/shared/shared.dart';
+import 'package:cross_platform_development/map/map.dart';
 
 /// {@template timeline_view}
 /// A [StatelessWidget] which reacts to the provided
@@ -15,91 +16,209 @@ class TimelineView extends StatefulWidget {
   State<TimelineView> createState() => _TimelineViewState();
 }
 
-class _TimelineViewState extends State<TimelineView> {
-  final TransformationController _transformationController =
-      TransformationController();
+class _TimelineViewState extends State<TimelineView>
+    with TickerProviderStateMixin {
+  late final TransformationController _transformationController;
   int? _draggedRowIndex;
   int? _dragTargetIndex;
+  AnimationController? _scrollAnimationController;
+  double _actualTimelineWidth = 0.0;
+  TimelineCubit?
+  _timelineCubit; // Store reference to avoid unsafe context access
 
   @override
   void dispose() {
+    // Save the current transformation state before disposal using stored reference
+    _timelineCubit?.saveTransformationMatrix(_transformationController.value);
+
     _transformationController.dispose();
+    _scrollAnimationController?.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    context.read<TimelineCubit>().loadTimeline();
+
+    // Store reference to cubit to avoid unsafe context access in dispose
+    _timelineCubit = context.read<TimelineCubit>();
+
+    // Initialize transformation controller with saved state or identity matrix
+    final savedMatrix = _timelineCubit!.getSavedTransformationMatrix();
+
+    if (savedMatrix != null) {
+      _transformationController = TransformationController(savedMatrix);
+    } else {
+      _transformationController = TransformationController(Matrix4.identity());
+    }
+
+    // Listen to transformation changes and save them to cubit
+    _transformationController.addListener(() {
+      _timelineCubit!.saveTransformationMatrix(_transformationController.value);
+    });
+
+    // Load timeline events only if not already loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_timelineCubit!.state.events.isEmpty) {
+        _timelineCubit!.loadTimeline();
+      } else {}
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<TimelineCubit, TimelineState>(
-        builder: (context, state) {
-          if (state.rows.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+      body: BlocListener<TimelineCubit, TimelineState>(
+        listenWhen: (previous, current) =>
+            current.scrollToEvent != null &&
+            previous.scrollToEvent != current.scrollToEvent,
+        listener: (context, state) {
+          if (state.scrollToEvent != null) {
+            _scrollToEventAnimated(state.scrollToEvent!, state);
+            // Clear the scroll event after handling
+            context.read<TimelineCubit>().clearScrollToEvent();
           }
-
-          // Calculate consistent dimensions based on time and content
-          final dimensions = _TimelineDimensions.calculate(
-            visibleStart: state.visibleStart,
-            visibleEnd: state.visibleEnd,
-            rows: state.rows,
-          );
-
-          return Column(
-            children: [
-              // Sticky ruler header
-              _StickyRuler(
-                dimensions: dimensions,
-                transformationController: _transformationController,
-              ),
-              // Timeline content with drag and drop functionality
-              Expanded(
-                child: _DraggableTimelineContent(
-                  rows: state.rows,
-                  dimensions: dimensions,
-                  transformationController: _transformationController,
-                  draggedRowIndex: _draggedRowIndex,
-                  dragTargetIndex: _dragTargetIndex,
-                  onDragStarted: (index) {
-                    setState(() {
-                      _draggedRowIndex = index;
-                    });
-                  },
-                  onDragEnded: () {
-                    setState(() {
-                      _draggedRowIndex = null;
-                      _dragTargetIndex = null;
-                    });
-                  },
-                  onDragAccepted: (draggedIndex, targetIndex) {
-                    // Only perform reorder if targetIndex is valid (not -1)
-                    if (targetIndex >= 0 && targetIndex != draggedIndex) {
-                      context.read<TimelineCubit>().reorderRows(
-                        draggedIndex,
-                        targetIndex,
-                      );
-                    }
-                    setState(() {
-                      _draggedRowIndex = null;
-                      _dragTargetIndex = null;
-                    });
-                  },
-                  onDragTargetChanged: (index) {
-                    setState(() {
-                      _dragTargetIndex = index;
-                    });
-                  },
-                ),
-              ),
-            ],
-          );
         },
+        child: BlocBuilder<TimelineCubit, TimelineState>(
+          builder: (context, state) {
+            if (state.rows.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            // Calculate consistent dimensions based on time and content
+            final dimensions = _TimelineDimensions.calculate(
+              visibleStart: state.visibleStart,
+              visibleEnd: state.visibleEnd,
+              rows: state.rows,
+            );
+
+            // Use LayoutBuilder to get actual timeline dimensions for proper scroll calculations
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                // Store the actual timeline width for scroll calculations
+                _actualTimelineWidth = constraints.maxWidth;
+
+                return Column(
+                  children: [
+                    // Sticky ruler header
+                    _StickyRuler(
+                      dimensions: dimensions,
+                      transformationController: _transformationController,
+                    ),
+                    // Timeline content with drag and drop functionality
+                    Expanded(
+                      child: _DraggableTimelineContent(
+                        rows: state.rows,
+                        dimensions: dimensions,
+                        transformationController: _transformationController,
+                        draggedRowIndex: _draggedRowIndex,
+                        dragTargetIndex: _dragTargetIndex,
+                        actualTimelineWidth: _actualTimelineWidth,
+                        onDragStarted: (index) {
+                          setState(() {
+                            _draggedRowIndex = index;
+                          });
+                        },
+                        onDragEnded: () {
+                          setState(() {
+                            _draggedRowIndex = null;
+                            _dragTargetIndex = null;
+                          });
+                        },
+                        onDragAccepted: (draggedIndex, targetIndex) {
+                          // Only perform reorder if targetIndex is valid (not -1)
+                          if (targetIndex >= 0 && targetIndex != draggedIndex) {
+                            context.read<TimelineCubit>().reorderRows(
+                              draggedIndex,
+                              targetIndex,
+                            );
+                          }
+                          setState(() {
+                            _draggedRowIndex = null;
+                            _dragTargetIndex = null;
+                          });
+                        },
+                        onDragTargetChanged: (index) {
+                          setState(() {
+                            _dragTargetIndex = index;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
       ),
     );
+  }
+
+  /// Animate the timeline to show a specific event
+  void _scrollToEventAnimated(Event event, TimelineState state) {
+    // Calculate dimensions to get pixel positions
+    final dimensions = _TimelineDimensions.calculate(
+      visibleStart: state.visibleStart,
+      visibleEnd: state.visibleEnd,
+      rows: state.rows,
+    );
+
+    // Calculate event position in timeline coordinates
+    final eventOffset = event.effectiveStartTime.difference(
+      dimensions.visibleStart,
+    );
+    final eventPixelPosition = eventOffset.inHours * dimensions.pixelsPerHour;
+
+    // Get current transformation values
+    final currentMatrix = _transformationController.value;
+    final currentScale = currentMatrix.getMaxScaleOnAxis();
+    final currentTranslation = currentMatrix.getTranslation();
+
+    // Get the actual viewport width available to the timeline (accounts for split screen)
+    final currentViewportWidth = _actualTimelineWidth > 0
+        ? _actualTimelineWidth
+        : MediaQuery.of(context).size.width;
+
+    // Calculate target screen position (1/3 from left edge for visual balance)
+    final targetScreenPosition = currentViewportWidth * (1 / 3);
+
+    // Calculate correct translation using transformation matrix mathematics:
+    // screen_x = (timeline_x × scale) + translation_x
+    // Therefore: translation_x = screen_x - (timeline_x × scale)
+    final targetTranslationX =
+        targetScreenPosition - (eventPixelPosition * currentScale);
+
+    // Create target transformation matrix preserving current scale and vertical position
+    final targetMatrix = Matrix4.identity()
+      ..translate(targetTranslationX, currentTranslation.y)
+      ..scale(currentScale);
+
+    // Dispose previous animation controller if it exists
+    _scrollAnimationController?.dispose();
+
+    // Create new animation controller
+    _scrollAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    // Create animation that interpolates between current and target matrix
+    final animation = Matrix4Tween(begin: currentMatrix, end: targetMatrix)
+        .animate(
+          CurvedAnimation(
+            parent: _scrollAnimationController!,
+            curve: Curves.easeInOut,
+          ),
+        );
+
+    // Listen to animation updates
+    animation.addListener(() {
+      _transformationController.value = animation.value;
+    });
+
+    // Start the animation
+    _scrollAnimationController!.forward();
   }
 }
 
@@ -193,11 +312,16 @@ class _TimelineDimensions {
     const periodEventFontWeight = FontWeight.w500;
     const groupEventFontWeight = FontWeight.w500;
 
-    // Timeline height based on actual row heights
-    final timelineHeight = rows.fold<double>(
+    // Timeline height based on actual row heights with extra padding for zoom-out
+    final baseTimelineHeight = rows.fold<double>(
       0.0,
       (sum, row) => sum + row.height,
     );
+
+    // Add significant padding to allow for more zoom-out flexibility
+    // This ensures users can always zoom out beyond the content bounds
+    final timelineHeight =
+        baseTimelineHeight * 2.0; // Double the height for zoom-out room
 
     return _TimelineDimensions._(
       visibleStart: visibleStart,
@@ -216,7 +340,7 @@ class _TimelineDimensions {
       eventPadding: eventPadding,
       eventBorderRadius: eventBorderRadius,
       eventOpacity: 0.9,
-      minScale: 0.2,
+      minScale: 0.1, // Allow more zoom-out
       maxScale: 4.0,
       defaultEventDuration: const Duration(hours: 2),
       memberCircleSize: memberCircleSize,
@@ -599,7 +723,7 @@ class _TimelineRowWidgetState extends State<_TimelineRowWidget> {
 }
 
 /// Event display component
-class _EventBox extends StatelessWidget {
+class _EventBox extends StatefulWidget {
   final Event event;
   final _TimelineDimensions dimensions;
   final double rowHeight;
@@ -610,70 +734,206 @@ class _EventBox extends StatelessWidget {
     required this.rowHeight,
   });
 
+  @override
+  State<_EventBox> createState() => _EventBoxState();
+}
+
+class _EventBoxState extends State<_EventBox> {
+  bool _isHovered = false;
+
   /// Get the display height for this event based on row height
   double _getEventDisplayHeight() {
     // For compact rows (≤75px), use standard event height
-    if (rowHeight <= 75) {
-      return dimensions.eventHeight;
+    if (widget.rowHeight <= 75) {
+      return widget.dimensions.eventHeight;
     }
     // For taller rows, maintain symmetric padding (same as top padding)
     final topPadding =
-        (75.0 - dimensions.eventHeight) / 2; // Same as verticalTop calculation
+        (75.0 - widget.dimensions.eventHeight) /
+        2; // Same as verticalTop calculation
     final availableHeight =
-        rowHeight - (topPadding * 2); // Subtract top and bottom padding
-    return availableHeight.clamp(dimensions.eventHeight, double.infinity);
+        widget.rowHeight - (topPadding * 2); // Subtract top and bottom padding
+    return availableHeight.clamp(
+      widget.dimensions.eventHeight,
+      double.infinity,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = _getEventColor(event);
-    final isGrouped = event.type == EventType.grouped;
+    return BlocBuilder<TimelineCubit, TimelineState>(
+      builder: (context, state) {
+        final color = _getEventColor(widget.event);
+        final isGrouped = widget.event.type == EventType.grouped;
 
-    // Calculate positioning
-    final leftOffset = _calculateLeftOffset();
-    // Position events to look centered at default height, then grow down from there
-    final verticalTop =
-        (75.0 - dimensions.eventHeight) / 2; // Centers at default 75px height
+        // Check if this event is hovered from external source (like map)
+        final isExternallyHovered = state.hoveredEvent?.id == widget.event.id;
+        final isEffectivelyHovered = _isHovered || isExternallyHovered;
 
-    // Handle grouped events specially
-    if (isGrouped) {
-      return Transform.translate(
-        offset: Offset(leftOffset, verticalTop),
-        child: _GroupedEventWidget(
-          event: event,
-          dimensions: dimensions,
-          color: color,
-          rowHeight: rowHeight,
-        ),
-      );
-    }
+        // Check if this event is selected
+        final isSelected = state.selectedEvent?.id == widget.event.id;
 
-    final isPeriodic = event.hasDuration;
-    final eventDuration = isPeriodic
-        ? event.duration!
-        : dimensions.defaultEventDuration;
+        // Calculate positioning
+        final leftOffset = _calculateLeftOffset();
+        // Position events to look centered at default height, then grow down from there
+        final verticalTop =
+            (75.0 - widget.dimensions.eventHeight) /
+            2; // Centers at default 75px height
 
-    final textWidth = _computeEventTextWidth(eventDuration);
-
-    return Transform.translate(
-      offset: Offset(leftOffset, verticalTop),
-      child: SizedBox(
-        width: textWidth,
-        height: _getEventDisplayHeight(),
-        child: isPeriodic
-            ? _PeriodEventWidget(
-                event: event,
+        // Handle grouped events specially
+        if (isGrouped) {
+          return Transform.translate(
+            offset: Offset(leftOffset, verticalTop),
+            child: _buildHoverableEvent(
+              isEffectivelyHovered: isEffectivelyHovered,
+              isSelected: isSelected,
+              child: _GroupedEventWidget(
+                event: widget.event,
+                dimensions: widget.dimensions,
                 color: color,
-                eventDuration: eventDuration,
-                dimensions: dimensions,
-                rowHeight: rowHeight,
-              )
-            : _PointEventWidget(
-                event: event,
-                color: color,
-                dimensions: dimensions,
-                rowHeight: rowHeight,
+                rowHeight: widget.rowHeight,
               ),
+            ),
+          );
+        }
+
+        final isPeriodic = widget.event.hasDuration;
+        final eventDuration = isPeriodic
+            ? widget.event.duration!
+            : widget.dimensions.defaultEventDuration;
+
+        final textWidth = _computeEventTextWidth(eventDuration);
+
+        return Transform.translate(
+          offset: Offset(leftOffset, verticalTop),
+          child: SizedBox(
+            width: textWidth,
+            height: _getEventDisplayHeight(),
+            child: _buildHoverableEvent(
+              isEffectivelyHovered: isEffectivelyHovered,
+              isSelected: isSelected,
+              child: isPeriodic
+                  ? _PeriodEventWidget(
+                      event: widget.event,
+                      color: color,
+                      eventDuration: eventDuration,
+                      dimensions: widget.dimensions,
+                      rowHeight: widget.rowHeight,
+                    )
+                  : _PointEventWidget(
+                      event: widget.event,
+                      color: color,
+                      dimensions: widget.dimensions,
+                      rowHeight: widget.rowHeight,
+                    ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHoverableEvent({
+    required Widget child,
+    required bool isEffectivelyHovered,
+    required bool isSelected,
+  }) {
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() => _isHovered = true);
+        context.read<TimelineCubit>().setHoveredEvent(widget.event);
+      },
+      onExit: (_) {
+        setState(() => _isHovered = false);
+        context.read<TimelineCubit>().clearHoveredEvent();
+      },
+      child: GestureDetector(
+        onTap: () {
+          // Select the event when clicked
+          context.read<TimelineCubit>().selectEvent(widget.event);
+        },
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Add selection overlay when selected - larger border that overlays adjacent events
+            if (isSelected)
+              Positioned(
+                left: -8, // Extend 8px to the left
+                right: -8, // Extend 8px to the right
+                top: -8, // Extend 8px upward
+                bottom: -8, // Extend 8px downward
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.deepPurpleAccent,
+                      width: 3,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            // Add highlight overlay when hovered (either directly or from map) - only if not selected
+            if (isEffectivelyHovered && !isSelected)
+              Positioned(
+                left:
+                    -6, // Extend 6px to the left (slightly smaller than selection)
+                right: -6, // Extend 6px to the right
+                top: -6, // Extend 6px upward
+                bottom: -6, // Extend 6px downward
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.deepPurpleAccent,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ),
+            child,
+            // "View on Map" button - only show when directly hovered (not from map) and event has coordinates
+            if (_isHovered && widget.event.hasCoordinates)
+              Positioned(
+                right: -8,
+                top: -8,
+                child: GestureDetector(
+                  onTap: () {
+                    // Navigate to event on map
+                    context.read<MapCubit>().navigateToEvent(widget.event);
+                  },
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.map, size: 14, color: Colors.white),
+                          const SizedBox(width: 4),
+                          const Text(
+                            'View on Map',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -693,44 +953,46 @@ class _EventBox extends StatelessWidget {
   }
 
   double _computeEventTextWidth(Duration eventDuration) {
-    final maxTextSpan = eventDuration < dimensions.defaultEventDuration
-        ? dimensions.defaultEventDuration
+    final maxTextSpan = eventDuration < widget.dimensions.defaultEventDuration
+        ? widget.dimensions.defaultEventDuration
         : eventDuration;
     // Use the same calculation method as the grid: hours * pixelsPerHour
-    return maxTextSpan.inHours * dimensions.pixelsPerHour;
+    return maxTextSpan.inHours * widget.dimensions.pixelsPerHour;
   }
 
   double _calculateLeftOffset() {
-    final isGrouped = event.type == EventType.grouped;
+    final isGrouped = widget.event.type == EventType.grouped;
 
     // For grouped events, calculate the leftmost position based on all members
-    if (isGrouped && event.members != null && event.members!.isNotEmpty) {
-      final memberPositions = event.members!.map((member) {
+    if (isGrouped &&
+        widget.event.members != null &&
+        widget.event.members!.isNotEmpty) {
+      final memberPositions = widget.event.members!.map((member) {
         final memberOffset = member.timestamp.difference(
-          dimensions.visibleStart,
+          widget.dimensions.visibleStart,
         );
-        return memberOffset.inHours * dimensions.pixelsPerHour;
+        return memberOffset.inHours * widget.dimensions.pixelsPerHour;
       }).toList();
 
       final minMemberPos = memberPositions.reduce((a, b) => a < b ? a : b);
-      final circleRadius = dimensions.memberCircleSize / 2;
+      final circleRadius = widget.dimensions.memberCircleSize / 2;
       return minMemberPos - circleRadius; // Left edge of first circle
     }
 
     // For regular events
-    final eventOffset = event.effectiveStartTime.difference(
-      dimensions.visibleStart,
+    final eventOffset = widget.event.effectiveStartTime.difference(
+      widget.dimensions.visibleStart,
     );
     // Use the same calculation method as the grid: hours * pixelsPerHour
     final timestampPixelPosition =
-        eventOffset.inHours * dimensions.pixelsPerHour;
+        eventOffset.inHours * widget.dimensions.pixelsPerHour;
 
     // For point events, center the circle on the timestamp
-    final isPeriodic = event.hasDuration;
+    final isPeriodic = widget.event.hasDuration;
     return isPeriodic
         ? timestampPixelPosition
         : timestampPixelPosition -
-              (dimensions.eventHeight / 2); // Center the circle
+              (widget.dimensions.eventHeight / 2); // Center the circle
   }
 }
 
@@ -1218,6 +1480,7 @@ class _DraggableTimelineContent extends StatelessWidget {
   final VoidCallback onDragEnded;
   final Function(int, int) onDragAccepted;
   final Function(int) onDragTargetChanged;
+  final double actualTimelineWidth;
 
   const _DraggableTimelineContent({
     required this.rows,
@@ -1229,6 +1492,7 @@ class _DraggableTimelineContent extends StatelessWidget {
     required this.onDragEnded,
     required this.onDragAccepted,
     required this.onDragTargetChanged,
+    required this.actualTimelineWidth,
   });
 
   @override
@@ -1345,6 +1609,7 @@ class _DraggableTimelineContent extends StatelessWidget {
                       row: rows[index],
                       dimensions: dimensions,
                       transformationController: transformationController,
+                      actualTimelineWidth: actualTimelineWidth,
                     ),
                     childWhenDragging: Container(
                       width: 40,
@@ -1496,11 +1761,13 @@ class _DragFeedback extends StatelessWidget {
   final TimelineRow row;
   final _TimelineDimensions dimensions;
   final TransformationController transformationController;
+  final double actualTimelineWidth;
 
   const _DragFeedback({
     required this.row,
     required this.dimensions,
     required this.transformationController,
+    required this.actualTimelineWidth,
   });
 
   @override
@@ -1511,15 +1778,18 @@ class _DragFeedback extends StatelessWidget {
     final scale = matrix.getMaxScaleOnAxis();
 
     // Calculate what part of the timeline is currently visible on screen
-    final screenWidth = MediaQuery.of(context).size.width;
+    // Use actual timeline width instead of full screen width for accurate calculations
+    final timelineWidth = actualTimelineWidth > 0
+        ? actualTimelineWidth
+        : MediaQuery.of(context).size.width;
     final visibleTimelineStart =
         -translation.x / scale; // Left edge of visible area in timeline coords
     final visibleTimelineWidth =
-        screenWidth / scale; // Width of visible area in timeline coords
+        timelineWidth / scale; // Width of visible area in timeline coords
     final visibleTimelineEnd = visibleTimelineStart + visibleTimelineWidth;
 
     // Create a preview showing only the visible portion at current scale
-    final previewWidth = screenWidth * 0.8;
+    final previewWidth = timelineWidth * 0.8;
     final previewHeight = row.height * scale; // Scale the height to match zoom
 
     return Material(

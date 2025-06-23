@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'package:bloc/bloc.dart';
-import 'package:flutter/services.dart';
-import 'package:cross_platform_development/timeline/models/models.dart';
+import 'package:cross_platform_development/shared/shared.dart';
+import 'package:cross_platform_development/map/map.dart';
 import 'timeline_state.dart';
+import 'package:flutter/rendering.dart';
 
 /// Extension to add layout-specific properties to Event
 extension EventLayout on Event {
@@ -23,23 +23,21 @@ extension EventLayout on Event {
 /// {@endtemplate}
 class TimelineCubit extends Cubit<TimelineState> {
   /// {@macro timeline_cubit}
-  TimelineCubit()
-    : super(
+  TimelineCubit({EventsRepository? eventsRepository, MapCubit? mapCubit})
+    : _eventsRepository = eventsRepository ?? const EventsRepository(),
+      _mapCubit = mapCubit,
+      super(
         TimelineState(
           visibleStart: DateTime.now().subtract(const Duration(hours: 2)),
           visibleEnd: DateTime.now().add(const Duration(hours: 6)),
         ),
       );
 
+  final EventsRepository _eventsRepository;
+  MapCubit? _mapCubit;
+
   Future<List<Event>> loadEvents() async {
-    final raw = await rootBundle.loadString('data.json');
-    final data = jsonDecode(raw) as Map<String, dynamic>;
-    final events = (data['events'] as List)
-        .map((e) => Event.fromJson(e))
-        .toList()
-        .cast<Event>();
-    events.sort((a, b) => a.effectiveStartTime.compareTo(b.effectiveStartTime));
-    return events;
+    return _eventsRepository.loadEvents();
   }
 
   Future<void> loadTimeline() async {
@@ -179,4 +177,65 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   /// Get the default row height
   static const double defaultRowHeight = 75.0;
+
+  /// Set hovered event and notify map to highlight corresponding marker
+  void setHoveredEvent(Event? event) {
+    emit(state.copyWith(hoveredEvent: event));
+    _mapCubit?.highlightEvent(event);
+  }
+
+  /// Clear hovered event
+  void clearHoveredEvent() {
+    emit(state.copyWith(clearHoveredEvent: true));
+    _mapCubit?.clearHighlight();
+  }
+
+  /// Scroll timeline to show a specific event
+  void scrollToEvent(Event event) {
+    // Trigger programmatic scrolling in the view without changing timeline bounds
+    emit(state.copyWith(scrollToEvent: event));
+  }
+
+  /// Clear the scroll to event flag (called after scrolling is complete)
+  void clearScrollToEvent() {
+    emit(state.copyWith(clearScrollToEvent: true));
+  }
+
+  /// Set the MapCubit reference (used to resolve circular dependency)
+  void setMapCubit(MapCubit mapCubit) {
+    _mapCubit = mapCubit;
+  }
+
+  /// Select an event (shared between map and timeline)
+  void selectEvent(Event? event) {
+    emit(state.copyWith(selectedEvent: event));
+    // Notify map to update its visual state
+    _mapCubit?.updateSelectedEvent(event);
+  }
+
+  /// Clear selected event
+  void clearSelection() {
+    emit(state.copyWith(clearSelectedEvent: true));
+    // Notify map to update its visual state
+    _mapCubit?.updateSelectedEvent(null);
+  }
+
+  /// Save the current transformation matrix to preserve scroll/zoom state
+  void saveTransformationMatrix(Matrix4 matrix) {
+    emit(state.copyWith(transformationMatrix: Matrix4.copy(matrix)));
+  }
+
+  /// Get the saved transformation matrix, or null if none exists
+  Matrix4? getSavedTransformationMatrix() {
+    if (state.transformationMatrix != null) {
+      return Matrix4.copy(state.transformationMatrix!);
+    } else {
+      return null;
+    }
+  }
+
+  /// Clear the saved transformation matrix
+  void clearTransformationMatrix() {
+    emit(state.copyWith(clearTransformationMatrix: true));
+  }
 }
