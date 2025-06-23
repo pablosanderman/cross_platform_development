@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:bloc/bloc.dart';
 import 'package:cross_platform_development/shared/shared.dart';
 import 'package:cross_platform_development/map/map.dart';
@@ -38,6 +40,24 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   Future<void> loadEvents() async {
     emit(state.copyWith(events: await _eventsRepository.loadEvents()));
+  }
+
+  Future<void> addEvent(String eventTitle) async {
+    var random = new Random();
+    var maxInt = 9;
+    final List<Event> newEvents = [...state.events];
+    String eventId = "evt-"
+        "${random.nextInt(maxInt)}"
+        "${random.nextInt(maxInt)}"
+        "${random.nextInt(maxInt)}"
+        "${random.nextInt(maxInt)}";
+    newEvents.add(Event(
+        id: eventId,
+        type: EventType.period,
+        title: eventTitle)
+    );
+
+    emit(state.copyWith(events: newEvents));
   }
 
   Future<void> loadTimeline() async {

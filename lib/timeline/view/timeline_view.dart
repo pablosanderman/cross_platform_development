@@ -91,67 +91,118 @@ class _TimelineViewState extends State<TimelineView>
               visibleEnd: state.visibleEnd,
               rows: state.rows,
             );
+            return Stack(
+              children: [
+                // Use LayoutBuilder to get actual timeline dimensions for proper scroll calculations
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Store the actual timeline width for scroll calculations
+                    _actualTimelineWidth = constraints.maxWidth;
 
-            // Use LayoutBuilder to get actual timeline dimensions for proper scroll calculations
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                // Store the actual timeline width for scroll calculations
-                _actualTimelineWidth = constraints.maxWidth;
-
-                return Column(
-                  children: [
-                    // Sticky ruler header
-                    _StickyRuler(
-                      dimensions: dimensions,
-                      transformationController: _transformationController,
-                    ),
-                    // Timeline content with drag and drop functionality
-                    Expanded(
-                      child: _DraggableTimelineContent(
-                        rows: state.rows,
-                        dimensions: dimensions,
-                        transformationController: _transformationController,
-                        draggedRowIndex: _draggedRowIndex,
-                        dragTargetIndex: _dragTargetIndex,
-                        actualTimelineWidth: _actualTimelineWidth,
-                        onDragStarted: (index) {
-                          setState(() {
-                            _draggedRowIndex = index;
-                          });
-                        },
-                        onDragEnded: () {
-                          setState(() {
-                            _draggedRowIndex = null;
-                            _dragTargetIndex = null;
-                          });
-                        },
-                        onDragAccepted: (draggedIndex, targetIndex) {
-                          // Only perform reorder if targetIndex is valid (not -1)
-                          if (targetIndex >= 0 && targetIndex != draggedIndex) {
-                            context.read<TimelineCubit>().reorderRows(
-                              draggedIndex,
-                              targetIndex,
-                            );
-                          }
-                          setState(() {
-                            _draggedRowIndex = null;
-                            _dragTargetIndex = null;
-                          });
-                        },
-                        onDragTargetChanged: (index) {
-                          setState(() {
-                            _dragTargetIndex = index;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
+                    return Column(
+                      children: [
+                        // Sticky ruler header
+                        _StickyRuler(
+                          dimensions: dimensions,
+                          transformationController: _transformationController,
+                        ),
+                        // Timeline content with drag and drop functionality
+                        Expanded(
+                          child: _DraggableTimelineContent(
+                            rows: state.rows,
+                            dimensions: dimensions,
+                            transformationController: _transformationController,
+                            draggedRowIndex: _draggedRowIndex,
+                            dragTargetIndex: _dragTargetIndex,
+                            actualTimelineWidth: _actualTimelineWidth,
+                            onDragStarted: (index) {
+                              setState(() {
+                                _draggedRowIndex = index;
+                              });
+                            },
+                            onDragEnded: () {
+                              setState(() {
+                                _draggedRowIndex = null;
+                                _dragTargetIndex = null;
+                              });
+                            },
+                            onDragAccepted: (draggedIndex, targetIndex) {
+                              // Only perform reorder if targetIndex is valid (not -1)
+                              if (targetIndex >= 0 &&
+                                  targetIndex != draggedIndex) {
+                                context.read<TimelineCubit>().reorderRows(
+                                  draggedIndex,
+                                  targetIndex,
+                                );
+                              }
+                              setState(() {
+                                _draggedRowIndex = null;
+                                _dragTargetIndex = null;
+                              });
+                            },
+                            onDragTargetChanged: (index) {
+                              setState(() {
+                                _dragTargetIndex = index;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: FloatingActionButton(
+                    child: Icon(Icons.add),
+                    onPressed: () {
+                      _displayTextInputDialog(context);
+                    },
+                  ),
+                ),
+              ],
             );
           },
         ),
       ),
+    );
+  }
+
+  Future<void> _displayTextInputDialog(BuildContext context) async {
+    final TextEditingController _textFieldController = TextEditingController();
+    return showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return BlocProvider.value(
+          value: context.read<TimelineCubit>(),
+          child: AlertDialog(
+            title: Text('Add Event'),
+            content: TextField(
+              controller: _textFieldController,
+              decoration: InputDecoration(hintText: "event name"),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('CANCEL'),
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                },
+              ),
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  if (_textFieldController.text.isNotEmpty) {
+                    context.read<TimelineCubit>()
+                        .addEvent(_textFieldController.text);
+
+                    Navigator.pop(dialogContext);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
