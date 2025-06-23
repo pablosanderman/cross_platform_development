@@ -33,7 +33,7 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
           color: Colors.black.withOpacity(0.8),
           child: Center(
             child: Container(
-              width: 500, // Fixed width (approximately 1/3 of 1440px screen)
+              width: 1000, // Fixed width (approximately 2/3 of 1440px screen)
               child: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(40),
@@ -79,12 +79,12 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
                   }).toList(),
                   
                   // Search field with Compare button
-                  Row(
+                  Stack(
                     children: [
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Container(
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
                               height: 48,
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.white, width: 1),
@@ -106,114 +106,73 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
                                 },
                               ),
                             ),
-                            // Search results dropdown
-                            if (state.searchQuery.isNotEmpty && state.searchResults.isNotEmpty)
-                              Container(
-                                margin: const EdgeInsets.only(top: 4),
-                                constraints: const BoxConstraints(maxHeight: 200),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: state.searchResults.take(5).length, // Limit to 5 results
-                                  itemBuilder: (context, index) {
-                                    final event = state.searchResults[index];
-                                    final isInComparison = state.isEventInComparison(event.id);
-                                    final isAtMaxCapacity = state.isAtMaxCapacity;
-                                    
-                                    return InkWell(
-                                      onTap: isInComparison || isAtMaxCapacity ? null : () {
-                                        context.read<ComparisonBloc>().add(AddEventToComparison(event));
-                                        _searchController.clear();
-                                        context.read<ComparisonBloc>().add(const SearchEventsForComparison(''));
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                            bottom: index < state.searchResults.take(5).length - 1
-                                                ? BorderSide(color: Colors.grey.shade200)
-                                                : BorderSide.none,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    event.title,
-                                                    style: TextStyle(
-                                                      fontWeight: FontWeight.w500,
-                                                      fontSize: 14,
-                                                      color: isInComparison || isAtMaxCapacity 
-                                                          ? Colors.grey 
-                                                          : Colors.black,
-                                                    ),
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                  const SizedBox(height: 2),
-                                                  Text(
-                                                    _getEventLocation(event),
-                                                    style: TextStyle(
-                                                      color: Colors.grey.shade600,
-                                                      fontSize: 12,
-                                                    ),
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            if (isInComparison)
-                                              const Icon(Icons.check, color: Colors.green, size: 20)
-                                            else if (isAtMaxCapacity)
-                                              Icon(Icons.block, color: Colors.grey.shade400, size: 20)
-                                            else
-                                              const Icon(Icons.add, color: Color(0xFF69A8F8), size: 20),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      GestureDetector(
-                        onTap: state.comparisonList.length >= 2 ? () {
-                          Navigator.of(context).pushNamed('/comparison');
-                          // Close the overlay after navigating
-                          context.read<ComparisonBloc>().add(const HideComparisonSelectionOverlay());
-                        } : null,
-                        child: Container(
-                          height: 48,
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          decoration: BoxDecoration(
-                            color: state.comparisonList.length >= 2 
-                                ? const Color(0xFF69A8F8) 
-                                : Colors.grey,
-                            borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Center(
-                            child: Text(
-                              'COMPARE',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                          const SizedBox(width: 16),
+                          GestureDetector(
+                            onTap: state.comparisonList.length >= 2 ? () {
+                              Navigator.of(context).pushNamed('/comparison');
+                              // Close the overlay after navigating
+                              context.read<ComparisonBloc>().add(const HideComparisonSelectionOverlay());
+                            } : null,
+                            child: Container(
+                              height: 48,
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              decoration: BoxDecoration(
+                                color: state.comparisonList.length >= 2 
+                                    ? const Color(0xFF69A8F8) 
+                                    : Colors.grey,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  'COMPARE',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
+                      // Search results dropdown (positioned absolutely)
+                      if (state.searchQuery.isNotEmpty && state.searchResults.isNotEmpty)
+                        Positioned(
+                          top: 52, // Just below the search field
+                          left: 0,
+                          right: 136, // Leave space for the compare button
+                          child: Container(
+                            constraints: const BoxConstraints(maxHeight: 200),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade900,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.grey.shade700),
+                            ),
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: state.searchResults.take(5).length, // Limit to 5 results
+                              itemBuilder: (context, index) {
+                                final event = state.searchResults[index];
+                                final isInComparison = state.isEventInComparison(event.id);
+                                final isAtMaxCapacity = state.isAtMaxCapacity;
+                                
+                                return _SearchResultItem(
+                                  event: event,
+                                  isInComparison: isInComparison,
+                                  isAtMaxCapacity: isAtMaxCapacity,
+                                  isLast: index == state.searchResults.take(5).length - 1,
+                                  onTap: isInComparison || isAtMaxCapacity ? null : () {
+                                    context.read<ComparisonBloc>().add(AddEventToComparison(event));
+                                    _searchController.clear();
+                                    context.read<ComparisonBloc>().add(const SearchEventsForComparison(''));
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 40),
@@ -268,7 +227,7 @@ class _ComparisonSelectionOverlayState extends State<ComparisonSelectionOverlay>
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        childAspectRatio: 1.5,
+        childAspectRatio: 1.8, // Increased from 1.5 to give more width
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
@@ -362,6 +321,110 @@ class _EventInputField extends StatelessWidget {
   }
 }
 
+// Search result item widget with hover effects
+class _SearchResultItem extends StatefulWidget {
+  final Event event;
+  final bool isInComparison;
+  final bool isAtMaxCapacity;
+  final bool isLast;
+  final VoidCallback? onTap;
+
+  const _SearchResultItem({
+    required this.event,
+    required this.isInComparison,
+    required this.isAtMaxCapacity,
+    required this.isLast,
+    this.onTap,
+  });
+
+  @override
+  State<_SearchResultItem> createState() => _SearchResultItemState();
+}
+
+class _SearchResultItemState extends State<_SearchResultItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isClickable = !widget.isInComparison && !widget.isAtMaxCapacity;
+    
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: _isHovered && isClickable 
+                ? Colors.grey.shade800 
+                : Colors.transparent,
+            border: Border(
+              bottom: widget.isLast
+                  ? BorderSide.none
+                  : BorderSide(color: Colors.grey.shade700),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.event.title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: widget.isInComparison || widget.isAtMaxCapacity 
+                            ? Colors.grey.shade500
+                            : Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                                         Text(
+                       _getEventLocationStatic(widget.event),
+                       style: TextStyle(
+                         color: Colors.grey.shade400,
+                         fontSize: 12,
+                       ),
+                       maxLines: 1,
+                       overflow: TextOverflow.ellipsis,
+                     ),
+                  ],
+                ),
+              ),
+              if (widget.isInComparison)
+                const Icon(Icons.check, color: Colors.green, size: 20)
+              else if (widget.isAtMaxCapacity)
+                Icon(Icons.block, color: Colors.grey.shade500, size: 20)
+              else
+                const Icon(Icons.add, color: Color(0xFF69A8F8), size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static String _getEventLocationStatic(Event event) {
+    final location = event.properties?['location']?.toString();
+    final region = event.properties?['region']?.toString();
+    
+    if (location != null && region != null) {
+      return '$location, $region';
+    } else if (location != null) {
+      return location;
+    } else if (region != null) {
+      return region;
+    } else {
+      return 'Unknown location';
+    }
+  }
+}
+
 // Recently viewed card widget
 class _RecentlyViewedCard extends StatelessWidget {
   final Event event;
@@ -384,27 +447,30 @@ class _RecentlyViewedCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8), // Reduced padding
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // Important: don't take more space than needed
           children: [
             // Event title at top
-            Text(
-              event.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+            Flexible(
+              child: Text(
+                event.title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12, // Reduced font size
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
-            const Spacer(),
+            const SizedBox(height: 8), // Fixed spacing instead of Spacer
             // Placeholder image in center
             Center(
               child: Container(
-                width: 60,
-                height: 40,
+                width: 50, // Reduced size
+                height: 30, // Reduced size
                 decoration: BoxDecoration(
                   color: Colors.grey.shade600,
                   borderRadius: BorderRadius.circular(4),
@@ -412,11 +478,11 @@ class _RecentlyViewedCard extends StatelessWidget {
                 child: Icon(
                   Icons.image,
                   color: Colors.grey.shade400,
-                  size: 24,
+                  size: 20, // Reduced icon size
                 ),
               ),
             ),
-            const Spacer(),
+            const SizedBox(height: 8), // Fixed spacing instead of Spacer
             // + button at bottom right
             Row(
               children: [
