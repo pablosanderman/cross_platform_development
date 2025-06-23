@@ -19,21 +19,15 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     on<AddMember>(_handleAddMemberToGroup);
   }
 
-void _handleDeleteGroup(
-  DeleteGroup event,
-  Emitter<GroupsState> emit,
-) {
-  final updatedGroups =
-      state.groups.where((g) => g.id != event.groupId).toList();
+  void _handleDeleteGroup(DeleteGroup event, Emitter<GroupsState> emit) {
+    final updatedGroups = state.groups
+        .where((g) => g.id != event.groupId)
+        .toList();
 
-  emit(state.copyWith(groups: updatedGroups));
-}
+    emit(state.copyWith(groups: updatedGroups));
+  }
 
-  void _handleRemoveMember(
-      RemoveMember event,
-      Emitter<GroupsState> emit,
-      ) {
-
+  void _handleRemoveMember(RemoveMember event, Emitter<GroupsState> emit) {
     final updatedGroups = state.groups.map((group) {
       if (group.id == event.groupId) {
         return _removeUserFromGroupMembers(group, event.user.id);
@@ -48,13 +42,15 @@ void _handleDeleteGroup(
       return currentUser;
     }).toList();
 
-    emit(state.copyWith(
+    emit(
+      state.copyWith(
         groups: updatedGroups,
         users: updatedUsers,
-        chosenGroup: _getUpdatedChosenGroup(updatedGroups, event.groupId)));
+        chosenGroup: _getUpdatedChosenGroup(updatedGroups, event.groupId),
+      ),
+    );
     Group.saveGroupsToFile(updatedGroups);
   }
-
 
   void _handleGroupMemberRoleChange(
     ChangeGroupMemberRole event,
@@ -76,8 +72,9 @@ void _handleDeleteGroup(
 
     emit(
       state.copyWith(
-          groups: updatedGroups,
-          chosenGroup: _getUpdatedChosenGroup(updatedGroups, event.group.id)),
+        groups: updatedGroups,
+        chosenGroup: _getUpdatedChosenGroup(updatedGroups, event.group.id),
+      ),
     );
     DataManager.saveAllData(getUsers(), getGroups());
   }
@@ -108,23 +105,20 @@ void _handleDeleteGroup(
     emit(state.copyWith(chosenGroup: event.chosenGroup));
   }
 
-void _handleCreateGroup(
-    CreateGroup event,
-    Emitter<GroupsState> emit,
-    ) {
-  var uuid = Uuid();
-  Group group = Group(
-    id: uuid.v4(),
-    name: event.groupName,
-    ownerId: FakeAccount.loggedInUser!.id,
-  );
-  group.addMember(FakeAccount.loggedInUser!.id);
-  FakeAccount.loggedInUser!.groupIds.add(group.id);
+  void _handleCreateGroup(CreateGroup event, Emitter<GroupsState> emit) {
+    var uuid = Uuid();
+    Group group = Group(
+      id: uuid.v4(),
+      name: event.groupName,
+      ownerId: FakeAccount.loggedInUser!.id,
+    );
+    group.addMember(FakeAccount.loggedInUser!.id);
+    FakeAccount.loggedInUser!.groupIds.add(group.id);
 
-  final updatedGroups = List<Group>.from(state.groups)..add(group);
+    final updatedGroups = List<Group>.from(state.groups)..add(group);
 
-  emit(state.copyWith(groups: updatedGroups));
-}
+    emit(state.copyWith(groups: updatedGroups));
+  }
 
   List<Group> getGroups() {
     return state.groups;
@@ -134,10 +128,7 @@ void _handleCreateGroup(
     return state.users;
   }
 
-  void _handleAddMemberToGroup(
-    AddMember event,
-    Emitter<GroupsState> emit,
-  ) {
+  void _handleAddMemberToGroup(AddMember event, Emitter<GroupsState> emit) {
     final updatedGroups = state.groups.map((group) {
       if (group == event.chosenGroup) {
         final newGroup = Group(

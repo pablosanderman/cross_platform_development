@@ -19,6 +19,8 @@ class Event extends Equatable {
   final DateTime? computedEnd;
   final Map<String, dynamic>? properties;
   final Map<String, dynamic>? aggregateData;
+  final double? latitude;
+  final double? longitude;
 
   const Event({
     required this.id,
@@ -33,6 +35,8 @@ class Event extends Equatable {
     this.computedEnd,
     this.properties,
     this.aggregateData,
+    this.latitude,
+    this.longitude,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
@@ -56,6 +60,8 @@ class Event extends Equatable {
       computedEnd: _parseNullableDate(json['computedEnd']),
       properties: json['properties'] as Map<String, dynamic>?,
       aggregateData: json['aggregateData'] as Map<String, dynamic>?,
+      latitude: json['latitude'] as double?,
+      longitude: json['longitude'] as double?,
     );
   }
 
@@ -127,6 +133,11 @@ class Event extends Equatable {
     }
   }
 
+  /// Check if this event has geographic coordinates
+  bool get hasCoordinates {
+    return latitude != null && longitude != null;
+  }
+
   @override
   List<Object?> get props => [
     id,
@@ -141,6 +152,8 @@ class Event extends Equatable {
     computedEnd,
     properties,
     aggregateData,
+    latitude,
+    longitude,
   ];
 }
 

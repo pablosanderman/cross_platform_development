@@ -1,34 +1,52 @@
 import 'package:cross_platform_development/app_observer.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
+import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'groups/bloc/groups_bloc.dart';
 import 'groups/groups.dart';
+import 'groups/bloc/groups_bloc.dart';
+import 'groups/groups.dart';
 import 'navigation/navigation.dart';
 import 'navigation/nav_item/nav_item.dart';
+import 'navigation/nav_item/nav_item.dart';
 import 'app.dart';
+import 'map/map.dart';
 
 void main() {
   Bloc.observer = const AppObserver();
+
+  // Create NavigationBloc first
+  final navigationBloc = NavigationBloc();
+
+  // Create TimelineCubit first (without MapCubit dependency for now)
+  final timelineCubit = TimelineCubit();
+
+  // Create MapCubit with NavigationBloc and TimelineCubit
+  final mapCubit = MapCubit(
+    navigationBloc: navigationBloc,
+    timelineCubit: timelineCubit,
+  );
+
+  // Now set the MapCubit reference in TimelineCubit
+  timelineCubit.setMapCubit(mapCubit);
+
   runApp(
     MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => NavigationBloc(),),
-        BlocProvider(create: (_) => NavItemsCubit(),),
-        BlocProvider(create: (_) => GroupsBloc(),),
-        BlocProvider(create: (_) => TimelineCubit(),),
+        BlocProvider.value(value: navigationBloc),
+        BlocProvider.value(value: mapCubit),
+        BlocProvider.value(value: timelineCubit),
+        BlocProvider(create: (_) => NavItemsCubit()),
+        BlocProvider(create: (_) => GroupsBloc()),
       ],
       child: const MyApp(),
-    )
+    ),
   );
   doWhenWindowReady(() {
     final win = appWindow;
-    const initialSize = Size(900, 500);
-    win.minSize = initialSize;
-    win.size = initialSize;
-    win.alignment = Alignment.center;
-    win.title = "Custom window with Flutter";
+    win.title = "Volcano Monitoring Dashboard";
     win.show();
   });
 }
