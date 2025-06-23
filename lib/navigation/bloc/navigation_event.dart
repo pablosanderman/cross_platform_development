@@ -28,3 +28,8 @@ class ShowMap extends NavigationEvent {
 class ShowTimeline extends NavigationEvent {
   ShowTimeline() : super(forceNavigate: true);
 }
+
+class UpdateSplitRatio extends NavigationEvent {
+  final double splitRatio;
+  UpdateSplitRatio(this.splitRatio) : super(forceNavigate: false);
+}
