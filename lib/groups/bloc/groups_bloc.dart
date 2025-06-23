@@ -112,6 +112,11 @@ void _handleCreateGroup(
     CreateGroup event,
     Emitter<GroupsState> emit,
     ) {
+    if(FakeAccount.loggedInUser == null) {
+      print("No LoggedInUser found, cannot create group");
+      return;
+    }
+
   var uuid = Uuid();
   Group group = Group(
     id: uuid.v4(),
