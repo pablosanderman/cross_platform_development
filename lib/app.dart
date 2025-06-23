@@ -1,6 +1,7 @@
 import 'package:cross_platform_development/navigation/nav_item/nav_item.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/map/map.dart';
+import 'package:cross_platform_development/shared/shared.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -24,14 +25,24 @@ class MyApp extends StatelessWidget {
               const NavigationView(),
               BlocBuilder<NavigationBloc, NavigationState>(
                 builder: (context, navState) {
-                  // If we're on page 0, show the timeline/map split-screen
+                  // If we're on page 0, show the timeline/map split-screen or event details
                   if (navState.currentPageIndex == 0) {
                     return Expanded(
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           final availableWidth = constraints.maxWidth;
-                          final bothVisible =
-                              navState.showTimeline && navState.showMap;
+                          
+                          // Handle event details mode
+                          if (navState.showEventDetails) {
+                            return _buildEventDetailsLayout(
+                              navState, 
+                              availableWidth, 
+                              constraints.maxHeight,
+                            );
+                          }
+                          
+                          // Standard timeline/map layout
+                          final bothVisible = navState.showTimeline && navState.showMap;
 
                           // Calculate widths based on visibility
                           double timelineWidth = 0;
@@ -57,9 +68,7 @@ class MyApp extends StatelessWidget {
                               Positioned(
                                 left: 0,
                                 top: 0,
-                                width: navState.showTimeline
-                                    ? timelineWidth
-                                    : 0,
+                                width: navState.showTimeline ? timelineWidth : 0,
                                 height: constraints.maxHeight,
                                 child: ClipRect(
                                   child: Visibility(
@@ -113,5 +122,61 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Build the layout for event details mode
+  Widget _buildEventDetailsLayout(
+    NavigationState navState,
+    double availableWidth,
+    double availableHeight,
+  ) {
+    final halfWidth = availableWidth / 2;
+    
+    // Determine layout based on details source
+    if (navState.detailsSource == EventDetailsSource.timeline) {
+      // Timeline source: Show timeline on left, event details on right
+      return Stack(
+        children: [
+          // Timeline on the left
+          Positioned(
+            left: 0,
+            top: 0,
+            width: halfWidth,
+            height: availableHeight,
+            child: const TimelinePage(),
+          ),
+          // Event details on the right
+          Positioned(
+            left: halfWidth,
+            top: 0,
+            width: halfWidth,
+            height: availableHeight,
+            child: const EventDetailsPanel(),
+          ),
+        ],
+      );
+    } else {
+      // Map source: Show event details on left, map on right
+      return Stack(
+        children: [
+          // Event details on the left
+          Positioned(
+            left: 0,
+            top: 0,
+            width: halfWidth,
+            height: availableHeight,
+            child: const EventDetailsPanel(),
+          ),
+          // Map on the right
+          Positioned(
+            left: halfWidth,
+            top: 0,
+            width: halfWidth,
+            height: availableHeight,
+            child: const MapPage(),
+          ),
+        ],
+      );
+    }
   }
 }

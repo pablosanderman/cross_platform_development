@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cross_platform_development/map/map.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
+import 'package:cross_platform_development/navigation/navigation.dart';
 
 /// {@template map_page}
 /// A page that displays an interactive map using OpenStreetMap.
@@ -73,7 +74,10 @@ class _MapViewState extends State<MapView> {
               isSelected: timelineState.selectedEvent?.id == firstEvent.id,
               isHighlighted: mapState.highlightedEvent?.id == firstEvent.id,
               onTap: () {
-                context.read<MapCubit>().showEventPopup(firstEvent);
+                // Show event details panel
+                context.read<NavigationBloc>().add(
+                  ShowEventDetails(firstEvent, EventDetailsSource.map),
+                );
               },
               onHover: () {
                 context.read<MapCubit>().hoverMapEvent(firstEvent);
@@ -98,7 +102,10 @@ class _MapViewState extends State<MapView> {
                 (e) => mapState.highlightedEvent?.id == e.id,
               ),
               onTap: () {
-                context.read<MapCubit>().showClusterPopup(events);
+                // For clusters, show details of the first event
+                context.read<NavigationBloc>().add(
+                  ShowEventDetails(events.first, EventDetailsSource.map),
+                );
               },
               onHover: () {
                 // For clusters, don't highlight any specific timeline event

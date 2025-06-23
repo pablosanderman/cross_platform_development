@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/map/map.dart';
+import 'package:cross_platform_development/navigation/navigation.dart';
 
 /// {@template timeline_view}
 /// A [StatelessWidget] which reacts to the provided
@@ -850,6 +851,11 @@ class _EventBoxState extends State<_EventBox> {
         onTap: () {
           // Select the event when clicked
           context.read<TimelineCubit>().selectEvent(widget.event);
+          
+          // Show event details panel
+          context.read<NavigationBloc>().add(
+            ShowEventDetails(widget.event, EventDetailsSource.timeline),
+          );
         },
         child: Stack(
           clipBehavior: Clip.none,

@@ -16,6 +16,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<ChangePage>(_handleChangePage);
     on<ShowMap>(_handleShowMap);
     on<ShowTimeline>(_handleShowTimeline);
+    on<ShowEventDetails>(_handleShowEventDetails);
+    on<CloseEventDetails>(_handleCloseEventDetails);
+    on<SwitchEventDetailsView>(_handleSwitchEventDetailsView);
   }
 
   void _handleToggleTimeline(
@@ -65,5 +68,76 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   void _handleShowTimeline(ShowTimeline event, Emitter<NavigationState> emit) {
     // Navigate to timeline/map page (index 0) and ensure timeline is visible
     emit(state.copyWith(showTimeline: true, currentPageIndex: 0));
+  }
+
+  void _handleShowEventDetails(ShowEventDetails event, Emitter<NavigationState> emit) {
+    // Navigate to timeline/map page (index 0) and show event details
+    
+    // Determine current view state to handle transitions properly
+    final currentlyBothVisible = state.showTimeline && state.showMap;
+    final currentlyTimelineOnly = state.showTimeline && !state.showMap;
+    final currentlyMapOnly = !state.showTimeline && state.showMap;
+    
+    if (event.source == EventDetailsSource.timeline) {
+      // Timeline click: Show timeline + event details (replace map)
+      // If currently in full-screen timeline, transition to split view
+      // If currently in split view or map-only, show timeline + details
+      emit(state.copyWith(
+        showTimeline: true,
+        showMap: false,
+        currentPageIndex: 0,
+        selectedEventForDetails: event.event,
+        detailsSource: EventDetailsSource.timeline,
+      ));
+    } else {
+      // Map click: Show event details + map (replace timeline)  
+      // If currently in full-screen map, transition to split view
+      // If currently in split view or timeline-only, show details + map
+      emit(state.copyWith(
+        showTimeline: false,
+        showMap: true,
+        currentPageIndex: 0,
+        selectedEventForDetails: event.event,
+        detailsSource: EventDetailsSource.map,
+      ));
+    }
+  }
+
+  void _handleCloseEventDetails(CloseEventDetails event, Emitter<NavigationState> emit) {
+    // Return to the previous view state based on the details source
+    if (state.detailsSource == EventDetailsSource.timeline) {
+      // Return to timeline view
+      emit(state.copyWith(
+        showTimeline: true,
+        showMap: false,
+        clearEventDetails: true,
+      ));
+    } else {
+      // Return to map view
+      emit(state.copyWith(
+        showTimeline: false,
+        showMap: true,
+        clearEventDetails: true,
+      ));
+    }
+  }
+
+  void _handleSwitchEventDetailsView(SwitchEventDetailsView event, Emitter<NavigationState> emit) {
+    // Switch to the target view while maintaining event details
+    if (event.targetSource == EventDetailsSource.timeline) {
+      // Switch to timeline + event details
+      emit(state.copyWith(
+        showTimeline: true,
+        showMap: false,
+        detailsSource: EventDetailsSource.timeline,
+      ));
+    } else {
+      // Switch to map + event details
+      emit(state.copyWith(
+        showTimeline: false,
+        showMap: true,
+        detailsSource: EventDetailsSource.map,
+      ));
+    }
   }
 }
