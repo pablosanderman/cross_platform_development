@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:cross_platform_development/shared/shared.dart';
@@ -38,23 +39,29 @@ class TimelineCubit extends Cubit<TimelineState> {
   final EventsRepository _eventsRepository;
   MapCubit? _mapCubit;
 
+  // Debouncing timer for transformation matrix updates
+  Timer? _transformationDebounceTimer;
+  Matrix4? _pendingTransformationMatrix;
+
   Future<void> addEvent(
-      String title,
-      String description,
-      DateTime? startTime,
-      DateTime? endTime,
-      double? latitude,
-      double? longitude,
-      ) async {
+    String title,
+    String description,
+    DateTime? startTime,
+    DateTime? endTime,
+    double? latitude,
+    double? longitude,
+  ) async {
     var random = Random();
     var maxInt = 9;
     final List<Event> newEvents = [...state.events];
-    String eventId = "evt-"
+    String eventId =
+        "evt-"
         "${random.nextInt(maxInt)}"
         "${random.nextInt(maxInt)}"
         "${random.nextInt(maxInt)}"
         "${random.nextInt(maxInt)}";
-    newEvents.add(Event(
+    newEvents.add(
+      Event(
         id: eventId,
         type: EventType.period,
         title: title,
@@ -62,8 +69,8 @@ class TimelineCubit extends Cubit<TimelineState> {
         startTime: startTime,
         endTime: endTime,
         latitude: latitude,
-        longitude: longitude
-    )
+        longitude: longitude,
+      ),
     );
 
     emit(state.copyWith(events: newEvents));
@@ -75,7 +82,9 @@ class TimelineCubit extends Cubit<TimelineState> {
   }
 
   Future<void> loadTimeline() async {
-    if(state.events.isEmpty) { await loadEvents(); }
+    if (state.events.isEmpty) {
+      await loadEvents();
+    }
 
     final List<Event> events = state.events;
     // Calculate visible window based on events
@@ -257,8 +266,23 @@ class TimelineCubit extends Cubit<TimelineState> {
   }
 
   /// Save the current transformation matrix to preserve scroll/zoom state
+  /// Uses debouncing to prevent excessive state emissions during drag operations
   void saveTransformationMatrix(Matrix4 matrix) {
-    emit(state.copyWith(transformationMatrix: Matrix4.copy(matrix)));
+    // Store the latest matrix but don't emit immediately
+    _pendingTransformationMatrix = Matrix4.copy(matrix);
+
+    // Cancel any existing timer
+    _transformationDebounceTimer?.cancel();
+
+    // Set a new timer to emit the state after a short delay
+    _transformationDebounceTimer = Timer(const Duration(milliseconds: 16), () {
+      if (_pendingTransformationMatrix != null) {
+        emit(
+          state.copyWith(transformationMatrix: _pendingTransformationMatrix),
+        );
+        _pendingTransformationMatrix = null;
+      }
+    });
   }
 
   /// Get the saved transformation matrix, or null if none exists
@@ -273,5 +297,11 @@ class TimelineCubit extends Cubit<TimelineState> {
   /// Clear the saved transformation matrix
   void clearTransformationMatrix() {
     emit(state.copyWith(clearTransformationMatrix: true));
+  }
+
+  @override
+  Future<void> close() {
+    _transformationDebounceTimer?.cancel();
+    return super.close();
   }
 }
