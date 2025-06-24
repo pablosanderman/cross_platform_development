@@ -391,6 +391,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
             children: [
               _buildHeader(),
               const SizedBox(height: 24),
+              _buildTimelineSection(),
+              const SizedBox(height: 24),
               _buildUniqueDataSection(),
               const SizedBox(height: 24),
               _buildAttachmentsAndActionsSection(),
@@ -444,23 +446,14 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title with mini-timeline positioned next to it
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text(
-                _event!.title,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1F2937),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            _buildMiniTimeline(),
-          ],
+        // Title only (no mini-timeline here)
+        Text(
+          _event!.title,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1F2937),
+          ),
         ),
         const SizedBox(height: 8),
         Row(
@@ -495,12 +488,23 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     );
   }
 
-  Widget _buildMiniTimeline() {
+  Widget _buildTimelineSection() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Timeline heading
+        Text(
+          'Timeline',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade800,
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Full-width timeline bar
         Container(
-          width: 120,
+          width: double.infinity,
           height: 6,
           decoration: BoxDecoration(
             color: const Color(0xFFE6E8EF),
@@ -521,12 +525,36 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
             ],
           ),
         ),
+        const SizedBox(height: 8),
+        // Start and end timestamps underneath
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              _formatDateTime(_event!.dateRange.start),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            if (_event!.dateRange.end != null)
+              Text(
+                _formatDateTime(_event!.dateRange.end!),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+          ],
+        ),
         const SizedBox(height: 4),
+        // Duration caption directly under the bar
         Text(
           _getDurationLabel(),
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
@@ -537,11 +565,11 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     if (_event!.dateRange.end != null) {
       final duration = _event!.dateRange.end!.difference(_event!.dateRange.start);
       if (duration.inDays > 0) {
-        return '${duration.inDays}d';
+        return '${duration.inDays} d';
       } else if (duration.inHours > 0) {
-        return '${duration.inHours}h';
+        return '${duration.inHours} h';
       } else {
-        return '${duration.inMinutes}m';
+        return '${duration.inMinutes} m';
       }
     }
     return 'Point Event';
@@ -1005,7 +1033,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // User name without group badges (removed as per feedback)
+                    // Tightened layout: removed extra spacing after removing user tags
                     Text(
                       user.displayName,
                       style: const TextStyle(
@@ -1026,7 +1054,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8), // Reduced from 12 to tighten layout
           Text(
             message.body,
             style: const TextStyle(
@@ -1036,7 +1064,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
             ),
           ),
           if (message.attachments.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 8), // Reduced from 12 to tighten layout
             _buildMessageAttachments(message.attachments),
           ],
         ],
@@ -1109,7 +1137,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6), // Reduced from 8 to tighten layout
                   // Render reply body with @mention highlighting
                   _buildReplyBodyWithMentions(reply.body),
                 ],
@@ -1241,7 +1269,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
             ),
           ),
           const SizedBox(height: 12),
-          // Updated layout: attach-file and post buttons on the right edge
+          // Fixed layout: attach-file and Post buttons on same row, right-aligned
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
