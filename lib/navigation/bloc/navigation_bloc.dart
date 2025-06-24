@@ -64,12 +64,26 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
 
   void _handleShowMap(ShowMap event, Emitter<NavigationState> emit) {
     // Navigate to timeline/map page (index 0) and ensure map is visible
-    emit(state.copyWith(showMap: true, currentPageIndex: 0));
+    // Preserve the current timeline state to avoid losing it
+    emit(
+      state.copyWith(
+        showMap: true,
+        showTimeline: state.showTimeline, // Explicitly preserve timeline state
+        currentPageIndex: 0,
+      ),
+    );
   }
 
   void _handleShowTimeline(ShowTimeline event, Emitter<NavigationState> emit) {
     // Navigate to timeline/map page (index 0) and ensure timeline is visible
-    emit(state.copyWith(showTimeline: true, currentPageIndex: 0));
+    // Preserve the current map state to avoid losing it
+    emit(
+      state.copyWith(
+        showTimeline: true,
+        showMap: state.showMap, // Explicitly preserve map state
+        currentPageIndex: 0,
+      ),
+    );
   }
 
   void _handleShowEventDetails(
@@ -82,16 +96,18 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     final previousShowTimeline = state.showTimeline;
     final previousShowMap = state.showMap;
 
-    // Force split-screen mode when showing event details
+    // Don't force split-screen mode - preserve current view state
+    // Only ensure we're on the timeline/map page (index 0)
     emit(
       state.copyWith(
-        showTimeline: true,
-        showMap: true,
         currentPageIndex: 0,
         selectedEventForDetails: event.event,
         detailsSource: event.source,
         previousShowTimeline: previousShowTimeline,
         previousShowMap: previousShowMap,
+        // Keep current view state instead of forcing both visible
+        showTimeline: state.showTimeline,
+        showMap: state.showMap,
       ),
     );
   }

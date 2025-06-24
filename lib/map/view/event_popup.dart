@@ -140,10 +140,22 @@ class EventPopup extends StatelessWidget {
                                     // Clickable image placeholder
                                     GestureDetector(
                                       onTap: () {
-                                        // Close popup and show event details
-                                        context.read<MapCubit>().closePopup();
+                                        // Hide popup without clearing selection and show event details
+                                        context.read<MapCubit>().emit(
+                                          context
+                                              .read<MapCubit>()
+                                              .state
+                                              .copyWith(
+                                                showPopup: false,
+                                                popupEvents: <Event>[],
+                                                popupCurrentIndex: 0,
+                                              ),
+                                        );
                                         context.read<NavigationBloc>().add(
-                                          ShowEventDetails(currentEvent, EventDetailsSource.map),
+                                          ShowEventDetails(
+                                            currentEvent,
+                                            EventDetailsSource.map,
+                                          ),
                                         );
                                       },
                                       child: Container(
@@ -151,7 +163,9 @@ class EventPopup extends StatelessWidget {
                                         height: 80,
                                         decoration: BoxDecoration(
                                           color: Colors.grey[200],
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                           border: Border.all(
                                             color: Colors.grey[300]!,
                                           ),
@@ -175,11 +189,25 @@ class EventPopup extends StatelessWidget {
                                           // Clickable title
                                           GestureDetector(
                                             onTap: () {
-                                              // Close popup and show event details
-                                              context.read<MapCubit>().closePopup();
-                                              context.read<NavigationBloc>().add(
-                                                ShowEventDetails(currentEvent, EventDetailsSource.map),
+                                              // Hide popup without clearing selection and show event details
+                                              context.read<MapCubit>().emit(
+                                                context
+                                                    .read<MapCubit>()
+                                                    .state
+                                                    .copyWith(
+                                                      showPopup: false,
+                                                      popupEvents: <Event>[],
+                                                      popupCurrentIndex: 0,
+                                                    ),
                                               );
+                                              context
+                                                  .read<NavigationBloc>()
+                                                  .add(
+                                                    ShowEventDetails(
+                                                      currentEvent,
+                                                      EventDetailsSource.map,
+                                                    ),
+                                                  );
                                             },
                                             child: Text(
                                               currentEvent.title,
@@ -187,7 +215,8 @@ class EventPopup extends StatelessWidget {
                                                 fontSize: 24,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.blue,
-                                                decoration: TextDecoration.underline,
+                                                decoration:
+                                                    TextDecoration.underline,
                                               ),
                                             ),
                                           ),
