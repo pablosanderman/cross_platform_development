@@ -186,43 +186,20 @@ class MyApp extends StatelessWidget {
     // Calculate event details width based on split ratio
     final eventDetailsWidth = (availableWidth * navState.eventDetailsSplitRatio)
         .clamp(minDetailsWidth, maxDetailsWidth);
-    final remainingWidth = availableWidth - eventDetailsWidth;
 
     double overlayLeft;
-    double mainContentLeft;
-    double mainContentWidth;
-    double dividerLeft;
-    final dividerWidth = 6.0;
 
     if (navState.detailsSource == EventDetailsSource.timeline) {
       // Timeline source: Show event details on right side
-      overlayLeft = remainingWidth;
-      mainContentLeft = 0;
-      mainContentWidth = remainingWidth - dividerWidth;
-      dividerLeft = remainingWidth - dividerWidth;
+      overlayLeft = availableWidth - eventDetailsWidth;
     } else {
       // Map source: Show event details on left side
       overlayLeft = 0;
-      mainContentLeft = eventDetailsWidth + dividerWidth;
-      mainContentWidth = remainingWidth - dividerWidth;
-      dividerLeft = eventDetailsWidth;
     }
 
     return Stack(
       children: [
-        // Main content area (timeline or map)
-        Positioned(
-          left: mainContentLeft,
-          top: 0,
-          width: mainContentWidth,
-          height: availableHeight,
-          child: ClipRect(
-            child: navState.detailsSource == EventDetailsSource.timeline
-                ? const TimelinePage()
-                : const MapPage(),
-          ),
-        ),
-        // Event details panel
+        // Event details panel only - no duplicate main content area
         Positioned(
           left: overlayLeft,
           top: 0,
@@ -239,20 +216,6 @@ class MyApp extends StatelessWidget {
               ],
             ),
             child: const EventDetailsPanel(),
-          ),
-        ),
-        // Resizable divider
-        Positioned(
-          left: dividerLeft,
-          top: 0,
-          width: dividerWidth,
-          height: availableHeight,
-          child: _EventDetailsResizeDivider(
-            availableWidth: availableWidth,
-            minDetailsWidth: minDetailsWidth,
-            maxDetailsWidth: maxDetailsWidth,
-            isDetailsOnRight:
-                navState.detailsSource == EventDetailsSource.timeline,
           ),
         ),
       ],
