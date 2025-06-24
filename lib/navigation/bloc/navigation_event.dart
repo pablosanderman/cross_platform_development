@@ -49,3 +49,8 @@ class SwitchEventDetailsView extends NavigationEvent {
   
   SwitchEventDetailsView(this.targetSource) : super(forceNavigate: false);
 }
+
+class UpdateSplitRatio extends NavigationEvent {
+  final double splitRatio;
+  UpdateSplitRatio(this.splitRatio) : super(forceNavigate: false);
+}

@@ -19,6 +19,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<ShowEventDetails>(_handleShowEventDetails);
     on<CloseEventDetails>(_handleCloseEventDetails);
     on<SwitchEventDetailsView>(_handleSwitchEventDetailsView);
+    on<UpdateSplitRatio>(_handleUpdateSplitRatio);
   }
 
   void _handleToggleTimeline(
@@ -106,5 +107,14 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     emit(state.copyWith(
       detailsSource: event.targetSource,
     ));
+  }
+
+  void _handleUpdateSplitRatio(
+    UpdateSplitRatio event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Clamp split ratio between 0.0 and 1.0
+    final clampedRatio = event.splitRatio.clamp(0.0, 1.0);
+    emit(state.copyWith(splitRatio: clampedRatio));
   }
 }

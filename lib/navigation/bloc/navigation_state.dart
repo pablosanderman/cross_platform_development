@@ -12,6 +12,7 @@ class NavigationState {
   // Store the previous state before showing event details
   final bool? previousShowTimeline;
   final bool? previousShowMap;
+  final double splitRatio; // 0.0 = full map, 1.0 = full timeline, 0.5 = equal split
 
   NavigationState({
     required this.showTimeline,
@@ -21,6 +22,7 @@ class NavigationState {
     this.detailsSource,
     this.previousShowTimeline,
     this.previousShowMap,
+    this.splitRatio = 0.5, // Default to equal split
   });
 
   /// Checks if event details panel should be shown
@@ -38,6 +40,7 @@ class NavigationState {
     bool? previousShowTimeline,
     bool? previousShowMap,
     bool clearEventDetails = false,
+    double? splitRatio,
   }) {
     return NavigationState(
       showTimeline: showTimeline ?? this.showTimeline,
@@ -47,6 +50,7 @@ class NavigationState {
       detailsSource: clearEventDetails ? null : (detailsSource ?? this.detailsSource),
       previousShowTimeline: clearEventDetails ? null : (previousShowTimeline ?? this.previousShowTimeline),
       previousShowMap: clearEventDetails ? null : (previousShowMap ?? this.previousShowMap),
+      splitRatio: splitRatio ?? this.splitRatio,
     );
   }
 }

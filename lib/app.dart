@@ -2,6 +2,7 @@ import 'package:cross_platform_development/navigation/nav_item/nav_item.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/map/map.dart';
 import 'package:cross_platform_development/shared/shared.dart';
+import 'package:cross_platform_development/resizable_split_view.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -35,28 +36,11 @@ class MyApp extends StatelessWidget {
                           
                           // Always build the standard timeline/map layout
                           // Event details will be shown as overlay if needed
+                          // Now with resizable split view support
                           
-                          // Standard timeline/map layout
                           final bothVisible = navState.showTimeline && navState.showMap;
 
-                          // Calculate widths based on visibility
-                          double timelineWidth = 0;
-                          double mapWidth = 0;
-
-                          if (bothVisible) {
-                            // Both visible: split the space equally
-                            timelineWidth = availableWidth / 2;
-                            mapWidth = availableWidth / 2;
-                          } else if (navState.showTimeline) {
-                            // Only timeline visible: take full width
-                            timelineWidth = availableWidth;
-                            mapWidth = 0;
-                          } else if (navState.showMap) {
-                            // Only map visible: take full width
-                            timelineWidth = 0;
-                            mapWidth = availableWidth;
-                          }
-
+                          // Wrap everything with EventVisibility and Comparison features
                           return BlocBuilder<
                             EventVisibilityCubit,
                             EventVisibilityState
@@ -65,44 +49,28 @@ class MyApp extends StatelessWidget {
                               return ComparisonPage(
                                 child: Stack(
                                   children: [
-                                    // Timeline - always present but positioned/sized
-                                    Positioned(
-                                      left: 0,
-                                      top: 0,
-                                      width: navState.showTimeline
-                                          ? timelineWidth
-                                          : 0,
-                                      height: constraints.maxHeight,
-                                      child: ClipRect(
-                                        child: Visibility(
-                                          visible: navState.showTimeline,
-                                          maintainState: true,
-                                          maintainAnimation: true,
-                                          maintainSize: false,
-                                          child: const TimelinePage(),
-                                        ),
+                                    // Main layout - either resizable split view or single view
+                                    if (bothVisible)
+                                      // Both visible: use resizable split view
+                                      ResizableSplitView(
+                                        leftChild: const TimelinePage(),
+                                        rightChild: const MapPage(),
+                                        splitRatio: navState.splitRatio,
+                                        minLeftWidth: 200.0,
+                                        minRightWidth: 200.0,
+                                        onSplitRatioChanged: (ratio) {
+                                          context.read<NavigationBloc>().add(
+                                            UpdateSplitRatio(ratio),
+                                          );
+                                        },
+                                      )
+                                    else
+                                      // Only one component visible: use simple layout
+                                      _buildSingleViewLayout(
+                                        navState,
+                                        constraints,
+                                        availableWidth,
                                       ),
-                                    ),
-                                    // Map - always present but positioned/sized
-                                    Positioned(
-                                      left: bothVisible
-                                          ? timelineWidth
-                                          : (navState.showMap
-                                                ? 0
-                                                : availableWidth),
-                                      top: 0,
-                                      width: navState.showMap ? mapWidth : 0,
-                                      height: constraints.maxHeight,
-                                      child: ClipRect(
-                                        child: Visibility(
-                                          visible: navState.showMap,
-                                          maintainState: true,
-                                          maintainAnimation: true,
-                                          maintainSize: false,
-                                          child: const MapPage(),
-                                        ),
-                                      ),
-                                    ),
                                     // Event details overlay
                                     if (navState.showEventDetails)
                                       _buildEventDetailsOverlay(
@@ -148,6 +116,63 @@ class MyApp extends StatelessWidget {
         ),
       ),
       routes: {'/comparison': (context) => const ComparisonResultsPage()},
+    );
+  }
+
+  /// Build single view layout when only timeline or map is visible
+  Widget _buildSingleViewLayout(
+    NavigationState navState,
+    BoxConstraints constraints,
+    double availableWidth,
+  ) {
+    double timelineWidth = 0;
+    double mapWidth = 0;
+
+    if (navState.showTimeline) {
+      // Only timeline visible: take full width
+      timelineWidth = availableWidth;
+      mapWidth = 0;
+    } else if (navState.showMap) {
+      // Only map visible: take full width
+      timelineWidth = 0;
+      mapWidth = availableWidth;
+    }
+
+    return Stack(
+      children: [
+        // Timeline - always present but positioned/sized
+        Positioned(
+          left: 0,
+          top: 0,
+          width: navState.showTimeline ? timelineWidth : 0,
+          height: constraints.maxHeight,
+          child: ClipRect(
+            child: Visibility(
+              visible: navState.showTimeline,
+              maintainState: true,
+              maintainAnimation: true,
+              maintainSize: false,
+              child: const TimelinePage(),
+            ),
+          ),
+        ),
+        // Map - always present but positioned/sized
+        Positioned(
+          left: navState.showMap ? 0 : availableWidth,
+          top: 0,
+          width: navState.showMap ? mapWidth : 0,
+          height: constraints.maxHeight,
+          child: ClipRect(
+            child: Visibility(
+              visible: navState.showMap,
+              maintainState: true,
+              maintainAnimation: true,
+              maintainSize: false,
+              child: const MapPage(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
