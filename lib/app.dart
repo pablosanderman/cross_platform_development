@@ -6,6 +6,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'navigation/navigation.dart';
+import 'comparison/comparison.dart';
 
 const borderColor = Color(0xFF805306);
 
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
               const NavigationView(),
               BlocBuilder<NavigationBloc, NavigationState>(
                 builder: (context, navState) {
-                  // If we're on page 0, show the timeline/map split-screen
+                  // If we're on page 0, show the timeline/map split-screen with comparison overlay
                   if (navState.currentPageIndex == 0) {
                     return Expanded(
                       child: LayoutBuilder(
@@ -52,58 +53,65 @@ class MyApp extends StatelessWidget {
                             mapWidth = availableWidth;
                           }
 
-                          return BlocBuilder<EventVisibilityCubit, EventVisibilityState>(
+                          return BlocBuilder<
+                            EventVisibilityCubit,
+                            EventVisibilityState
+                          >(
                             builder: (context, visibilityState) {
-                              return Stack(
-                                children: [
-                                  // Timeline - always present but positioned/sized
-                                  Positioned(
-                                    left: 0,
-                                    top: 0,
-                                    width: navState.showTimeline
-                                        ? timelineWidth
-                                        : 0,
-                                    height: constraints.maxHeight,
-                                    child: ClipRect(
-                                      child: Visibility(
-                                        visible: navState.showTimeline,
-                                        maintainState: true,
-                                        maintainAnimation: true,
-                                        maintainSize: false,
-                                        child: const TimelinePage(),
+                              return ComparisonPage(
+                                child: Stack(
+                                  children: [
+                                    // Timeline - always present but positioned/sized
+                                    Positioned(
+                                      left: 0,
+                                      top: 0,
+                                      width: navState.showTimeline
+                                          ? timelineWidth
+                                          : 0,
+                                      height: constraints.maxHeight,
+                                      child: ClipRect(
+                                        child: Visibility(
+                                          visible: navState.showTimeline,
+                                          maintainState: true,
+                                          maintainAnimation: true,
+                                          maintainSize: false,
+                                          child: const TimelinePage(),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  // Map - always present but positioned/sized
-                                  Positioned(
-                                    left: bothVisible
-                                        ? timelineWidth
-                                        : (navState.showMap ? 0 : availableWidth),
-                                    top: 0,
-                                    width: navState.showMap ? mapWidth : 0,
-                                    height: constraints.maxHeight,
-                                    child: ClipRect(
-                                      child: Visibility(
-                                        visible: navState.showMap,
-                                        maintainState: true,
-                                        maintainAnimation: true,
-                                        maintainSize: false,
-                                        child: const MapPage(),
+                                    // Map - always present but positioned/sized
+                                    Positioned(
+                                      left: bothVisible
+                                          ? timelineWidth
+                                          : (navState.showMap
+                                                ? 0
+                                                : availableWidth),
+                                      top: 0,
+                                      width: navState.showMap ? mapWidth : 0,
+                                      height: constraints.maxHeight,
+                                      child: ClipRect(
+                                        child: Visibility(
+                                          visible: navState.showMap,
+                                          maintainState: true,
+                                          maintainAnimation: true,
+                                          maintainSize: false,
+                                          child: const MapPage(),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  // Event Visibility FAB
-                                  const Positioned(
-                                    bottom: 16,
-                                    right: 16,
-                                    child: EventVisibilityFab(),
-                                  ),
-                                  // Event Visibility Panel Overlay
-                                  if (visibilityState.panelOpen)
-                                    const Positioned.fill(
-                                      child: EventVisibilityPanel(),
+                                    // Event Visibility FAB
+                                    const Positioned(
+                                      bottom: 16,
+                                      right: 16,
+                                      child: EventVisibilityFab(),
                                     ),
-                                ],
+                                    // Event Visibility Panel Overlay
+                                    if (visibilityState.panelOpen)
+                                      const Positioned.fill(
+                                        child: EventVisibilityPanel(),
+                                      ),
+                                  ],
+                                ),
                               );
                             },
                           );
@@ -128,6 +136,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
+      routes: {'/comparison': (context) => const ComparisonResultsPage()},
     );
   }
 }

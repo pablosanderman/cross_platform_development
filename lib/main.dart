@@ -10,9 +10,15 @@ import 'navigation/nav_item/nav_item.dart';
 import 'shared/shared.dart';
 import 'app.dart';
 import 'map/map.dart';
+import 'comparison/comparison.dart';
+import 'shared/repositories/repositories.dart';
 
 void main() {
   Bloc.observer = const AppObserver();
+
+  // Create repositories and services
+  final eventsRepository = const EventsRepository();
+  final recentlyViewedService = RecentlyViewedService();
 
   // Create NavigationBloc first
   final navigationBloc = NavigationBloc();
@@ -29,6 +35,12 @@ void main() {
   // Now set the MapCubit reference in TimelineCubit
   timelineCubit.setMapCubit(mapCubit);
 
+  // Create ComparisonBloc
+  final comparisonBloc = ComparisonBloc(
+    eventsRepository: eventsRepository,
+    recentlyViewedService: recentlyViewedService,
+  );
+
   runApp(
     MultiBlocProvider(
       providers: [
@@ -38,6 +50,7 @@ void main() {
         BlocProvider(create: (_) => NavItemsCubit()),
         BlocProvider(create: (_) => GroupsBloc()),
         BlocProvider(create: (_) => EventVisibilityCubit()),
+        BlocProvider.value(value: comparisonBloc),
       ],
       child: const MyApp(),
     ),
