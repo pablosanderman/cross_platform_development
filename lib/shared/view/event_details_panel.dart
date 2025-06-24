@@ -458,41 +458,78 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               ),
             ),
             const SizedBox(width: 16),
-            // Mini timeline bar next to title
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  width: 120,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE6E8EF),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Container(
+            // Mini timeline bar next to title - positioned to avoid close button overlap
+            Padding(
+              padding: const EdgeInsets.only(right: 60), // Extra margin to avoid close button at top:16, right:16
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // Timeline bar with start/end timestamps
+                  SizedBox(
+                    width: 160, // Increased width to accommodate timestamps
+                    child: Column(
+                      children: [
+                        // Start and end timestamps above the bar
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _formatCompactDateTime(_event!.dateRange.start),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            if (_event!.dateRange.end != null)
+                              Text(
+                                _formatCompactDateTime(_event!.dateRange.end!),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        // Timeline bar
+                        Container(
+                          width: 160,
+                          height: 6,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF63656E),
+                            color: const Color(0xFFE6E8EF),
                             borderRadius: BorderRadius.circular(3),
                           ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF63656E),
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                ),
+                              ),
+                              Expanded(flex: 7, child: Container()),
+                            ],
+                          ),
                         ),
-                      ),
-                      Expanded(flex: 7, child: Container()),
-                    ],
+                        const SizedBox(height: 4),
+                        // Duration label underneath the bar
+                        Text(
+                          _getDurationLabel(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _getDurationLabel(),
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -844,40 +881,9 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
   Widget _buildInlineReplyField(String parentMessageId) {
     final showField = _showReplyField[parentMessageId] ?? false;
     
+    // Don't show the "Reply..." prompt - only show the actual reply field when activated
     if (!showField) {
-      return Padding(
-        padding: const EdgeInsets.only(left: 40, top: 8),
-        child: GestureDetector(
-          onTap: () {
-            setState(() {
-              _showReplyField[parentMessageId] = true;
-            });
-            // Create controller and focus node if they don't exist
-            if (!_replyControllers.containsKey(parentMessageId)) {
-              _replyControllers[parentMessageId] = TextEditingController();
-              _replyFocusNodes[parentMessageId] = FocusNode();
-            }
-            // Pre-fill with @mention and focus
-            final parentMessage = _event!.discussion.firstWhere((m) => m.id == parentMessageId);
-            final parentAuthor = _users.firstWhere(
-              (u) => u.id == parentMessage.author,
-              orElse: () => User(id: parentMessage.author, displayName: 'Unknown User', avatar: '', groups: []),
-            );
-            _replyControllers[parentMessageId]!.text = '@${parentAuthor.id} ';
-            _replyControllers[parentMessageId]!.selection = TextSelection.fromPosition(
-              TextPosition(offset: _replyControllers[parentMessageId]!.text.length),
-            );
-            _replyFocusNodes[parentMessageId]!.requestFocus();
-          },
-          child: Text(
-            'Reply...',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade600,
-            ),
-          ),
-        ),
-      );
+      return const SizedBox.shrink(); // Remove the extra reply button completely
     }
 
     return Container(
@@ -915,26 +921,38 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                 child: const Text('Cancel'),
               ),
               const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement actual reply posting
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Reply posting feature coming soon!'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                  setState(() {
-                    _showReplyField[parentMessageId] = false;
-                    _replyControllers[parentMessageId]?.clear();
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1A73E8),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              // Reply arrow icon button for consistency
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A73E8),
+                  borderRadius: BorderRadius.circular(16), // Smaller circular button for inline reply
                 ),
-                child: const Text('Reply'),
+                child: IconButton(
+                  onPressed: () {
+                    // TODO: Implement actual reply posting
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Reply posting feature coming soon!'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    setState(() {
+                      _showReplyField[parentMessageId] = false;
+                      _replyControllers[parentMessageId]?.clear();
+                    });
+                  },
+                  icon: const Icon(
+                    Icons.send,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  tooltip: 'Post reply',
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
               ),
             ],
           ),
@@ -1318,21 +1336,34 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                 tooltip: 'Attach file',
               ),
               const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Post message feature coming soon!'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                  _mainComposerController.clear();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1A73E8),
-                  foregroundColor: Colors.white,
+              // Post arrow icon button instead of text button
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A73E8),
+                  borderRadius: BorderRadius.circular(20), // Circular button
                 ),
-                child: const Text('Post'),
+                child: IconButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Post message feature coming soon!'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    _mainComposerController.clear();
+                  },
+                  icon: const Icon(
+                    Icons.send,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                  tooltip: 'Post message',
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
               ),
             ],
           ),
@@ -1343,6 +1374,11 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
 
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _formatCompactDateTime(DateTime dateTime) {
+    // Format for compact timeline display: "12/03 14:30"
+    return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   String _formatRelativeTime(DateTime timestamp) {
