@@ -16,6 +16,11 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<ChangePage>(_handleChangePage);
     on<ShowMap>(_handleShowMap);
     on<ShowTimeline>(_handleShowTimeline);
+    on<ShowEventDetails>(_handleShowEventDetails);
+    on<CloseEventDetails>(_handleCloseEventDetails);
+    on<SwitchEventDetailsView>(_handleSwitchEventDetailsView);
+    on<UpdateSplitRatio>(_handleUpdateSplitRatio);
+    on<UpdateEventDetailsSplitRatio>(_handleUpdateEventDetailsSplitRatio);
   }
 
   void _handleToggleTimeline(
@@ -65,5 +70,72 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   void _handleShowTimeline(ShowTimeline event, Emitter<NavigationState> emit) {
     // Navigate to timeline/map page (index 0) and ensure timeline is visible
     emit(state.copyWith(showTimeline: true, currentPageIndex: 0));
+  }
+
+  void _handleShowEventDetails(
+    ShowEventDetails event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Navigate to timeline/map page (index 0) and show event details as overlay
+
+    // Store current state to restore when closing details
+    final previousShowTimeline = state.showTimeline;
+    final previousShowMap = state.showMap;
+
+    // Force split-screen mode when showing event details
+    emit(
+      state.copyWith(
+        showTimeline: true,
+        showMap: true,
+        currentPageIndex: 0,
+        selectedEventForDetails: event.event,
+        detailsSource: event.source,
+        previousShowTimeline: previousShowTimeline,
+        previousShowMap: previousShowMap,
+      ),
+    );
+  }
+
+  void _handleCloseEventDetails(
+    CloseEventDetails event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Restore the previous view state
+    final previousTimeline = state.previousShowTimeline ?? true;
+    final previousMap = state.previousShowMap ?? false;
+
+    emit(
+      state.copyWith(
+        showTimeline: previousTimeline,
+        showMap: previousMap,
+        clearEventDetails: true,
+      ),
+    );
+  }
+
+  void _handleSwitchEventDetailsView(
+    SwitchEventDetailsView event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Switch the overlay position while maintaining event details and both views visible
+    emit(state.copyWith(detailsSource: event.targetSource));
+  }
+
+  void _handleUpdateSplitRatio(
+    UpdateSplitRatio event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Clamp split ratio between 0.0 and 1.0
+    final clampedRatio = event.splitRatio.clamp(0.0, 1.0);
+    emit(state.copyWith(splitRatio: clampedRatio));
+  }
+
+  void _handleUpdateEventDetailsSplitRatio(
+    UpdateEventDetailsSplitRatio event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Clamp split ratio between 0.0 and 1.0
+    final clampedRatio = event.splitRatio.clamp(0.0, 1.0);
+    emit(state.copyWith(eventDetailsSplitRatio: clampedRatio));
   }
 }
