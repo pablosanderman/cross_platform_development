@@ -391,8 +391,6 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
             children: [
               _buildHeader(),
               const SizedBox(height: 24),
-              _buildTimelineSection(),
-              const SizedBox(height: 24),
               _buildUniqueDataSection(),
               const SizedBox(height: 24),
               _buildAttachmentsAndActionsSection(),
@@ -446,14 +444,57 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title only (no mini-timeline here)
-        Text(
-          _event!.title,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1F2937),
-          ),
+        // Title with timeline bar next to it
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                _event!.title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Mini timeline bar next to title
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  width: 120,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE6E8EF),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF63656E),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ),
+                      Expanded(flex: 7, child: Container()),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _getDurationLabel(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Row(
@@ -488,78 +529,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     );
   }
 
-  Widget _buildTimelineSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Timeline heading
-        Text(
-          'Timeline',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade800,
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Full-width timeline bar
-        Container(
-          width: double.infinity,
-          height: 6,
-          decoration: BoxDecoration(
-            color: const Color(0xFFE6E8EF),
-            borderRadius: BorderRadius.circular(3),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF63656E),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-              Expanded(flex: 7, child: Container()),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        // Start and end timestamps underneath
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              _formatDateTime(_event!.dateRange.start),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
-            ),
-            if (_event!.dateRange.end != null)
-              Text(
-                _formatDateTime(_event!.dateRange.end!),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        // Duration caption directly under the bar
-        Text(
-          _getDurationLabel(),
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
+
 
   String _getDurationLabel() {
     if (_event!.dateRange.end != null) {
@@ -737,7 +707,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
   }
 
   Widget _buildActionButtons() {
-    return Column(
+    return Row(
       children: [
         ElevatedButton.icon(
           onPressed: () {
@@ -754,17 +724,17 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
             }
           },
           icon: const Icon(Icons.map, size: 16),
-          label: const Text('View on Map'),
+          label: const Text('View on Timeline'),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF1A73E8),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(width: 8),
         OutlinedButton.icon(
           onPressed: () {
-            // Use real comparison logic from the codebase
+            // Use real comparison logic from the codebase - removed snackbar
             final navState = context.read<NavigationBloc>().state;
             final selectedEvent = navState.selectedEventForDetails;
             if (selectedEvent != null) {
@@ -773,26 +743,6 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
 
               if (!state.isEventInComparison(selectedEvent.id) && !state.isAtMaxCapacity) {
                 comparisonBloc.add(AddEventToComparison(selectedEvent));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Added "${selectedEvent.title}" to comparison'),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              } else if (state.isAtMaxCapacity) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Comparison is at maximum capacity'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Event is already in comparison'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
               }
             }
           },
@@ -913,7 +863,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               (u) => u.id == parentMessage.author,
               orElse: () => User(id: parentMessage.author, displayName: 'Unknown User', avatar: '', groups: []),
             );
-            _replyControllers[parentMessageId]!.text = '@${parentAuthor.displayName} ';
+            _replyControllers[parentMessageId]!.text = '@${parentAuthor.id} ';
             _replyControllers[parentMessageId]!.selection = TextSelection.fromPosition(
               TextPosition(offset: _replyControllers[parentMessageId]!.text.length),
             );
@@ -1033,9 +983,9 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Tightened layout: removed extra spacing after removing user tags
+                    // @username format instead of friendly display name
                     Text(
-                      user.displayName,
+                      '@${user.id}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -1067,6 +1017,46 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
             const SizedBox(height: 8), // Reduced from 12 to tighten layout
             _buildMessageAttachments(message.attachments),
           ],
+          const SizedBox(height: 8),
+          // Reply button for main comment
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: () {
+                setState(() {
+                  _showReplyField[message.id] = true;
+                  // Initialize if needed
+                  if (!_replyControllers.containsKey(message.id)) {
+                    _replyControllers[message.id] = TextEditingController();
+                    _replyFocusNodes[message.id] = FocusNode();
+                  }
+                  // Pre-fill with @mention
+                  final author = _users.firstWhere(
+                    (u) => u.id == message.author,
+                    orElse: () => User(id: message.author, displayName: 'Unknown User', avatar: '', groups: []),
+                  );
+                  _replyControllers[message.id]!.text = '@${author.id} ';
+                  _replyControllers[message.id]!.selection = TextSelection.fromPosition(
+                    TextPosition(offset: _replyControllers[message.id]!.text.length),
+                  );
+                  _replyFocusNodes[message.id]!.requestFocus();
+                });
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                'Reply',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1120,7 +1110,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        user.displayName,
+                        '@${user.id}',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -1140,6 +1130,48 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                   const SizedBox(height: 6), // Reduced from 8 to tighten layout
                   // Render reply body with @mention highlighting
                   _buildReplyBodyWithMentions(reply.body),
+                  const SizedBox(height: 6),
+                  // Reply button for reply comment
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () {
+                        // Use the top-level message ID for the reply field
+                        final parentId = reply.replyTo ?? reply.id;
+                        setState(() {
+                          _showReplyField[parentId] = true;
+                          // Initialize if needed
+                          if (!_replyControllers.containsKey(parentId)) {
+                            _replyControllers[parentId] = TextEditingController();
+                            _replyFocusNodes[parentId] = FocusNode();
+                          }
+                          // Pre-fill with @mention to the reply author
+                          final replyAuthor = _users.firstWhere(
+                            (u) => u.id == reply.author,
+                            orElse: () => User(id: reply.author, displayName: 'Unknown User', avatar: '', groups: []),
+                          );
+                          _replyControllers[parentId]!.text = '@${replyAuthor.id} ';
+                          _replyControllers[parentId]!.selection = TextSelection.fromPosition(
+                            TextPosition(offset: _replyControllers[parentId]!.text.length),
+                          );
+                          _replyFocusNodes[parentId]!.requestFocus();
+                        });
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'Reply',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1150,7 +1182,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
   }
 
   Widget _buildReplyBodyWithMentions(String body) {
-    final mentionRegex = RegExp(r'@(\w+(?:\s+\w+)*)');
+    final mentionRegex = RegExp(r'@([a-zA-Z0-9_]+(?:\s+[a-zA-Z0-9_]+)*)');
     final matches = mentionRegex.allMatches(body);
     
     if (matches.isEmpty) {
