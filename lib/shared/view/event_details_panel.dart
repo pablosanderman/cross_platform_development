@@ -748,17 +748,17 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     return BlocBuilder<NavigationBloc, NavigationState>(
       builder: (context, navState) {
         final currentSource = navState.detailsSource;
-
+        
         // Dynamic button text and icon based on where the event details were opened from
         final String buttonText;
         final IconData buttonIcon;
-
+        
         if (currentSource == EventDetailsSource.timeline) {
           // Opened from timeline → button should go to map
           buttonText = 'View on Map';
           buttonIcon = Icons.map;
         } else if (currentSource == EventDetailsSource.map) {
-          // Opened from map → button should go to timeline
+          // Opened from map → button should go to timeline  
           buttonText = 'View on Timeline';
           buttonIcon = Icons.timeline;
         } else {
@@ -766,7 +766,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
           buttonText = 'View on Map';
           buttonIcon = Icons.map;
         }
-
+        
         return Row(
           children: [
             ElevatedButton.icon(
@@ -804,10 +804,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1A73E8),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
             const SizedBox(width: 8),
@@ -820,8 +817,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                   final comparisonBloc = context.read<ComparisonBloc>();
                   final state = comparisonBloc.state;
 
-                  if (!state.isEventInComparison(selectedEvent.id) &&
-                      !state.isAtMaxCapacity) {
+                  if (!state.isEventInComparison(selectedEvent.id) && !state.isAtMaxCapacity) {
                     comparisonBloc.add(AddEventToComparison(selectedEvent));
                   }
                 }
@@ -831,10 +827,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF4A4D52),
                 side: const BorderSide(color: Color(0xFF4A4D52)),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
           ],
