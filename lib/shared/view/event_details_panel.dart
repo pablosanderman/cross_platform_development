@@ -16,7 +16,6 @@ class EventDetailsPanel extends StatefulWidget {
 }
 
 class _EventDetailsPanelState extends State<EventDetailsPanel> {
-  final EventsV2Repository _eventsRepository = const EventsV2Repository();
   final UsersRepository _usersRepository = const UsersRepository();
   final GroupsRepository _groupsRepository = const GroupsRepository();
   
@@ -71,9 +70,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     }
 
     try {
-      // For now, we'll convert the old Event to EventV2
-      // In a real implementation, you'd load from the new events.json
-      final eventV2 = await _eventsRepository.loadEvent(selectedEvent.id);
+      // Convert the old Event to EventV2 on the fly
+      final eventV2 = _convertEventToV2(selectedEvent);
       
       setState(() {
         _event = eventV2;
@@ -87,11 +85,213 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     }
   }
 
+  EventV2 _convertEventToV2(Event oldEvent) {
+    // Convert old Event model to new EventV2 model
+    return EventV2(
+      id: oldEvent.id,
+      title: oldEvent.title,
+      type: oldEvent.type.name,
+      location: EventLocation(
+        name: _extractLocationName(oldEvent),
+        lat: oldEvent.latitude,
+        lng: oldEvent.longitude,
+      ),
+      description: oldEvent.displayDescription,
+      dateRange: EventDateRange(
+        start: oldEvent.effectiveStartTime,
+        end: oldEvent.effectiveEndTime,
+      ),
+      uniqueData: _extractUniqueData(oldEvent),
+      attachments: _generateSampleAttachments(oldEvent),
+      discussion: _generateSampleDiscussion(oldEvent),
+    );
+  }
+
+  String _extractLocationName(Event oldEvent) {
+    if (oldEvent.properties != null) {
+      final location = oldEvent.properties!['location']?.toString();
+      final region = oldEvent.properties!['region']?.toString();
+      
+      if (location != null && region != null) {
+        return '$location, $region';
+      } else if (location != null) {
+        return location;
+      } else if (region != null) {
+        return region;
+      }
+    }
+    return 'Unknown Location';
+  }
+
+  Map<String, dynamic> _extractUniqueData(Event oldEvent) {
+    final uniqueData = <String, dynamic>{};
+    
+    // Add properties if they exist
+    if (oldEvent.properties != null) {
+      uniqueData.addAll(oldEvent.properties!);
+    }
+    
+    // Add aggregate data if it exists
+    if (oldEvent.aggregateData != null) {
+      uniqueData['aggregateData'] = oldEvent.aggregateData!;
+    }
+    
+    // Add members data for grouped events
+    if (oldEvent.members != null) {
+      uniqueData['members'] = oldEvent.members!.map((m) => {
+        'id': m.id,
+        'timestamp': m.timestamp.toIso8601String(),
+        ...m.data,
+      }).toList();
+    }
+    
+    return uniqueData;
+  }
+
+  List<EventAttachment> _generateSampleAttachments(Event oldEvent) {
+    final attachments = <EventAttachment>[];
+    
+    // Generate sample attachments based on event type and properties
+    switch (oldEvent.type) {
+      case EventType.point:
+        if (oldEvent.properties?.containsKey('magnitude') == true) {
+          attachments.add(EventAttachment(
+            id: '${oldEvent.id}_seismic_data',
+            file: 'seismic_readings.png',
+            mime: 'image/png',
+            label: 'Seismic readings chart',
+          ));
+        }
+        if (oldEvent.properties?.containsKey('ashHeightKm') == true) {
+          attachments.add(EventAttachment(
+            id: '${oldEvent.id}_ash_plume',
+            file: 'ash_plume_satellite.jpg',
+            mime: 'image/jpeg',
+            label: 'Satellite ash plume image',
+          ));
+        }
+        break;
+        
+      case EventType.period:
+        attachments.add(EventAttachment(
+          id: '${oldEvent.id}_timeline_chart',
+          file: 'activity_timeline.png',
+          mime: 'image/png',
+          label: 'Activity timeline',
+        ));
+        if (oldEvent.properties?.containsKey('so2FluxTonsPerDay') == true) {
+          attachments.add(EventAttachment(
+            id: '${oldEvent.id}_gas_report',
+            file: 'gas_emission_report.pdf',
+            mime: 'application/pdf',
+            label: 'Gas emission analysis',
+          ));
+        }
+        break;
+        
+      case EventType.grouped:
+        attachments.add(EventAttachment(
+          id: '${oldEvent.id}_cluster_analysis',
+          file: 'cluster_analysis.pdf',
+          mime: 'application/pdf',
+          label: 'Cluster analysis report',
+        ));
+        break;
+    }
+    
+    return attachments;
+  }
+
+  List<DiscussionMessage> _generateSampleDiscussion(Event oldEvent) {
+    final discussions = <DiscussionMessage>[];
+    final now = DateTime.now();
+    
+    // Generate realistic discussion based on event type and properties
+    switch (oldEvent.type) {
+      case EventType.point:
+        if (oldEvent.properties?.containsKey('magnitude') == true) {
+          final magnitude = oldEvent.properties!['magnitude'];
+          discussions.add(DiscussionMessage(
+            id: '${oldEvent.id}_msg_001',
+            author: 'u_dr_rossi',
+            timestamp: now.subtract(const Duration(hours: 4)),
+            body: 'M $magnitude event detected. Depth and location suggest volcanic-tectonic origin. Recommend continued monitoring.',
+            replyTo: null,
+            attachments: [],
+          ));
+          
+          discussions.add(DiscussionMessage(
+            id: '${oldEvent.id}_msg_002',
+            author: 'u_dr_bianchi',
+            timestamp: now.subtract(const Duration(hours: 2)),
+            body: 'Agreed. The waveform characteristics match previous pre-eruptive sequences.',
+            replyTo: '${oldEvent.id}_msg_001',
+            attachments: [],
+          ));
+        }
+        break;
+        
+      case EventType.period:
+        discussions.add(DiscussionMessage(
+          id: '${oldEvent.id}_msg_001',
+          author: 'u_prof_ferrari',
+          timestamp: now.subtract(const Duration(hours: 6)),
+          body: 'Extended period of activity observed. All monitoring parameters show sustained elevation.',
+          replyTo: null,
+          attachments: [],
+        ));
+        
+        if (oldEvent.properties?.containsKey('so2FluxTonsPerDay') == true) {
+          discussions.add(DiscussionMessage(
+            id: '${oldEvent.id}_msg_002',
+            author: 'u_dr_moretti',
+            timestamp: now.subtract(const Duration(hours: 3)),
+            body: 'SO₂ flux measurements confirm significant degassing. Wind conditions are dispersing emissions safely offshore.',
+            replyTo: '${oldEvent.id}_msg_001',
+            attachments: ['${oldEvent.id}_gas_report'],
+          ));
+        }
+        break;
+        
+      case EventType.grouped:
+        discussions.add(DiscussionMessage(
+          id: '${oldEvent.id}_msg_001',
+          author: 'u_dr_moretti',
+          timestamp: now.subtract(const Duration(hours: 8)),
+          body: 'Swarm pattern analysis shows clustering consistent with magma intrusion. Depth distribution suggests common source.',
+          replyTo: null,
+          attachments: ['${oldEvent.id}_cluster_analysis'],
+        ));
+        
+        discussions.add(DiscussionMessage(
+          id: '${oldEvent.id}_msg_002',
+          author: 'u_dr_rossi',
+          timestamp: now.subtract(const Duration(hours: 5)),
+          body: 'Migration pattern indicates possible dyke propagation. Should we deploy additional temporary stations?',
+          replyTo: '${oldEvent.id}_msg_001',
+          attachments: [],
+        ));
+        
+        discussions.add(DiscussionMessage(
+          id: '${oldEvent.id}_msg_003',
+          author: 'u_prof_ferrari',
+          timestamp: now.subtract(const Duration(hours: 1)),
+          body: 'Yes, recommend deployment of 3 additional seismometers in the affected sector for better location accuracy.',
+          replyTo: '${oldEvent.id}_msg_002',
+          attachments: [],
+        ));
+        break;
+    }
+    
+    return discussions;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<NavigationBloc, NavigationState>(
       listener: (context, state) {
-        if (state.selectedEventForDetails != _event?.id) {
+        final currentEventId = state.selectedEventForDetails?.id;
+        if (currentEventId != _event?.id) {
           _loadEventData();
         }
       },
@@ -344,7 +544,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                     ),
                     Expanded(
                       child: Text(
-                        entry.value.toString(),
+                        _formatValue(entry.value),
                         style: const TextStyle(
                           fontSize: 14,
                           color: Color(0xFF374151),
@@ -428,7 +628,17 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       children: [
         ElevatedButton.icon(
           onPressed: () {
-            // TODO: Implement view on map/timeline
+            // Close event details and focus on the source view
+            final navBloc = context.read<NavigationBloc>();
+            final currentSource = navBloc.state.detailsSource;
+            navBloc.add(CloseEventDetails());
+            
+            // Focus on the appropriate view
+            if (currentSource == EventDetailsSource.timeline) {
+              navBloc.add(ShowTimeline());
+            } else {
+              navBloc.add(ShowMap());
+            }
           },
           icon: const Icon(Icons.map, size: 16),
           label: const Text('View on Map'),
@@ -442,6 +652,12 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
         OutlinedButton.icon(
           onPressed: () {
             // TODO: Implement add to comparison
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Add to comparison feature coming soon!'),
+                duration: Duration(seconds: 2),
+              ),
+            );
           },
           icon: const Icon(Icons.compare_arrows, size: 16),
           label: const Text('Add to Compare'),
@@ -756,14 +972,24 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      // TODO: Implement attachment
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('File attachment feature coming soon!'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
                     },
                     icon: const Icon(Icons.attach_file),
                     tooltip: 'Attach file',
                   ),
                   IconButton(
                     onPressed: () {
-                      // TODO: Implement emoji
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Emoji feature coming soon!'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
                     },
                     icon: const Icon(Icons.emoji_emotions_outlined),
                     tooltip: 'Add emoji',
@@ -772,7 +998,12 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  // TODO: Implement post message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Post message feature coming soon!'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1A73E8),
@@ -811,6 +1042,15 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
         .map((word) => word.toLowerCase())
         .map((word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : word)
         .join(' ');
+  }
+
+  String _formatValue(dynamic value) {
+    if (value is List) {
+      return value.length <= 3 
+          ? value.join(', ')
+          : '${value.take(3).join(', ')}... (${value.length} items)';
+    }
+    return value.toString();
   }
 
   IconData _getAttachmentIcon(EventAttachment attachment) {
