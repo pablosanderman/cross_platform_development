@@ -33,12 +33,13 @@ class MyApp extends StatelessWidget {
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           final availableWidth = constraints.maxWidth;
-                          
+
                           // Always build the standard timeline/map layout
                           // Event details will be shown as overlay if needed
                           // Now with resizable split view support
-                          
-                          final bothVisible = navState.showTimeline && navState.showMap;
+
+                          final bothVisible =
+                              navState.showTimeline && navState.showMap;
 
                           // Wrap everything with EventVisibility and Comparison features
                           return BlocBuilder<
@@ -58,11 +59,6 @@ class MyApp extends StatelessWidget {
                                         splitRatio: navState.splitRatio,
                                         minLeftWidth: 200.0,
                                         minRightWidth: 200.0,
-                                        onSplitRatioChanged: (ratio) {
-                                          context.read<NavigationBloc>().add(
-                                            UpdateSplitRatio(ratio),
-                                          );
-                                        },
                                       )
                                     else
                                       // Only one component visible: use simple layout
@@ -184,10 +180,10 @@ class MyApp extends StatelessWidget {
   ) {
     // Event details always force split-screen mode
     final halfWidth = availableWidth / 2;
-    
+
     double overlayLeft;
     double overlayWidth;
-    
+
     if (navState.detailsSource == EventDetailsSource.timeline) {
       // Timeline source: Show event details on right side (over map area)
       overlayLeft = halfWidth;
@@ -197,7 +193,7 @@ class MyApp extends StatelessWidget {
       overlayLeft = 0;
       overlayWidth = halfWidth;
     }
-    
+
     return Positioned(
       left: overlayLeft,
       top: 0,
