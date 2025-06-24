@@ -14,6 +14,8 @@ class NavigationState {
   final bool? previousShowMap;
   final double
   splitRatio; // 0.0 = full map, 1.0 = full timeline, 0.5 = equal split
+  final double
+  eventDetailsSplitRatio; // For event details overlay: 0.0 = minimal details, 1.0 = maximal details, 0.5 = equal split
 
   NavigationState({
     required this.showTimeline,
@@ -24,6 +26,8 @@ class NavigationState {
     this.previousShowTimeline,
     this.previousShowMap,
     this.splitRatio = 0.5, // Default to equal split
+    this.eventDetailsSplitRatio =
+        0.5, // Default to equal split for event details
   });
 
   /// Checks if event details panel should be shown
@@ -42,6 +46,7 @@ class NavigationState {
     bool? previousShowMap,
     bool clearEventDetails = false,
     double? splitRatio,
+    double? eventDetailsSplitRatio,
   }) {
     return NavigationState(
       showTimeline: showTimeline ?? this.showTimeline,
@@ -60,6 +65,8 @@ class NavigationState {
           ? null
           : (previousShowMap ?? this.previousShowMap),
       splitRatio: splitRatio ?? this.splitRatio,
+      eventDetailsSplitRatio:
+          eventDetailsSplitRatio ?? this.eventDetailsSplitRatio,
     );
   }
 }

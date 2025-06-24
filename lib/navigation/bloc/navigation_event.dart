@@ -54,3 +54,8 @@ class UpdateSplitRatio extends NavigationEvent {
   final double splitRatio;
   UpdateSplitRatio(this.splitRatio) : super(forceNavigate: false);
 }
+
+class UpdateEventDetailsSplitRatio extends NavigationEvent {
+  final double splitRatio;
+  UpdateEventDetailsSplitRatio(this.splitRatio) : super(forceNavigate: false);
+}

@@ -57,8 +57,8 @@ class MyApp extends StatelessWidget {
                                         leftChild: const TimelinePage(),
                                         rightChild: const MapPage(),
                                         splitRatio: navState.splitRatio,
-                                        minLeftWidth: 200.0,
-                                        minRightWidth: 200.0,
+                                        minLeftWidth: 350.0,
+                                        minRightWidth: 350.0,
                                       )
                                     else
                                       // Only one component visible: use simple layout
@@ -172,44 +172,193 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  /// Build the event details overlay
+  /// Build the event details overlay with resizable functionality
   Widget _buildEventDetailsOverlay(
     NavigationState navState,
     double availableWidth,
     double availableHeight,
   ) {
-    // Event details always force split-screen mode
-    final halfWidth = availableWidth / 2;
+    // Calculate minimum and maximum widths for event details
+    final minDetailsWidth = 400.0;
+    final maxDetailsWidth =
+        availableWidth - 350.0; // Leave at least 350px for main content
+
+    // Calculate event details width based on split ratio
+    final eventDetailsWidth = (availableWidth * navState.eventDetailsSplitRatio)
+        .clamp(minDetailsWidth, maxDetailsWidth);
+    final remainingWidth = availableWidth - eventDetailsWidth;
 
     double overlayLeft;
-    double overlayWidth;
+    double mainContentLeft;
+    double mainContentWidth;
+    double dividerLeft;
+    final dividerWidth = 6.0;
 
     if (navState.detailsSource == EventDetailsSource.timeline) {
-      // Timeline source: Show event details on right side (over map area)
-      overlayLeft = halfWidth;
-      overlayWidth = halfWidth;
+      // Timeline source: Show event details on right side
+      overlayLeft = remainingWidth;
+      mainContentLeft = 0;
+      mainContentWidth = remainingWidth - dividerWidth;
+      dividerLeft = remainingWidth - dividerWidth;
     } else {
-      // Map source: Show event details on left side (over timeline area)
+      // Map source: Show event details on left side
       overlayLeft = 0;
-      overlayWidth = halfWidth;
+      mainContentLeft = eventDetailsWidth + dividerWidth;
+      mainContentWidth = remainingWidth - dividerWidth;
+      dividerLeft = eventDetailsWidth;
     }
 
-    return Positioned(
-      left: overlayLeft,
-      top: 0,
-      width: overlayWidth,
-      height: availableHeight,
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 10,
-              offset: Offset(overlayLeft > 0 ? -2 : 2, 0),
-            ),
-          ],
+    return Stack(
+      children: [
+        // Main content area (timeline or map)
+        Positioned(
+          left: mainContentLeft,
+          top: 0,
+          width: mainContentWidth,
+          height: availableHeight,
+          child: ClipRect(
+            child: navState.detailsSource == EventDetailsSource.timeline
+                ? const TimelinePage()
+                : const MapPage(),
+          ),
         ),
-        child: const EventDetailsPanel(),
+        // Event details panel
+        Positioned(
+          left: overlayLeft,
+          top: 0,
+          width: eventDetailsWidth,
+          height: availableHeight,
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 10,
+                  offset: Offset(overlayLeft > 0 ? -2 : 2, 0),
+                ),
+              ],
+            ),
+            child: const EventDetailsPanel(),
+          ),
+        ),
+        // Resizable divider
+        Positioned(
+          left: dividerLeft,
+          top: 0,
+          width: dividerWidth,
+          height: availableHeight,
+          child: _EventDetailsResizeDivider(
+            availableWidth: availableWidth,
+            minDetailsWidth: minDetailsWidth,
+            maxDetailsWidth: maxDetailsWidth,
+            isDetailsOnRight:
+                navState.detailsSource == EventDetailsSource.timeline,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Resizable divider widget for event details overlay
+class _EventDetailsResizeDivider extends StatefulWidget {
+  final double availableWidth;
+  final double minDetailsWidth;
+  final double maxDetailsWidth;
+  final bool isDetailsOnRight;
+
+  const _EventDetailsResizeDivider({
+    required this.availableWidth,
+    required this.minDetailsWidth,
+    required this.maxDetailsWidth,
+    required this.isDetailsOnRight,
+  });
+
+  @override
+  State<_EventDetailsResizeDivider> createState() =>
+      _EventDetailsResizeDividerState();
+}
+
+class _EventDetailsResizeDividerState
+    extends State<_EventDetailsResizeDivider> {
+  bool _isHovering = false;
+  bool _isDragging = false;
+  double? _initialRatio;
+  double? _startX;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.resizeColumn,
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: GestureDetector(
+        onPanStart: (details) {
+          setState(() => _isDragging = true);
+          _initialRatio = context
+              .read<NavigationBloc>()
+              .state
+              .eventDetailsSplitRatio;
+          _startX = details.globalPosition.dx;
+        },
+        onPanUpdate: (details) {
+          if (_initialRatio != null && _startX != null) {
+            final deltaX = details.globalPosition.dx - _startX!;
+
+            // Calculate new ratio based on drag delta
+            final deltaRatio = widget.isDetailsOnRight
+                ? -deltaX /
+                      widget
+                          .availableWidth // Reverse direction for right-side details
+                : deltaX / widget.availableWidth;
+            final newRatio = _initialRatio! + deltaRatio;
+
+            // Apply minimum and maximum width constraints
+            final minRatio = widget.minDetailsWidth / widget.availableWidth;
+            final maxRatio = widget.maxDetailsWidth / widget.availableWidth;
+
+            final constrainedRatio = newRatio.clamp(minRatio, maxRatio);
+
+            // Update the event details split ratio via NavigationBloc
+            context.read<NavigationBloc>().add(
+              UpdateEventDetailsSplitRatio(constrainedRatio),
+            );
+          }
+        },
+        onPanEnd: (details) {
+          setState(() => _isDragging = false);
+          _initialRatio = null;
+          _startX = null;
+        },
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            color: _isDragging
+                ? Colors.blue.withValues(alpha: 0.4)
+                : _isHovering
+                ? Colors.blue.withValues(alpha: 0.2)
+                : Colors.grey.withValues(alpha: 0.1),
+            border: Border(
+              left: BorderSide(
+                color: _isDragging
+                    ? Colors.blue.withValues(alpha: 0.8)
+                    : _isHovering
+                    ? Colors.blue.withValues(alpha: 0.6)
+                    : Colors.grey.withValues(alpha: 0.3),
+                width: 1,
+              ),
+              right: BorderSide(
+                color: _isDragging
+                    ? Colors.blue.withValues(alpha: 0.8)
+                    : _isHovering
+                    ? Colors.blue.withValues(alpha: 0.6)
+                    : Colors.grey.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

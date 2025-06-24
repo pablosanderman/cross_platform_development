@@ -60,7 +60,8 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
 
         return Positioned(
           bottom: 20,
-          right: 20,
+          right:
+              88, // Position to the left of the visibility FAB (56px width + 16px margin + 16px spacing)
           child: Material(
             elevation: 2,
             borderRadius: BorderRadius.circular(4),
@@ -78,7 +79,10 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
                   GestureDetector(
                     onTap: _toggleExpanded,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       child: Row(
                         children: [
                           Expanded(
@@ -150,17 +154,19 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
                                     item: item,
                                     onRemove: () {
                                       context.read<ComparisonBloc>().add(
-                                            RemoveEventFromComparison(item.event.id),
-                                          );
+                                        RemoveEventFromComparison(
+                                          item.event.id,
+                                        ),
+                                      );
                                     },
                                   );
                                 },
                               ),
                             ),
                           ],
-                          
+
                           // Action buttons (always show at bottom)
-                          if (state.comparisonList.isNotEmpty) 
+                          if (state.comparisonList.isNotEmpty)
                             Divider(
                               height: 1,
                               thickness: 1,
@@ -174,12 +180,16 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
                                   child: OutlinedButton(
                                     onPressed: () {
                                       context.read<ComparisonBloc>().add(
-                                            const ShowComparisonSelectionOverlay(),
-                                          );
+                                        const ShowComparisonSelectionOverlay(),
+                                      );
                                     },
                                     style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(vertical: 8),
-                                      side: BorderSide(color: Colors.grey.shade400),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                      ),
+                                      side: BorderSide(
+                                        color: Colors.grey.shade400,
+                                      ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(4),
                                       ),
@@ -198,13 +208,19 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
                                   child: ElevatedButton(
                                     onPressed: state.canCompare
                                         ? () {
-                                            Navigator.of(context).pushNamed('/comparison');
+                                            Navigator.of(
+                                              context,
+                                            ).pushNamed('/comparison');
                                           }
                                         : null,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: state.canCompare ? Colors.blue : Colors.grey.shade400,
+                                      backgroundColor: state.canCompare
+                                          ? Colors.blue
+                                          : Colors.grey.shade400,
                                       foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                      ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(4),
                                       ),
@@ -236,10 +252,7 @@ class _FlatComparisonListItem extends StatelessWidget {
   final ComparisonEventItem item;
   final VoidCallback onRemove;
 
-  const _FlatComparisonListItem({
-    required this.item,
-    required this.onRemove,
-  });
+  const _FlatComparisonListItem({required this.item, required this.onRemove});
 
   @override
   Widget build(BuildContext context) {
@@ -275,10 +288,7 @@ class _FlatComparisonListItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   _getEventLocation(item.event),
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -290,11 +300,7 @@ class _FlatComparisonListItem extends StatelessWidget {
             onTap: onRemove,
             child: Container(
               padding: const EdgeInsets.all(4),
-              child: Icon(
-                Icons.close,
-                size: 16,
-                color: Colors.grey.shade500,
-              ),
+              child: Icon(Icons.close, size: 16, color: Colors.grey.shade500),
             ),
           ),
         ],
@@ -316,7 +322,7 @@ class _FlatComparisonListItem extends StatelessWidget {
   String _getEventLocation(Event event) {
     final location = event.properties?['location']?.toString();
     final region = event.properties?['region']?.toString();
-    
+
     if (location != null && region != null) {
       return '$location, $region';
     } else if (location != null) {
