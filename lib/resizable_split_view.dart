@@ -45,7 +45,9 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
         _availableWidth = availableWidth;
 
         // Calculate effective widths based on split ratio
-        final effectiveDividerWidth = widget.showDivider ? widget.dividerWidth : 0.0;
+        final effectiveDividerWidth = widget.showDivider
+            ? widget.dividerWidth
+            : 0.0;
         final contentWidth = availableWidth - effectiveDividerWidth;
         final leftWidth = contentWidth * widget.splitRatio;
         final rightWidth = contentWidth * (1.0 - widget.splitRatio);
@@ -82,14 +84,17 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
                   },
                   onDragUpdate: (details) {
                     if (_initialRatio != null && _availableWidth != null) {
-                      final deltaX = details.globalPosition.dx - (_startX ?? details.globalPosition.dx);
+                      final deltaX =
+                          details.globalPosition.dx -
+                          (_startX ?? details.globalPosition.dx);
                       if (_startX == null) {
                         _startX = details.globalPosition.dx;
                         return;
                       }
 
                       // Calculate new ratio based on drag delta
-                      final contentWidth = _availableWidth! - widget.dividerWidth;
+                      final contentWidth =
+                          _availableWidth! - widget.dividerWidth;
                       final deltaRatio = deltaX / contentWidth;
                       final newRatio = _initialRatio! + deltaRatio;
 
@@ -98,10 +103,15 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
                       final minRightRatio = widget.minRightWidth / contentWidth;
                       final maxLeftRatio = 1.0 - minRightRatio;
 
-                      final constrainedRatio = newRatio.clamp(minLeftRatio, maxLeftRatio);
+                      final constrainedRatio = newRatio.clamp(
+                        minLeftRatio,
+                        maxLeftRatio,
+                      );
 
                       // Update the split ratio via NavigationBloc
-                      context.read<NavigationBloc>().add(UpdateSplitRatio(constrainedRatio));
+                      context.read<NavigationBloc>().add(
+                        UpdateSplitRatio(constrainedRatio),
+                      );
                     }
                   },
                   onDragEnded: () {
@@ -161,23 +171,23 @@ class _ResizeDividerState extends State<_ResizeDivider> {
             color: _isDragging
                 ? Colors.blue.withValues(alpha: 0.4)
                 : _isHovering
-                    ? Colors.blue.withValues(alpha: 0.2)
-                    : Colors.grey.withValues(alpha: 0.1),
+                ? Colors.blue.withValues(alpha: 0.2)
+                : Colors.grey.withValues(alpha: 0.1),
             border: Border(
               left: BorderSide(
                 color: _isDragging
                     ? Colors.blue.withValues(alpha: 0.8)
                     : _isHovering
-                        ? Colors.blue.withValues(alpha: 0.6)
-                        : Colors.grey.withValues(alpha: 0.3),
+                    ? Colors.blue.withValues(alpha: 0.6)
+                    : Colors.grey.withValues(alpha: 0.3),
                 width: 1,
               ),
               right: BorderSide(
                 color: _isDragging
                     ? Colors.blue.withValues(alpha: 0.8)
                     : _isHovering
-                        ? Colors.blue.withValues(alpha: 0.6)
-                        : Colors.grey.withValues(alpha: 0.3),
+                    ? Colors.blue.withValues(alpha: 0.6)
+                    : Colors.grey.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -190,8 +200,8 @@ class _ResizeDividerState extends State<_ResizeDivider> {
                 color: _isDragging
                     ? Colors.blue
                     : _isHovering
-                        ? Colors.blue.withValues(alpha: 0.8)
-                        : Colors.grey.withValues(alpha: 0.6),
+                    ? Colors.blue.withValues(alpha: 0.8)
+                    : Colors.grey.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(1),
               ),
             ),

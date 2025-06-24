@@ -6,10 +6,7 @@ class ComparisonEventItem extends Equatable {
   final Event event;
   final DateTime addedAt;
 
-  const ComparisonEventItem({
-    required this.event,
-    required this.addedAt,
-  });
+  const ComparisonEventItem({required this.event, required this.addedAt});
 
   @override
   List<Object?> get props => [event, addedAt];

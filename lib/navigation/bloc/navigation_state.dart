@@ -8,11 +8,12 @@ class NavigationState {
   final int currentPageIndex;
   final Event? selectedEventForDetails;
   final EventDetailsSource? detailsSource;
-  
+
   // Store the previous state before showing event details
   final bool? previousShowTimeline;
   final bool? previousShowMap;
-  final double splitRatio; // 0.0 = full map, 1.0 = full timeline, 0.5 = equal split
+  final double
+  splitRatio; // 0.0 = full map, 1.0 = full timeline, 0.5 = equal split
 
   NavigationState({
     required this.showTimeline,
@@ -46,10 +47,18 @@ class NavigationState {
       showTimeline: showTimeline ?? this.showTimeline,
       showMap: showMap ?? this.showMap,
       currentPageIndex: currentPageIndex ?? this.currentPageIndex,
-      selectedEventForDetails: clearEventDetails ? null : (selectedEventForDetails ?? this.selectedEventForDetails),
-      detailsSource: clearEventDetails ? null : (detailsSource ?? this.detailsSource),
-      previousShowTimeline: clearEventDetails ? null : (previousShowTimeline ?? this.previousShowTimeline),
-      previousShowMap: clearEventDetails ? null : (previousShowMap ?? this.previousShowMap),
+      selectedEventForDetails: clearEventDetails
+          ? null
+          : (selectedEventForDetails ?? this.selectedEventForDetails),
+      detailsSource: clearEventDetails
+          ? null
+          : (detailsSource ?? this.detailsSource),
+      previousShowTimeline: clearEventDetails
+          ? null
+          : (previousShowTimeline ?? this.previousShowTimeline),
+      previousShowMap: clearEventDetails
+          ? null
+          : (previousShowMap ?? this.previousShowMap),
       splitRatio: splitRatio ?? this.splitRatio,
     );
   }

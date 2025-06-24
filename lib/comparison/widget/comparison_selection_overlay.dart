@@ -32,9 +32,9 @@ class _ComparisonSelectionOverlayState
         }
 
         return Material(
-          color: Colors.black.withOpacity(0.8),
+          color: Colors.black.withValues(alpha: 0.8),
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 1000, // Fixed width (approximately 2/3 of 1440px screen)
               child: SafeArea(
                 child: Padding(
@@ -78,7 +78,7 @@ class _ComparisonSelectionOverlayState
                             },
                           ),
                         );
-                      }).toList(),
+                      }),
 
                       // Search field with Compare button
                       SizedBox(

@@ -36,7 +36,7 @@ class ShowTimeline extends NavigationEvent {
 class ShowEventDetails extends NavigationEvent {
   final Event event;
   final EventDetailsSource source;
-  
+
   ShowEventDetails(this.event, this.source) : super(forceNavigate: true);
 }
 
@@ -46,7 +46,7 @@ class CloseEventDetails extends NavigationEvent {
 
 class SwitchEventDetailsView extends NavigationEvent {
   final EventDetailsSource targetSource;
-  
+
   SwitchEventDetailsView(this.targetSource) : super(forceNavigate: false);
 }
 

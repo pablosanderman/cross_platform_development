@@ -18,7 +18,7 @@ class EventDetailsPanel extends StatelessWidget {
       builder: (context, navState) {
         final event = navState.selectedEventForDetails;
         final source = navState.detailsSource;
-        
+
         if (event == null || source == null) {
           return const SizedBox.shrink();
         }
@@ -67,7 +67,11 @@ class EventDetailsPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, Event event, EventDetailsSource source) {
+  Widget _buildHeader(
+    BuildContext context,
+    Event event,
+    EventDetailsSource source,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -79,8 +83,8 @@ class EventDetailsPanel extends StatelessWidget {
           // Event type badge
           _buildEventTypeBadge(event.type),
           const SizedBox(width: 12),
-          
-                    // Event title and time
+
+          // Event title and time
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +104,7 @@ class EventDetailsPanel extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(width: 12),
           // Close button on the right
           IconButton(
@@ -123,7 +127,7 @@ class EventDetailsPanel extends StatelessWidget {
   Widget _buildEventTypeBadge(EventType type) {
     Color badgeColor;
     String badgeText;
-    
+
     switch (type) {
       case EventType.point:
         badgeColor = Colors.blue;
@@ -138,7 +142,7 @@ class EventDetailsPanel extends StatelessWidget {
         badgeText = 'GROUPED';
         break;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -238,11 +242,11 @@ class EventDetailsPanel extends StatelessWidget {
 
   Widget _buildKeyInformationSection(Event event) {
     final keyInfo = _extractKeyInformation(event);
-    
+
     if (keyInfo.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -255,34 +259,33 @@ class EventDetailsPanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        ...keyInfo.entries.map((entry) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 120,
-                child: Text(
-                  entry.key,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey.shade700,
+        ...keyInfo.entries.map(
+          (entry) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 120,
+                  child: Text(
+                    entry.key,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade700,
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Text(
-                  entry.value,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
+                Expanded(
+                  child: Text(
+                    entry.value,
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
@@ -291,7 +294,7 @@ class EventDetailsPanel extends StatelessWidget {
     if (!event.hasCoordinates) {
       return const SizedBox.shrink();
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -315,7 +318,11 @@ class EventDetailsPanel extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.location_on, color: Colors.blue.shade700, size: 20),
+                  Icon(
+                    Icons.location_on,
+                    color: Colors.blue.shade700,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -382,7 +389,7 @@ class EventDetailsPanel extends StatelessWidget {
     if (data == null || data.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -402,33 +409,35 @@ class EventDetailsPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          ...data.entries.map((entry) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 100,
-                  child: Text(
-                    entry.key,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
+          ...data.entries.map(
+            (entry) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 100,
+                    child: Text(
+                      entry.key,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Text(
-                    entry.value.toString(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black87,
+                  Expanded(
+                    child: Text(
+                      entry.value.toString(),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -454,41 +463,48 @@ class EventDetailsPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          ...members.take(5).map((member) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade400,
-                    shape: BoxShape.circle,
+          ...members
+              .take(5)
+              .map(
+                (member) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade400,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        DateFormat('HH:mm').format(member.timestamp),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          member.data.entries
+                              .take(2)
+                              .map((e) => '${e.key}: ${e.value}')
+                              .join(', '),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black87,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  DateFormat('HH:mm').format(member.timestamp),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontFamily: 'monospace',
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    member.data.entries.take(2).map((e) => '${e.key}: ${e.value}').join(', '),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black87,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          )),
+              ),
           if (members.length > 5) ...[
             const SizedBox(height: 4),
             Text(
@@ -505,7 +521,11 @@ class EventDetailsPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildActionSection(BuildContext context, Event event, EventDetailsSource source) {
+  Widget _buildActionSection(
+    BuildContext context,
+    Event event,
+    EventDetailsSource source,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -529,7 +549,9 @@ class EventDetailsPanel extends StatelessWidget {
               onPressed: () {
                 // TODO: Implement compare functionality
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Compare functionality coming soon')),
+                  const SnackBar(
+                    content: Text('Compare functionality coming soon'),
+                  ),
                 );
               },
             ),
@@ -590,20 +612,14 @@ class EventDetailsPanel extends StatelessWidget {
       case EventType.point:
         return Text(
           _formatEventTime(event),
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
         );
       case EventType.period:
         return _buildMiniTimeline(event);
       case EventType.grouped:
         return Text(
           _formatEventTime(event),
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
         );
     }
   }
@@ -611,9 +627,9 @@ class EventDetailsPanel extends StatelessWidget {
   Widget _buildMiniTimeline(Event event) {
     final startTime = event.effectiveStartTime;
     final endTime = event.effectiveEndTime;
-    
+
     final formatter = DateFormat('MMM dd');
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -624,28 +640,19 @@ class EventDetailsPanel extends StatelessWidget {
             // Start date
             Text(
               formatter.format(startTime),
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.black,
-              ),
+              style: const TextStyle(fontSize: 12, color: Colors.black),
             ),
-            
+
             const SizedBox(width: 8),
-            
+
             // Timeline bar
-            Container(
-              width: 40,
-              height: 2,
-              color: Colors.grey.shade600,
-            ),
-            
+            Container(width: 40, height: 2, color: Colors.grey.shade600),
+
             const SizedBox(width: 8),
-            
+
             // End date
             Text(
-              endTime != null 
-                  ? formatter.format(endTime)
-                  : 'Ongoing',
+              endTime != null ? formatter.format(endTime) : 'Ongoing',
               style: TextStyle(
                 fontSize: 12,
                 color: endTime != null ? Colors.black : Colors.grey.shade600,
@@ -653,16 +660,13 @@ class EventDetailsPanel extends StatelessWidget {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 4),
-        
+
         // Duration underneath
         Text(
           _formatDuration(event.duration),
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey.shade600,
-          ),
+          style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
         ),
       ],
     );
@@ -670,11 +674,11 @@ class EventDetailsPanel extends StatelessWidget {
 
   String _formatDuration(Duration? duration) {
     if (duration == null) return 'Ongoing';
-    
+
     final days = duration.inDays;
     final hours = duration.inHours % 24;
     final minutes = duration.inMinutes % 60;
-    
+
     if (days > 0) {
       return '${days}d ${hours}h';
     } else if (hours > 0) {
@@ -686,19 +690,19 @@ class EventDetailsPanel extends StatelessWidget {
 
   String _formatEventTime(Event event) {
     final formatter = DateFormat('MMM dd, yyyy HH:mm');
-    
+
     switch (event.type) {
       case EventType.point:
         return formatter.format(event.effectiveStartTime);
       case EventType.period:
         final start = formatter.format(event.effectiveStartTime);
-        final end = event.effectiveEndTime != null 
+        final end = event.effectiveEndTime != null
             ? formatter.format(event.effectiveEndTime!)
             : 'Ongoing';
         return '$start - $end';
       case EventType.grouped:
         final start = formatter.format(event.effectiveStartTime);
-        final end = event.effectiveEndTime != null 
+        final end = event.effectiveEndTime != null
             ? formatter.format(event.effectiveEndTime!)
             : 'Ongoing';
         return '$start - $end (${event.members?.length ?? 0} events)';
@@ -708,46 +712,46 @@ class EventDetailsPanel extends StatelessWidget {
   Map<String, String> _extractKeyInformation(Event event) {
     final info = <String, String>{};
     final properties = event.properties;
-    
+
     if (properties == null) return info;
-    
+
     // Add event-specific key information based on properties
     if (properties.containsKey('magnitude')) {
       info['Magnitude'] = 'M ${properties['magnitude']}';
     }
-    
+
     if (properties.containsKey('depthKm')) {
       info['Depth'] = '${properties['depthKm']} km';
     }
-    
+
     if (properties.containsKey('vei')) {
       info['VEI'] = '${properties['vei']}';
     }
-    
+
     if (properties.containsKey('alertLevel')) {
       info['Alert Level'] = properties['alertLevel'].toString().toUpperCase();
     }
-    
+
     if (properties.containsKey('temperature')) {
       info['Temperature'] = '${properties['temperature']}°C';
     }
-    
+
     if (properties.containsKey('so2FluxTonsPerDay')) {
       info['SO₂ Flux'] = '${properties['so2FluxTonsPerDay']} tons/day';
     }
-    
+
     if (properties.containsKey('maxDisplacementCm')) {
       info['Max Displacement'] = '${properties['maxDisplacementCm']} cm';
     }
-    
+
     if (properties.containsKey('ashHeightKm')) {
       info['Ash Height'] = '${properties['ashHeightKm']} km';
     }
-    
+
     if (properties.containsKey('region')) {
       info['Region'] = properties['region'].toString();
     }
-    
+
     return info;
   }
 }

@@ -14,13 +14,13 @@ class EventVisibilityCubit extends Cubit<EventVisibilityState> {
   /// Toggle the visibility of an event by its ID
   void toggle(String eventId) {
     final hiddenIds = Set<String>.from(state.hiddenIds);
-    
+
     if (hiddenIds.contains(eventId)) {
       hiddenIds.remove(eventId);
     } else {
       hiddenIds.add(eventId);
     }
-    
+
     emit(state.copyWith(hiddenIds: hiddenIds));
   }
 

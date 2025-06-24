@@ -13,18 +13,21 @@ class UserSearchView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<GroupsBloc, GroupsState>(
       builder: (context, groupState) {
-        if(groupState.chosenGroup == null){
+        if (groupState.chosenGroup == null) {
           return const CircularProgressIndicator();
         }
         final nonMembers = Group.getNonGroupMembers(
-            groupState.chosenGroup!.groupMemberIds.keys, groupState.users);
+          groupState.chosenGroup!.groupMemberIds.keys,
+          groupState.users,
+        );
         if (nonMembers.isEmpty) {
           return const CircularProgressIndicator();
         }
 
         return GenericSearchBar<User>(
           loadItems: () => nonMembers,
-          filter: (user, query) => "${user.firstName} ${user.lastName}".contains(query),
+          filter: (user, query) =>
+              "${user.firstName} ${user.lastName}".contains(query),
           itemBuilder: (user) {
             return Text("${user.firstName} ${user.lastName}");
           },
