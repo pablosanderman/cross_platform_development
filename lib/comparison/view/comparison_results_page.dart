@@ -29,8 +29,10 @@ class ComparisonResultsPage extends StatelessWidget {
             return const _EmptyComparisonState();
           }
 
-          final events = state.comparisonList.map((item) => item.event).toList();
-          
+          final events = state.comparisonList
+              .map((item) => item.event)
+              .toList();
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -39,11 +41,11 @@ class ComparisonResultsPage extends StatelessWidget {
                 // Header section
                 _ComparisonHeader(events: events),
                 const SizedBox(height: 32),
-                
+
                 // General Information Table
                 _GeneralInformationTable(events: events),
                 const SizedBox(height: 32),
-                
+
                 // Specific Information Table
                 _SpecificInformationTable(events: events),
               ],
@@ -73,17 +75,14 @@ class _EmptyComparisonState extends StatelessWidget {
           Text(
             'No Events to Compare',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             'Add at least 2 events to start comparing',
-            style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 16,
-            ),
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
           ),
           const SizedBox(height: 32),
           ElevatedButton(
@@ -98,7 +97,7 @@ class _EmptyComparisonState extends StatelessWidget {
 
 class _ComparisonHeader extends StatelessWidget {
   final List<Event> events;
-  
+
   const _ComparisonHeader({required this.events});
 
   @override
@@ -108,20 +107,17 @@ class _ComparisonHeader extends StatelessWidget {
       children: [
         Text(
           'Event Comparison',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
           'Comparing ${events.length} events',
-          style: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 16,
-          ),
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
         ),
         const SizedBox(height: 16),
-        
+
         // Event summary cards
         Wrap(
           spacing: 12,
@@ -130,10 +126,10 @@ class _ComparisonHeader extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: _getEventTypeColor(event.type).withOpacity(0.1),
+                color: _getEventTypeColor(event.type).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
-                  color: _getEventTypeColor(event.type).withOpacity(0.3),
+                  color: _getEventTypeColor(event.type).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -178,7 +174,7 @@ class _ComparisonHeader extends StatelessWidget {
 
 class _GeneralInformationTable extends StatelessWidget {
   final List<Event> events;
-  
+
   const _GeneralInformationTable({required this.events});
 
   @override
@@ -188,9 +184,9 @@ class _GeneralInformationTable extends StatelessWidget {
       children: [
         Text(
           'General Information',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
         Container(
@@ -207,26 +203,38 @@ class _GeneralInformationTable extends StatelessWidget {
             children: [
               // Header row
               TableRow(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                ),
+                decoration: BoxDecoration(color: Colors.grey.shade50),
                 children: [
                   const _TableCell('Attribute', isHeader: true),
-                  ...events.map((event) => _TableCell(
-                        event.title,
-                        isHeader: true,
-                        maxLines: 2,
-                      )),
+                  ...events.map(
+                    (event) =>
+                        _TableCell(event.title, isHeader: true, maxLines: 2),
+                  ),
                 ],
               ),
-              
+
               // Data rows
               _buildGeneralInfoRow('Location', (event) => _getLocation(event)),
-              _buildGeneralInfoRow('Event Type', (event) => _getEventTypeText(event.type)),
-              _buildGeneralInfoRow('Start Time', (event) => _formatDateTime(event.effectiveStartTime)),
-              _buildGeneralInfoRow('End Time', (event) => _formatEndTime(event)),
-              _buildGeneralInfoRow('Description', (event) => event.description ?? '—'),
-              _buildGeneralInfoRow('Region', (event) => event.properties?['region']?.toString() ?? '—'),
+              _buildGeneralInfoRow(
+                'Event Type',
+                (event) => _getEventTypeText(event.type),
+              ),
+              _buildGeneralInfoRow(
+                'Start Time',
+                (event) => _formatDateTime(event.effectiveStartTime),
+              ),
+              _buildGeneralInfoRow(
+                'End Time',
+                (event) => _formatEndTime(event),
+              ),
+              _buildGeneralInfoRow(
+                'Description',
+                (event) => event.description ?? '—',
+              ),
+              _buildGeneralInfoRow(
+                'Region',
+                (event) => event.properties?['region']?.toString() ?? '—',
+              ),
             ],
           ),
         ),
@@ -234,7 +242,10 @@ class _GeneralInformationTable extends StatelessWidget {
     );
   }
 
-  TableRow _buildGeneralInfoRow(String attribute, String Function(Event) getValue) {
+  TableRow _buildGeneralInfoRow(
+    String attribute,
+    String Function(Event) getValue,
+  ) {
     return TableRow(
       children: [
         _TableCell(attribute, fontWeight: FontWeight.w500),
@@ -246,7 +257,7 @@ class _GeneralInformationTable extends StatelessWidget {
   String _getLocation(Event event) {
     final location = event.properties?['location']?.toString();
     final region = event.properties?['region']?.toString();
-    
+
     if (location != null && region != null) {
       return '$location, $region';
     } else if (location != null) {
@@ -282,7 +293,7 @@ class _GeneralInformationTable extends StatelessWidget {
 
 class _SpecificInformationTable extends StatelessWidget {
   final List<Event> events;
-  
+
   const _SpecificInformationTable({required this.events});
 
   @override
@@ -299,7 +310,9 @@ class _SpecificInformationTable extends StatelessWidget {
     }
 
     // Remove common keys that are already in general info
-    allPropertyKeys.removeWhere((key) => ['location', 'region', 'description'].contains(key));
+    allPropertyKeys.removeWhere(
+      (key) => ['location', 'region', 'description'].contains(key),
+    );
 
     if (allPropertyKeys.isEmpty) {
       return const SizedBox.shrink();
@@ -310,9 +323,9 @@ class _SpecificInformationTable extends StatelessWidget {
       children: [
         Text(
           'Specific Information',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
         Container(
@@ -329,19 +342,16 @@ class _SpecificInformationTable extends StatelessWidget {
             children: [
               // Header row
               TableRow(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                ),
+                decoration: BoxDecoration(color: Colors.grey.shade50),
                 children: [
                   const _TableCell('Attribute', isHeader: true),
-                  ...events.map((event) => _TableCell(
-                        event.title,
-                        isHeader: true,
-                        maxLines: 2,
-                      )),
+                  ...events.map(
+                    (event) =>
+                        _TableCell(event.title, isHeader: true, maxLines: 2),
+                  ),
                 ],
               ),
-              
+
               // Data rows
               ...allPropertyKeys.map((key) => _buildSpecificInfoRow(key)),
             ],
@@ -363,10 +373,17 @@ class _SpecificInformationTable extends StatelessWidget {
   String _formatPropertyKey(String key) {
     // Convert camelCase and snake_case to readable format
     return key
-        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (match) => '${match.group(1)} ${match.group(2)}')
+        .replaceAllMapped(
+          RegExp(r'([a-z])([A-Z])'),
+          (match) => '${match.group(1)} ${match.group(2)}',
+        )
         .replaceAll('_', ' ')
         .split(' ')
-        .map((word) => word.isEmpty ? word : '${word[0].toUpperCase()}${word.substring(1)}')
+        .map(
+          (word) => word.isEmpty
+              ? word
+              : '${word[0].toUpperCase()}${word.substring(1)}',
+        )
         .join(' ');
   }
 
@@ -376,19 +393,19 @@ class _SpecificInformationTable extends StatelessWidget {
       final value = event.properties![key];
       return _formatValue(value);
     }
-    
+
     // Check aggregate data
     if (event.aggregateData?[key] != null) {
       final value = event.aggregateData![key];
       return _formatValue(value);
     }
-    
+
     return '—';
   }
 
   String _formatValue(dynamic value) {
     if (value == null) return '—';
-    
+
     if (value is num) {
       // Format numbers nicely
       if (value == value.toInt()) {
@@ -397,11 +414,11 @@ class _SpecificInformationTable extends StatelessWidget {
         return value.toStringAsFixed(2);
       }
     }
-    
+
     if (value is bool) {
       return value ? 'Yes' : 'No';
     }
-    
+
     return value.toString();
   }
 }
@@ -432,7 +449,8 @@ class _TableCell extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          fontWeight: fontWeight ?? (isHeader ? FontWeight.w600 : FontWeight.normal),
+          fontWeight:
+              fontWeight ?? (isHeader ? FontWeight.w600 : FontWeight.normal),
           fontSize: isHeader ? 13 : 12,
           color: isHeader ? Colors.grey.shade800 : Colors.grey.shade700,
         ),

@@ -11,7 +11,6 @@ import 'shared/shared.dart';
 import 'app.dart';
 import 'map/map.dart';
 import 'comparison/comparison.dart';
-import 'shared/repositories/repositories.dart';
 
 void main() {
   Bloc.observer = const AppObserver();
