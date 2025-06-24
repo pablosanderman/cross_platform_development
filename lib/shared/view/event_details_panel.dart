@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/shared/models/models.dart';
 import 'package:cross_platform_development/shared/repositories/repositories.dart';
 import 'package:cross_platform_development/navigation/navigation.dart';
+import 'package:cross_platform_development/comparison/comparison.dart';
 
 /// {@template event_details_panel}
 /// Comprehensive event details panel with discussion functionality
@@ -24,11 +25,35 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
   List<Group> _groups = [];
   bool _isLoading = true;
   String? _error;
+  
+  // State for managing reply visibility and inline reply fields
+  final Map<String, bool> _repliesVisible = {};
+  final Map<String, bool> _showReplyField = {};
+  final Map<String, TextEditingController> _replyControllers = {};
+  final Map<String, FocusNode> _replyFocusNodes = {};
+  
+  // Main comment composer controller
+  final TextEditingController _mainComposerController = TextEditingController();
+  final FocusNode _mainComposerFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    // Clean up controllers and focus nodes
+    for (final controller in _replyControllers.values) {
+      controller.dispose();
+    }
+    for (final focusNode in _replyFocusNodes.values) {
+      focusNode.dispose();
+    }
+    _mainComposerController.dispose();
+    _mainComposerFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -76,6 +101,13 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       setState(() {
         _event = eventV2;
         _isLoading = false;
+        // Initialize reply visibility state
+        for (final message in eventV2.topLevelMessages) {
+          final replies = eventV2.getRepliesTo(message.id);
+          if (replies.isNotEmpty) {
+            _repliesVisible[message.id] = false; // Start collapsed
+          }
+        }
       });
     } catch (e) {
       setState(() {
@@ -350,23 +382,60 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          const SizedBox(height: 24),
-          _buildTimelineBar(),
-          const SizedBox(height: 24),
-          _buildUniqueDataSection(),
-          const SizedBox(height: 24),
-          _buildAttachmentsSection(),
-          const SizedBox(height: 24),
-          _buildActionButtons(),
-          const SizedBox(height: 32),
-          _buildDiscussionPanel(),
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 24),
+              _buildUniqueDataSection(),
+              const SizedBox(height: 24),
+              _buildAttachmentsAndActionsSection(),
+              const SizedBox(height: 32),
+              _buildDiscussionPanel(),
+            ],
+          ),
+        ),
+        // Close button in upper-right corner
+        Positioned(
+          top: 16,
+          right: 16,
+          child: _buildCloseButton(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCloseButton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
         ],
+      ),
+      child: IconButton(
+        onPressed: () {
+          context.read<NavigationBloc>().add(CloseEventDetails());
+        },
+        icon: const Icon(
+          Icons.close,
+          color: Color(0xFF6B7280),
+          size: 20,
+        ),
+        constraints: const BoxConstraints(
+          minWidth: 32,
+          minHeight: 32,
+        ),
+        padding: EdgeInsets.zero,
       ),
     );
   }
@@ -375,13 +444,23 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          _event!.title,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1F2937),
-          ),
+        // Title with mini-timeline positioned next to it
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                _event!.title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            _buildMiniTimeline(),
+          ],
         ),
         const SizedBox(height: 8),
         Row(
@@ -416,6 +495,58 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     );
   }
 
+  Widget _buildMiniTimeline() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Container(
+          width: 120,
+          height: 6,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE6E8EF),
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF63656E),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+              Expanded(flex: 7, child: Container()),
+            ],
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _getDurationLabel(),
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getDurationLabel() {
+    if (_event!.dateRange.end != null) {
+      final duration = _event!.dateRange.end!.difference(_event!.dateRange.start);
+      if (duration.inDays > 0) {
+        return '${duration.inDays}d';
+      } else if (duration.inHours > 0) {
+        return '${duration.inHours}h';
+      } else {
+        return '${duration.inMinutes}m';
+      }
+    }
+    return 'Point Event';
+  }
+
   Widget _buildTypeChip() {
     final colors = {
       'point': Colors.blue,
@@ -440,65 +571,6 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
           color: color.shade700,
         ),
       ),
-    );
-  }
-
-  Widget _buildTimelineBar() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Timeline',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade800,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          height: 6,
-          decoration: BoxDecoration(
-            color: const Color(0xFFE6E8EF),
-            borderRadius: BorderRadius.circular(3),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF63656E),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-              Expanded(flex: 7, child: Container()),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              _formatDateTime(_event!.dateRange.start),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
-            ),
-            if (_event!.dateRange.end != null)
-              Text(
-                _formatDateTime(_event!.dateRange.end!),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -561,27 +633,40 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     );
   }
 
-  Widget _buildAttachmentsSection() {
-    if (_event!.attachments.isEmpty) return const SizedBox.shrink();
-
+  Widget _buildAttachmentsAndActionsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Attachments',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade800,
+        if (_event!.attachments.isNotEmpty) ...[
+          Text(
+            'Attachments',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade800,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: _event!.attachments.map((attachment) {
-            return _buildAttachmentCard(attachment);
-          }).toList(),
+          const SizedBox(height: 12),
+        ],
+        // Attachments with action buttons aligned to bottom-right
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (_event!.attachments.isNotEmpty) ...[
+              Expanded(
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: _event!.attachments.map((attachment) {
+                    return _buildAttachmentCard(attachment);
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(width: 16),
+            ],
+            // Action buttons aligned to bottom-right of attachments
+            _buildActionButtons(),
+          ],
         ),
       ],
     );
@@ -624,7 +709,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
   }
 
   Widget _buildActionButtons() {
-    return Row(
+    return Column(
       children: [
         ElevatedButton.icon(
           onPressed: () {
@@ -648,16 +733,40 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: () {
-            // TODO: Implement add to comparison
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Add to comparison feature coming soon!'),
-                duration: Duration(seconds: 2),
-              ),
-            );
+            // Use real comparison logic from the codebase
+            final navState = context.read<NavigationBloc>().state;
+            final selectedEvent = navState.selectedEventForDetails;
+            if (selectedEvent != null) {
+              final comparisonBloc = context.read<ComparisonBloc>();
+              final state = comparisonBloc.state;
+
+              if (!state.isEventInComparison(selectedEvent.id) && !state.isAtMaxCapacity) {
+                comparisonBloc.add(AddEventToComparison(selectedEvent));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Added "${selectedEvent.title}" to comparison'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              } else if (state.isAtMaxCapacity) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Comparison is at maximum capacity'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Event is already in comparison'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            }
           },
           icon: const Icon(Icons.compare_arrows, size: 16),
           label: const Text('Add to Compare'),
@@ -699,10 +808,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       final message = topLevelMessages[i];
       widgets.add(_buildMessageCard(message));
       
-      // Add replies
+      // Add replies section if there are replies
       final replies = _event!.getRepliesTo(message.id);
-      for (final reply in replies) {
-        widgets.add(_buildReplyCard(reply));
+      if (replies.isNotEmpty) {
+        widgets.add(_buildRepliesSection(message.id, replies));
       }
       
       // Add spacing between message threads
@@ -712,6 +821,148 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     }
 
     return widgets;
+  }
+
+  Widget _buildRepliesSection(String parentMessageId, List<DiscussionMessage> replies) {
+    final isVisible = _repliesVisible[parentMessageId] ?? false;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Replies toggle button
+        Padding(
+          padding: const EdgeInsets.only(left: 24, top: 8),
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _repliesVisible[parentMessageId] = !isVisible;
+              });
+            },
+            child: Text(
+              isVisible 
+                ? 'Hide replies' 
+                : 'View replies (${replies.length})',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.blue.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+        
+        // Replies content (visible when expanded)
+        if (isVisible) ...[
+          const SizedBox(height: 8),
+          ...replies.map((reply) => _buildReplyCard(reply)),
+          
+          // Inline reply field for this thread
+          _buildInlineReplyField(parentMessageId),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildInlineReplyField(String parentMessageId) {
+    final showField = _showReplyField[parentMessageId] ?? false;
+    
+    if (!showField) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 40, top: 8),
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              _showReplyField[parentMessageId] = true;
+            });
+            // Create controller and focus node if they don't exist
+            if (!_replyControllers.containsKey(parentMessageId)) {
+              _replyControllers[parentMessageId] = TextEditingController();
+              _replyFocusNodes[parentMessageId] = FocusNode();
+            }
+            // Pre-fill with @mention and focus
+            final parentMessage = _event!.discussion.firstWhere((m) => m.id == parentMessageId);
+            final parentAuthor = _users.firstWhere(
+              (u) => u.id == parentMessage.author,
+              orElse: () => User(id: parentMessage.author, displayName: 'Unknown User', avatar: '', groups: []),
+            );
+            _replyControllers[parentMessageId]!.text = '@${parentAuthor.displayName} ';
+            _replyControllers[parentMessageId]!.selection = TextSelection.fromPosition(
+              TextPosition(offset: _replyControllers[parentMessageId]!.text.length),
+            );
+            _replyFocusNodes[parentMessageId]!.requestFocus();
+          },
+          child: Text(
+            'Reply...',
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(left: 40, top: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        children: [
+          TextField(
+            controller: _replyControllers[parentMessageId],
+            focusNode: _replyFocusNodes[parentMessageId],
+            maxLines: null,
+            decoration: const InputDecoration(
+              hintText: 'Write a reply...',
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+            ),
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _showReplyField[parentMessageId] = false;
+                    _replyControllers[parentMessageId]?.clear();
+                  });
+                },
+                child: const Text('Cancel'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  // TODO: Implement actual reply posting
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Reply posting feature coming soon!'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  setState(() {
+                    _showReplyField[parentMessageId] = false;
+                    _replyControllers[parentMessageId]?.clear();
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1A73E8),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: const Text('Reply'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildMessageCard(DiscussionMessage message) {
@@ -754,19 +1005,14 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          user.displayName,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F2937),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        ..._buildUserGroupBadges(user),
-                      ],
+                    // User name without group badges (removed as per feedback)
+                    Text(
+                      user.displayName,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1F2937),
+                      ),
                     ),
                     Text(
                       _formatRelativeTime(message.timestamp),
@@ -864,14 +1110,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    reply.body,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF374151),
-                      height: 1.4,
-                    ),
-                  ),
+                  // Render reply body with @mention highlighting
+                  _buildReplyBodyWithMentions(reply.body),
                 ],
               ),
             ),
@@ -881,30 +1121,64 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     );
   }
 
-  List<Widget> _buildUserGroupBadges(User user) {
-    return user.groups.take(2).map((groupId) {
-      final group = _groups.firstWhere(
-        (g) => g.id == groupId,
-        orElse: () => Group(id: groupId, label: groupId, color: '#6B7280'),
-      );
-      
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        margin: const EdgeInsets.only(right: 4),
-        decoration: BoxDecoration(
-          color: group.colorValue.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(4),
+  Widget _buildReplyBodyWithMentions(String body) {
+    final mentionRegex = RegExp(r'@(\w+(?:\s+\w+)*)');
+    final matches = mentionRegex.allMatches(body);
+    
+    if (matches.isEmpty) {
+      return Text(
+        body,
+        style: const TextStyle(
+          fontSize: 13,
+          color: Color(0xFF374151),
+          height: 1.4,
         ),
-        child: Text(
-          group.label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: group.colorValue,
+      );
+    }
+    
+    final spans = <TextSpan>[];
+    int lastEnd = 0;
+    
+    for (final match in matches) {
+      // Add text before the mention
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(
+          text: body.substring(lastEnd, match.start),
+          style: const TextStyle(
+            fontSize: 13,
+            color: Color(0xFF374151),
           ),
+        ));
+      }
+      
+      // Add the highlighted mention
+      spans.add(TextSpan(
+        text: match.group(0),
+        style: TextStyle(
+          fontSize: 13,
+          color: Colors.blue.shade600,
+          fontWeight: FontWeight.w600,
+          backgroundColor: Colors.blue.shade50,
         ),
-      );
-    }).toList();
+      ));
+      
+      lastEnd = match.end;
+    }
+    
+    // Add remaining text
+    if (lastEnd < body.length) {
+      spans.add(TextSpan(
+        text: body.substring(lastEnd),
+        style: const TextStyle(
+          fontSize: 13,
+          color: Color(0xFF374151),
+        ),
+      ));
+    }
+    
+    return RichText(
+      text: TextSpan(children: spans),
+    );
   }
 
   Widget _buildMessageAttachments(List<String> attachmentIds) {
@@ -956,46 +1230,34 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const TextField(
+          TextField(
+            controller: _mainComposerController,
+            focusNode: _mainComposerFocusNode,
             maxLines: 3,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Add a comment...',
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.all(12),
             ),
           ),
           const SizedBox(height: 12),
+          // Updated layout: attach-file and post buttons on the right edge
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('File attachment feature coming soon!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.attach_file),
-                    tooltip: 'Attach file',
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Emoji feature coming soon!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.emoji_emotions_outlined),
-                    tooltip: 'Add emoji',
-                  ),
-                ],
+              IconButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('File attachment feature coming soon!'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.attach_file),
+                tooltip: 'Attach file',
               ),
+              const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -1004,6 +1266,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                       duration: Duration(seconds: 2),
                     ),
                   );
+                  _mainComposerController.clear();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1A73E8),
