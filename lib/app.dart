@@ -26,14 +26,18 @@ class MyApp extends StatelessWidget {
               const NavigationView(),
               BlocBuilder<NavigationBloc, NavigationState>(
                 builder: (context, navState) {
-                  // If we're on page 0, show the timeline/map split-screen with comparison overlay
+                  // If we're on page 0, show the timeline/map split-screen with all overlays
                   if (navState.currentPageIndex == 0) {
                     return Expanded(
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           final availableWidth = constraints.maxWidth;
-                          final bothVisible =
-                              navState.showTimeline && navState.showMap;
+                          
+                          // Always build the standard timeline/map layout
+                          // Event details will be shown as overlay if needed
+                          
+                          // Standard timeline/map layout
+                          final bothVisible = navState.showTimeline && navState.showMap;
 
                           // Calculate widths based on visibility
                           double timelineWidth = 0;
@@ -99,6 +103,13 @@ class MyApp extends StatelessWidget {
                                         ),
                                       ),
                                     ),
+                                    // Event details overlay
+                                    if (navState.showEventDetails)
+                                      _buildEventDetailsOverlay(
+                                        navState,
+                                        availableWidth,
+                                        constraints.maxHeight,
+                                      ),
                                     // Event Visibility FAB
                                     const Positioned(
                                       bottom: 16,
@@ -137,6 +148,48 @@ class MyApp extends StatelessWidget {
         ),
       ),
       routes: {'/comparison': (context) => const ComparisonResultsPage()},
+    );
+  }
+
+  /// Build the event details overlay
+  Widget _buildEventDetailsOverlay(
+    NavigationState navState,
+    double availableWidth,
+    double availableHeight,
+  ) {
+    // Event details always force split-screen mode
+    final halfWidth = availableWidth / 2;
+    
+    double overlayLeft;
+    double overlayWidth;
+    
+    if (navState.detailsSource == EventDetailsSource.timeline) {
+      // Timeline source: Show event details on right side (over map area)
+      overlayLeft = halfWidth;
+      overlayWidth = halfWidth;
+    } else {
+      // Map source: Show event details on left side (over timeline area)
+      overlayLeft = 0;
+      overlayWidth = halfWidth;
+    }
+    
+    return Positioned(
+      left: overlayLeft,
+      top: 0,
+      width: overlayWidth,
+      height: availableHeight,
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: Offset(overlayLeft > 0 ? -2 : 2, 0),
+            ),
+          ],
+        ),
+        child: const EventDetailsPanel(),
+      ),
     );
   }
 }

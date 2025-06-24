@@ -4,6 +4,7 @@ import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/map/map.dart';
 import 'package:cross_platform_development/shared/shared.dart';
 import '../../comparison/comparison.dart';
+import 'package:cross_platform_development/navigation/navigation.dart';
 
 /// {@template timeline_view}
 /// A [StatelessWidget] which reacts to the provided
@@ -864,6 +865,10 @@ class _EventBoxState extends State<_EventBox> {
           context.read<TimelineCubit>().selectEvent(widget.event);
           // Mark event as viewed for recently viewed
           context.read<ComparisonBloc>().add(MarkEventAsViewed(widget.event));
+          // Show event details panel
+          context.read<NavigationBloc>().add(
+            ShowEventDetails(widget.event, EventDetailsSource.timeline),
+          );
         },
         onLongPress: () {
           _showComparisonContextMenu(context);
