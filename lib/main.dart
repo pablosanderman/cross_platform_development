@@ -56,6 +56,9 @@ void main() {
   );
   doWhenWindowReady(() {
     final win = appWindow;
+    const initialSize = Size(1200, 800);
+    win.minSize = Size(900, 600);
+    win.size = initialSize;
     win.title = "Volcano Monitoring Dashboard";
     win.show();
   });

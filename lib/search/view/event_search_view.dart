@@ -32,7 +32,7 @@ class EventSearchView extends StatelessWidget {
           },
           itemTitle: (event) => event.title,
           onItemSelected: (event) {
-            context.read<NavigationBloc>().add(ToggleTimeline());
+            context.read<NavigationBloc>().add(ShowTimeline());
             context.read<TimelineCubit>().scrollToEvent(event);
             context.read<TimelineCubit>().selectEvent(event);
           },
