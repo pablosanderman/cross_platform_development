@@ -1,0 +1,320 @@
+[
+  {
+    "id": "ev_2025_01_15_etna_earthquake_001",
+    "title": "M 4.2 earthquake near Etna",
+    "type": "point",
+    "location": {
+      "name": "Sicily, Italy",
+      "lat": 37.7513,
+      "lng": 14.9934
+    },
+    "description": "Seismic event detected with magnitude 4.2 at shallow depth near Mount Etna's southeast crater",
+    "dateRange": {
+      "start": "2025-01-15T21:45:00Z"
+    },
+    "uniqueData": {
+      "magnitude": 4.2,
+      "depthKm": 10.5,
+      "region": "Etna",
+      "location": "Sicily, Italy"
+    },
+    "attachments": [
+      {
+        "id": "att_etna_seismic_001",
+        "file": "seismic_readings_etna_jan15.png",
+        "mime": "image/png",
+        "label": "Seismic readings chart"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_etna_001_001",
+        "author": "u_dr_rossi",
+        "ts": "2025-01-16T08:30:00+01:00",
+        "body": "This M 4.2 event shows typical characteristics of volcanic-tectonic earthquakes. The shallow depth and location suggest it's related to magma movement.",
+        "replyTo": null,
+        "attachments": []
+      },
+      {
+        "id": "msg_etna_001_002",
+        "author": "u_dr_bianchi",
+        "ts": "2025-01-16T10:15:00+01:00",
+        "body": "Agreed. The seismic signature aligns with our recent InSAR data showing ground deformation in this sector.",
+        "replyTo": "msg_etna_001_001",
+        "attachments": []
+      },
+      {
+        "id": "msg_etna_001_003",
+        "author": "u_prof_ferrari",
+        "ts": "2025-01-16T14:20:00+01:00",
+        "body": "I've updated the hazard assessment. Recommend increasing monitoring frequency for this sector.",
+        "replyTo": null,
+        "attachments": ["att_etna_hazard_update_001"]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_01_15_stromboli_eruption_001",
+    "title": "Stromboli eruption phase",
+    "type": "period",
+    "location": {
+      "name": "Stromboli, Aeolian Islands",
+      "lat": 38.7890,
+      "lng": 15.2130
+    },
+    "description": "Extended strombolian activity with lava fountains and persistent explosive activity",
+    "dateRange": {
+      "start": "2025-01-15T00:00:00Z",
+      "end": "2025-01-15T23:59:59Z"
+    },
+    "uniqueData": {
+      "eruptionType": "Strombolian",
+      "maxAlertLevel": 3,
+      "vei": 2,
+      "description": "Extended strombolian activity with lava fountains"
+    },
+    "attachments": [
+      {
+        "id": "att_stromboli_timeline_001",
+        "file": "stromboli_activity_timeline_jan15.png",
+        "mime": "image/png",
+        "label": "Activity timeline"
+      },
+      {
+        "id": "att_stromboli_thermal_001",
+        "file": "thermal_camera_footage.mp4",
+        "mime": "video/mp4",
+        "label": "Thermal camera footage"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_stromboli_001_001",
+        "author": "u_dr_moretti",
+        "ts": "2025-01-15T12:00:00+01:00",
+        "body": "Current activity shows sustained lava fountaining from the NE crater. Wind conditions are dispersing ash to the southeast.",
+        "replyTo": null,
+        "attachments": []
+      },
+      {
+        "id": "msg_stromboli_001_002",
+        "author": "u_dr_rossi",
+        "ts": "2025-01-15T15:30:00+01:00",
+        "body": "Explosion frequency has increased to ~15 per hour. This is above the baseline of 8-10/hour.",
+        "replyTo": "msg_stromboli_001_001",
+        "attachments": []
+      },
+      {
+        "id": "msg_stromboli_001_003",
+        "author": "u_prof_ferrari",
+        "ts": "2025-01-15T18:45:00+01:00",
+        "body": "Tourist access to crater rim should remain restricted. Activity level warrants continued orange alert status.",
+        "replyTo": null,
+        "attachments": []
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_01_15_vulcano_gas_spike_001",
+    "title": "Gas emission spike at Vulcano",
+    "type": "point",
+    "location": {
+      "name": "La Fossa crater, Vulcano",
+      "lat": 38.4042,
+      "lng": 14.9619
+    },
+    "description": "Significant increase in SO2 emissions detected at La Fossa crater, 600% above background levels",
+    "dateRange": {
+      "start": "2025-01-15T08:30:00Z"
+    },
+    "uniqueData": {
+      "so2FluxTonsPerDay": 850,
+      "backgroundLevel": 120,
+      "increasePercent": 600,
+      "location": "La Fossa crater"
+    },
+    "attachments": [
+      {
+        "id": "att_vulcano_gas_001",
+        "file": "gas_flux_measurements_jan15.png",
+        "mime": "image/png",
+        "label": "Gas flux measurements"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_vulcano_001_001",
+        "author": "u_dr_bianchi",
+        "ts": "2025-01-15T10:45:00+01:00",
+        "body": "This is the highest SO2 flux we've recorded since 2018. Correlates with increased fumarole temperatures.",
+        "replyTo": null,
+        "attachments": []
+      },
+      {
+        "id": "msg_vulcano_001_002",
+        "author": "u_dr_rossi",
+        "ts": "2025-01-15T14:20:00+01:00",
+        "body": "Wind direction is favorable - emissions dispersing offshore. No immediate health concerns for Porto di Levante.",
+        "replyTo": "msg_vulcano_001_001",
+        "attachments": []
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_01_15_campi_flegrei_uplift_001",
+    "title": "Campi Flegrei ground uplift",
+    "type": "period",
+    "location": {
+      "name": "Campi Flegrei, Naples",
+      "lat": 40.8270,
+      "lng": 14.1390
+    },
+    "description": "Continued caldera-wide uplift detected through InSAR monitoring, reaching 3.2 cm maximum displacement",
+    "dateRange": {
+      "start": "2025-01-15T00:00:00Z",
+      "end": "2025-01-15T23:59:59Z"
+    },
+    "uniqueData": {
+      "maxDisplacementCm": 3.2,
+      "measurementMethod": "InSAR",
+      "alertLevel": "yellow",
+      "description": "Continued caldera-wide uplift detected"
+    },
+    "attachments": [
+      {
+        "id": "att_campi_insar_001",
+        "file": "insar_deformation_map_jan15.png",
+        "mime": "image/png",
+        "label": "InSAR deformation map"
+      },
+      {
+        "id": "att_campi_report_001",
+        "file": "weekly_monitoring_report.pdf",
+        "mime": "application/pdf",
+        "label": "Weekly monitoring report"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_campi_001_001",
+        "author": "u_prof_ferrari",
+        "ts": "2025-01-15T09:00:00+01:00",
+        "body": "Weekly displacement rate is accelerating. We're seeing 2-3mm/week compared to 1mm/week last month.",
+        "replyTo": null,
+        "attachments": ["att_campi_report_001"]
+      },
+      {
+        "id": "msg_campi_001_002", 
+        "author": "u_dr_moretti",
+        "ts": "2025-01-15T11:30:00+01:00",
+        "body": "Seismic data supports the InSAR observations. Low-frequency events are increasing in the central caldera.",
+        "replyTo": "msg_campi_001_001",
+        "attachments": []
+      },
+      {
+        "id": "msg_campi_001_003",
+        "author": "u_dr_bianchi",
+        "ts": "2025-01-15T16:45:00+01:00",
+        "body": "Civil protection has been briefed. Yellow alert status remains appropriate but we're monitoring closely.",
+        "replyTo": null,
+        "attachments": []
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_01_15_etna_microswarm_001",
+    "title": "Etna microearthquake swarm",
+    "type": "grouped",
+    "location": {
+      "name": "Mount Etna, Southeast crater",
+      "lat": 37.7513,
+      "lng": 14.9934
+    },
+    "description": "Grouped event series with 5 related occurrences indicating potential pre-eruptive activity",
+    "dateRange": {
+      "start": "2025-01-15T00:15:00Z",
+      "end": "2025-01-15T06:00:00Z"
+    },
+    "uniqueData": {
+      "location": "Mount Etna, Southeast crater",
+      "swarmType": "pre-eruptive",
+      "region": "Sicily",
+      "members": [
+        {
+          "id": "evt-9001-1",
+          "timestamp": "2025-01-15T00:15:00Z",
+          "magnitude": 1.9,
+          "depth": 8.2
+        },
+        {
+          "id": "evt-9001-2",
+          "timestamp": "2025-01-15T01:43:00Z",
+          "magnitude": 2.3,
+          "depth": 9.1
+        },
+        {
+          "id": "evt-9001-3",
+          "timestamp": "2025-01-15T02:00:00Z",
+          "magnitude": 2.7,
+          "depth": 7.8
+        },
+        {
+          "id": "evt-9001-4",
+          "timestamp": "2025-01-15T03:22:00Z",
+          "magnitude": 2.1,
+          "depth": 8.9
+        },
+        {
+          "id": "evt-9001-5",
+          "timestamp": "2025-01-15T04:15:00Z",
+          "magnitude": 1.8,
+          "depth": 9.3
+        }
+      ],
+      "aggregateData": {
+        "count": 5,
+        "minMagnitude": 1.8,
+        "maxMagnitude": 2.7,
+        "averageMagnitude": 2.16,
+        "minDepth": 7.8,
+        "maxDepth": 9.3,
+        "averageDepth": 8.66,
+        "duration": "5h 45m"
+      }
+    },
+    "attachments": [
+      {
+        "id": "att_etna_swarm_001",
+        "file": "microseismic_cluster_analysis.pdf",
+        "mime": "application/pdf",
+        "label": "Cluster analysis report"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_etna_swarm_001_001",
+        "author": "u_dr_moretti",
+        "ts": "2025-01-15T07:30:00+01:00",
+        "body": "This swarm pattern is consistent with dyke intrusion at shallow depth. Similar to the precursory activity we saw in 2023.",
+        "replyTo": null,
+        "attachments": ["att_etna_swarm_001"]
+      },
+      {
+        "id": "msg_etna_swarm_001_002",
+        "author": "u_dr_rossi",
+        "ts": "2025-01-15T09:15:00+01:00",
+        "body": "Agreed. The depth clustering around 8-9km suggests a common source. Should we increase network sensitivity?",
+        "replyTo": "msg_etna_swarm_001_001",
+        "attachments": []
+      },
+      {
+        "id": "msg_etna_swarm_001_003",
+        "author": "u_prof_ferrari",
+        "ts": "2025-01-15T12:00:00+01:00",
+        "body": "Yes, recommend activating additional temporary stations in the SE sector for better location accuracy.",
+        "replyTo": "msg_etna_swarm_001_002",
+        "attachments": []
+      }
+    ]
+  }
+]

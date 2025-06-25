@@ -16,6 +16,11 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<ChangePage>(_handleChangePage);
     on<ShowMap>(_handleShowMap);
     on<ShowTimeline>(_handleShowTimeline);
+    on<ShowEventDetails>(_handleShowEventDetails);
+    on<CloseEventDetails>(_handleCloseEventDetails);
+    on<SwitchEventDetailsView>(_handleSwitchEventDetailsView);
+    on<UpdateSplitRatio>(_handleUpdateSplitRatio);
+    on<UpdateEventDetailsSplitRatio>(_handleUpdateEventDetailsSplitRatio);
   }
 
   void _handleToggleTimeline(
@@ -48,7 +53,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   }
 
   void _handleChangePage(ChangePage event, Emitter<NavigationState> emit) {
-    print("Changing page index to: ${event.pageIndex}");
     emit(
       state.copyWith(
         showTimeline: false,
@@ -60,11 +64,94 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
 
   void _handleShowMap(ShowMap event, Emitter<NavigationState> emit) {
     // Navigate to timeline/map page (index 0) and ensure map is visible
-    emit(state.copyWith(showMap: true, currentPageIndex: 0));
+    // Preserve the current timeline state to avoid losing it
+    emit(
+      state.copyWith(
+        showMap: true,
+        showTimeline: state.showTimeline, // Explicitly preserve timeline state
+        currentPageIndex: 0,
+      ),
+    );
   }
 
   void _handleShowTimeline(ShowTimeline event, Emitter<NavigationState> emit) {
     // Navigate to timeline/map page (index 0) and ensure timeline is visible
-    emit(state.copyWith(showTimeline: true, currentPageIndex: 0));
+    // Preserve the current map state to avoid losing it
+    emit(
+      state.copyWith(
+        showTimeline: true,
+        showMap: state.showMap, // Explicitly preserve map state
+        currentPageIndex: 0,
+      ),
+    );
+  }
+
+  void _handleShowEventDetails(
+    ShowEventDetails event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Navigate to timeline/map page (index 0) and show event details as overlay
+
+    // Store current state to restore when closing details
+    final previousShowTimeline = state.showTimeline;
+    final previousShowMap = state.showMap;
+
+    // Don't force split-screen mode - preserve current view state
+    // Only ensure we're on the timeline/map page (index 0)
+    emit(
+      state.copyWith(
+        currentPageIndex: 0,
+        selectedEventForDetails: event.event,
+        detailsSource: event.source,
+        previousShowTimeline: previousShowTimeline,
+        previousShowMap: previousShowMap,
+        // Keep current view state instead of forcing both visible
+        showTimeline: state.showTimeline,
+        showMap: state.showMap,
+      ),
+    );
+  }
+
+  void _handleCloseEventDetails(
+    CloseEventDetails event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Restore the previous view state
+    final previousTimeline = state.previousShowTimeline ?? true;
+    final previousMap = state.previousShowMap ?? false;
+
+    emit(
+      state.copyWith(
+        showTimeline: previousTimeline,
+        showMap: previousMap,
+        clearEventDetails: true,
+      ),
+    );
+  }
+
+  void _handleSwitchEventDetailsView(
+    SwitchEventDetailsView event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Switch the overlay position while maintaining event details and both views visible
+    emit(state.copyWith(detailsSource: event.targetSource));
+  }
+
+  void _handleUpdateSplitRatio(
+    UpdateSplitRatio event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Clamp split ratio between 0.0 and 1.0
+    final clampedRatio = event.splitRatio.clamp(0.0, 1.0);
+    emit(state.copyWith(splitRatio: clampedRatio));
+  }
+
+  void _handleUpdateEventDetailsSplitRatio(
+    UpdateEventDetailsSplitRatio event,
+    Emitter<NavigationState> emit,
+  ) {
+    // Clamp split ratio between 0.0 and 1.0
+    final clampedRatio = event.splitRatio.clamp(0.0, 1.0);
+    emit(state.copyWith(eventDetailsSplitRatio: clampedRatio));
   }
 }

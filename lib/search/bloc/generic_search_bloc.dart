@@ -7,11 +7,8 @@ class GenericSearchBloc<T> extends Bloc<dynamic, GenericSearchState<T>> {
   final List<T> Function() loadItems;
   final bool Function(T, String) filter;
 
-  GenericSearchBloc({
-    required this.loadItems,
-    required this.filter,
-  }) : super(GenericSearchState<T>()) {
-
+  GenericSearchBloc({required this.loadItems, required this.filter})
+    : super(GenericSearchState<T>()) {
     on<SearchItemSelected<T>>((event, emit) {
       emit(state.copyWith(selectedItem: event.selectedItem));
     });

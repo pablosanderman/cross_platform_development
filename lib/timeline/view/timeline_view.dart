@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
-import 'package:cross_platform_development/shared/shared.dart';
 import 'package:cross_platform_development/map/map.dart';
+import 'package:cross_platform_development/shared/shared.dart';
+import '../../comparison/comparison.dart';
+import 'package:cross_platform_development/navigation/navigation.dart';
 
 import '../../widgets/add_event/add_event_overlay.dart';
 
@@ -764,73 +766,83 @@ class _EventBoxState extends State<_EventBox> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TimelineCubit, TimelineState>(
-      builder: (context, state) {
-        final color = _getEventColor(widget.event);
-        final isGrouped = widget.event.type == EventType.grouped;
-
-        // Check if this event is hovered from external source (like map)
-        final isExternallyHovered = state.hoveredEvent?.id == widget.event.id;
-        final isEffectivelyHovered = _isHovered || isExternallyHovered;
-
-        // Check if this event is selected
-        final isSelected = state.selectedEvent?.id == widget.event.id;
-
-        // Calculate positioning
-        final leftOffset = _calculateLeftOffset();
-        // Position events to look centered at default height, then grow down from there
-        final verticalTop =
-            (75.0 - widget.dimensions.eventHeight) /
-            2; // Centers at default 75px height
-
-        // Handle grouped events specially
-        if (isGrouped) {
-          return Transform.translate(
-            offset: Offset(leftOffset, verticalTop),
-            child: _buildHoverableEvent(
-              isEffectivelyHovered: isEffectivelyHovered,
-              isSelected: isSelected,
-              child: _GroupedEventWidget(
-                event: widget.event,
-                dimensions: widget.dimensions,
-                color: color,
-                rowHeight: widget.rowHeight,
-              ),
-            ),
-          );
+    return BlocBuilder<EventVisibilityCubit, EventVisibilityState>(
+      builder: (context, visibilityState) {
+        // Check if this event should be hidden
+        if (visibilityState.hiddenIds.contains(widget.event.id)) {
+          return const SizedBox.shrink();
         }
 
-        final isPeriodic = widget.event.hasDuration;
-        final eventDuration = isPeriodic
-            ? widget.event.duration!
-            : widget.dimensions.defaultEventDuration;
+        return BlocBuilder<TimelineCubit, TimelineState>(
+          builder: (context, state) {
+            final color = _getEventColor(widget.event);
+            final isGrouped = widget.event.type == EventType.grouped;
 
-        final textWidth = _computeEventTextWidth(eventDuration);
+            // Check if this event is hovered from external source (like map)
+            final isExternallyHovered =
+                state.hoveredEvent?.id == widget.event.id;
+            final isEffectivelyHovered = _isHovered || isExternallyHovered;
 
-        return Transform.translate(
-          offset: Offset(leftOffset, verticalTop),
-          child: SizedBox(
-            width: textWidth,
-            height: _getEventDisplayHeight(),
-            child: _buildHoverableEvent(
-              isEffectivelyHovered: isEffectivelyHovered,
-              isSelected: isSelected,
-              child: isPeriodic
-                  ? _PeriodEventWidget(
-                      event: widget.event,
-                      color: color,
-                      eventDuration: eventDuration,
-                      dimensions: widget.dimensions,
-                      rowHeight: widget.rowHeight,
-                    )
-                  : _PointEventWidget(
-                      event: widget.event,
-                      color: color,
-                      dimensions: widget.dimensions,
-                      rowHeight: widget.rowHeight,
-                    ),
-            ),
-          ),
+            // Check if this event is selected
+            final isSelected = state.selectedEvent?.id == widget.event.id;
+
+            // Calculate positioning
+            final leftOffset = _calculateLeftOffset();
+            // Position events to look centered at default height, then grow down from there
+            final verticalTop =
+                (75.0 - widget.dimensions.eventHeight) /
+                2; // Centers at default 75px height
+
+            // Handle grouped events specially
+            if (isGrouped) {
+              return Transform.translate(
+                offset: Offset(leftOffset, verticalTop),
+                child: _buildHoverableEvent(
+                  isEffectivelyHovered: isEffectivelyHovered,
+                  isSelected: isSelected,
+                  child: _GroupedEventWidget(
+                    event: widget.event,
+                    dimensions: widget.dimensions,
+                    color: color,
+                    rowHeight: widget.rowHeight,
+                  ),
+                ),
+              );
+            }
+
+            final isPeriodic = widget.event.hasDuration;
+            final eventDuration = isPeriodic
+                ? widget.event.duration!
+                : widget.dimensions.defaultEventDuration;
+
+            final textWidth = _computeEventTextWidth(eventDuration);
+
+            return Transform.translate(
+              offset: Offset(leftOffset, verticalTop),
+              child: SizedBox(
+                width: textWidth,
+                height: _getEventDisplayHeight(),
+                child: _buildHoverableEvent(
+                  isEffectivelyHovered: isEffectivelyHovered,
+                  isSelected: isSelected,
+                  child: isPeriodic
+                      ? _PeriodEventWidget(
+                          event: widget.event,
+                          color: color,
+                          eventDuration: eventDuration,
+                          dimensions: widget.dimensions,
+                          rowHeight: widget.rowHeight,
+                        )
+                      : _PointEventWidget(
+                          event: widget.event,
+                          color: color,
+                          dimensions: widget.dimensions,
+                          rowHeight: widget.rowHeight,
+                        ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -854,6 +866,18 @@ class _EventBoxState extends State<_EventBox> {
         onTap: () {
           // Select the event when clicked
           context.read<TimelineCubit>().selectEvent(widget.event);
+          // Mark event as viewed for recently viewed
+          context.read<ComparisonBloc>().add(MarkEventAsViewed(widget.event));
+          // Show event details panel
+          context.read<NavigationBloc>().add(
+            ShowEventDetails(widget.event, EventDetailsSource.timeline),
+          );
+        },
+        onLongPress: () {
+          _showComparisonContextMenu(context);
+        },
+        onSecondaryTap: () {
+          _showComparisonContextMenu(context);
         },
         child: Stack(
           clipBehavior: Clip.none,
@@ -894,50 +918,197 @@ class _EventBoxState extends State<_EventBox> {
                 ),
               ),
             child,
-            // "View on Map" button - only show when directly hovered (not from map) and event has coordinates
-            if (_isHovered && widget.event.hasCoordinates)
-              Positioned(
-                right: -8,
-                top: -8,
-                child: GestureDetector(
-                  onTap: () {
-                    // Navigate to event on map
-                    context.read<MapCubit>().navigateToEvent(widget.event);
-                  },
-                  child: Material(
-                    elevation: 4,
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.map, size: 14, color: Colors.white),
-                          const SizedBox(width: 4),
-                          const Text(
-                            'View on Map',
-                            style: TextStyle(
+            // Action buttons - only show when directly hovered (not from map)
+            if (_isHovered) ...[
+              // "View on Map" button - only show if event has coordinates
+              if (widget.event.hasCoordinates)
+                Positioned(
+                  right: -8,
+                  top: -8,
+                  child: GestureDetector(
+                    onTap: () {
+                      // Navigate to event on map
+                      context.read<MapCubit>().navigateToEvent(widget.event);
+                    },
+                    child: Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.map,
+                              size: 14,
                               color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            const Text(
+                              'View on Map',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
+              // "Add to Compare" button
+              Positioned(
+                right: widget.event.hasCoordinates ? 120 : -8,
+                top: -8,
+                child: BlocBuilder<ComparisonBloc, ComparisonState>(
+                  builder: (context, comparisonState) {
+                    final isInComparison = comparisonState.isEventInComparison(
+                      widget.event.id,
+                    );
+                    final isAtMaxCapacity = comparisonState.isAtMaxCapacity;
+
+                    return GestureDetector(
+                      onTap: isInComparison || isAtMaxCapacity
+                          ? null
+                          : () {
+                              context.read<ComparisonBloc>().add(
+                                AddEventToComparison(widget.event),
+                              );
+                            },
+                      child: Material(
+                        elevation: 4,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isInComparison
+                                ? Colors.green
+                                : (isAtMaxCapacity
+                                      ? Colors.grey
+                                      : Colors.orange),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isInComparison
+                                    ? Icons.check
+                                    : Icons.compare_arrows,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                isInComparison
+                                    ? 'Added'
+                                    : (isAtMaxCapacity
+                                          ? 'Max Reached'
+                                          : 'Add to Compare'),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
+            ],
           ],
         ),
       ),
+    );
+  }
+
+  void _showComparisonContextMenu(BuildContext context) {
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+    final position = renderBox.localToGlobal(Offset.zero);
+
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx + renderBox.size.width,
+        position.dy + renderBox.size.height,
+      ),
+      items: [
+        PopupMenuItem(
+          child: BlocBuilder<ComparisonBloc, ComparisonState>(
+            builder: (context, state) {
+              final isInComparison = state.isEventInComparison(widget.event.id);
+              final isAtMaxCapacity = state.isAtMaxCapacity;
+
+              if (isInComparison) {
+                return const Row(
+                  children: [
+                    Icon(Icons.check, color: Colors.green),
+                    SizedBox(width: 8),
+                    Text('Already in comparison'),
+                  ],
+                );
+              } else if (isAtMaxCapacity) {
+                return const Row(
+                  children: [
+                    Icon(Icons.warning, color: Colors.orange),
+                    SizedBox(width: 8),
+                    Text('Comparison list is full'),
+                  ],
+                );
+              } else {
+                return const Row(
+                  children: [
+                    Icon(Icons.compare_arrows),
+                    SizedBox(width: 8),
+                    Text('Add to comparison'),
+                  ],
+                );
+              }
+            },
+          ),
+          onTap: () {
+            final comparisonBloc = context.read<ComparisonBloc>();
+            final state = comparisonBloc.state;
+
+            if (!state.isEventInComparison(widget.event.id) &&
+                !state.isAtMaxCapacity) {
+              comparisonBloc.add(AddEventToComparison(widget.event));
+            }
+          },
+        ),
+        PopupMenuItem(
+          child: const Row(
+            children: [
+              Icon(Icons.open_in_new),
+              SizedBox(width: 8),
+              Text('View comparison overlay'),
+            ],
+          ),
+          onTap: () {
+            context.read<ComparisonBloc>().add(
+              const ShowComparisonSelectionOverlay(),
+            );
+          },
+        ),
+      ],
     );
   }
 
