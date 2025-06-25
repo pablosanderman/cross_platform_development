@@ -47,27 +47,25 @@ class GenericSearchBar<T> extends StatelessWidget {
                 leading: leadingIcon,
               );
             },
-            suggestionsBuilder:
-                (BuildContext context, SearchController controller) async {
-                  final String input = controller.text;
-                  final filteredItems = this
-                      .loadItems()
-                      .where((item) => filter(item, input))
-                      .toList();
-
-                  return filteredItems.map((item) {
-                    return ListTile(
-                      title: itemBuilder(item),
-                      onTap: () {
-                        controller.closeView(itemTitle(item));
-                        searchbloc.read<GenericSearchBloc<T>>().add(
-                          SearchItemSelected<T>(item),
-                        );
-                        onItemSelected?.call(item);
-                      },
-                    );
-                  }).toList();
-                },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+  final String input = controller.text;
+  
+  return Future.value(
+    loadItems()
+        .where((item) => filter(item, input.toLowerCase()))
+        .map<Widget>((item) => ListTile(
+              title: itemBuilder(item),
+              onTap: () {
+                controller.closeView(itemTitle(item));
+                searchbloc.read<GenericSearchBloc<T>>().add(
+                  SearchItemSelected<T>(item),
+                );
+                onItemSelected?.call(item);
+              },
+            ))
+        .toList(),
+  );
+},
           );
         },
       ),
