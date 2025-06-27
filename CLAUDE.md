@@ -173,6 +173,12 @@ Events support both point events (earthquakes) and period events (eruptions):
 
 ## Development Tips
 
+### Debugging and Testing
+- **Let the user handle app execution**: Do not attempt to run, debug, or hot reload the Flutter app yourself
+- User will provide debug output and test results
+- Focus on code analysis and fixes based on user feedback
+- Add temporary print statements for debugging when needed (user will run and provide output)
+
 ### Working with BLoC
 - Use `MultiBlocProvider` in main.dart for dependency injection
 - Follow the established pattern: Event → Bloc → State → UI

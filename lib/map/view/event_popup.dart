@@ -141,16 +141,7 @@ class EventPopup extends StatelessWidget {
                                     GestureDetector(
                                       onTap: () {
                                         // Hide popup without clearing selection and show event details
-                                        context.read<MapCubit>().emit(
-                                          context
-                                              .read<MapCubit>()
-                                              .state
-                                              .copyWith(
-                                                showPopup: false,
-                                                popupEvents: <Event>[],
-                                                popupCurrentIndex: 0,
-                                              ),
-                                        );
+                                        context.read<MapCubit>().closePopup();
                                         context.read<NavigationBloc>().add(
                                           ShowEventDetails(
                                             currentEvent,
@@ -190,16 +181,7 @@ class EventPopup extends StatelessWidget {
                                           GestureDetector(
                                             onTap: () {
                                               // Hide popup without clearing selection and show event details
-                                              context.read<MapCubit>().emit(
-                                                context
-                                                    .read<MapCubit>()
-                                                    .state
-                                                    .copyWith(
-                                                      showPopup: false,
-                                                      popupEvents: <Event>[],
-                                                      popupCurrentIndex: 0,
-                                                    ),
-                                              );
+                                              context.read<MapCubit>().closePopup();
                                               context
                                                   .read<NavigationBloc>()
                                                   .add(

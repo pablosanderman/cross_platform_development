@@ -167,9 +167,9 @@ class ComparisonBloc extends Bloc<ComparisonEvent, ComparisonState> {
     // Filter events based on search query
     final results = state.allEvents.where((eventItem) {
       final title = eventItem.title.toLowerCase();
-      final description = eventItem.description?.toLowerCase() ?? '';
-      final location = eventItem.properties?['location']?.toString().toLowerCase() ?? '';
-      final region = eventItem.properties?['region']?.toString().toLowerCase() ?? '';
+      final description = eventItem.description.toLowerCase();
+      final location = eventItem.location.name.toLowerCase();
+      final region = eventItem.uniqueData['region']?.toString().toLowerCase() ?? '';
       
       return title.contains(query) || 
              description.contains(query) ||

@@ -67,26 +67,7 @@ class RecentlyViewedService {
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/$_fileName');
       
-      final jsonData = _recentEvents.map((event) => {
-        'id': event.id,
-        'type': event.type.name.toUpperCase(),
-        'title': event.title,
-        'description': event.description,
-        'imageUrl': event.imageUrl,
-        'startTime': event.startTime?.toIso8601String(),
-        'endTime': event.endTime?.toIso8601String(),
-        'computedStart': event.computedStart?.toIso8601String(),
-        'computedEnd': event.computedEnd?.toIso8601String(),
-        'properties': event.properties,
-        'aggregateData': event.aggregateData,
-        'latitude': event.latitude,
-        'longitude': event.longitude,
-        'members': event.members?.map((member) => {
-          'id': member.id,
-          'timestamp': member.timestamp.toIso8601String(),
-          ...member.data,
-        }).toList(),
-      }).toList();
+      final jsonData = _recentEvents.map((event) => event.toJson()).toList();
       
       await file.writeAsString(jsonEncode(jsonData));
     } catch (e) {

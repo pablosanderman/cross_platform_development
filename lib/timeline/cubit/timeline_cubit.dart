@@ -66,10 +66,18 @@ class TimelineCubit extends Cubit<TimelineState> {
         type: EventType.period,
         title: title,
         description: description,
-        startTime: startTime,
-        endTime: endTime,
-        latitude: latitude,
-        longitude: longitude,
+        location: EventLocation(
+          name: 'Generated Location',
+          lat: latitude,
+          lng: longitude,
+        ),
+        dateRange: EventDateRange(
+          start: startTime ?? DateTime.now(),
+          end: endTime,
+        ),
+        uniqueData: {},
+        attachments: [],
+        discussion: [],
       ),
     );
 

@@ -1,4 +1,4 @@
-﻿import 'package:cross_platform_development/shared/models/event.dart';
+﻿import 'package:cross_platform_development/shared/models/event_v2.dart';
 
 enum EventDetailsSource { timeline, map }
 
