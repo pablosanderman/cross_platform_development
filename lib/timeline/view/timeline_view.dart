@@ -6,7 +6,6 @@ import 'package:cross_platform_development/shared/shared.dart';
 import '../../comparison/comparison.dart';
 import 'package:cross_platform_development/navigation/navigation.dart';
 
-import '../../widgets/add_event/add_event_overlay.dart';
 
 /// {@template timeline_view}
 /// A [StatelessWidget] which reacts to the provided
@@ -28,7 +27,6 @@ class _TimelineViewState extends State<TimelineView>
   AnimationController? _scrollAnimationController;
   double _actualTimelineWidth = 0.0;
   TimelineCubit? _timelineCubit;
-  bool _showAddEventOverlay = false; // Controls visibility of the add-event widget
 
   @override
   void initState() {
@@ -126,32 +124,6 @@ class _TimelineViewState extends State<TimelineView>
                   ],
                 );
               },
-            ),
-          ),
-          // Overlay Add Event Form
-          if (_showAddEventOverlay)
-            AddEventOverlay(
-              onSubmitted: (eventData) {
-                setState(() => _showAddEventOverlay = false);
-                if (eventData != null) {
-                  _timelineCubit!.addEvent(
-                    eventData['title'],
-                    eventData['description'],
-                    eventData['startTime'],
-                    eventData['endTime'],
-                    eventData['latitude'],
-                    eventData['longitude'],
-                  );
-                  // Pass other data if extending `addEvent` in the cubit.
-                }
-              },
-              onCancel: () => setState(() => _showAddEventOverlay = false),
-            ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: FloatingActionButton(
-              child: Icon(Icons.add),
-              onPressed: () => setState(() => _showAddEventOverlay = true),
             ),
           ),
         ],

@@ -8,11 +8,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'navigation/navigation.dart';
 import 'comparison/comparison.dart';
+import 'widgets/add_event/add_event_fab.dart';
+import 'widgets/add_event/add_event_overlay.dart';
 
 const borderColor = Color(0xFF805306);
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _showAddEventOverlay = false;
 
   @override
   Widget build(BuildContext context) {
@@ -74,12 +83,49 @@ class MyApp extends StatelessWidget {
                                         availableWidth,
                                         constraints.maxHeight,
                                       ),
-                                    // Event Visibility FAB
-                                    const Positioned(
+                                    // Floating Action Buttons
+                                    Positioned(
                                       bottom: 16,
                                       right: 16,
-                                      child: EventVisibilityFab(),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const EventVisibilityFab(),
+                                          const SizedBox(height: 8),
+                                          AddEventFab(
+                                            onPressed: () {
+                                              setState(() {
+                                                _showAddEventOverlay = true;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     ),
+                                    // Add Event Overlay
+                                    if (_showAddEventOverlay)
+                                      AddEventOverlay(
+                                        onSubmitted: (eventData) {
+                                          setState(() {
+                                            _showAddEventOverlay = false;
+                                          });
+                                          if (eventData != null) {
+                                            context.read<TimelineCubit>().addEvent(
+                                              eventData['title'],
+                                              eventData['description'],
+                                              eventData['startTime'],
+                                              eventData['endTime'],
+                                              eventData['latitude'],
+                                              eventData['longitude'],
+                                            );
+                                          }
+                                        },
+                                        onCancel: () {
+                                          setState(() {
+                                            _showAddEventOverlay = false;
+                                          });
+                                        },
+                                      ),
                                     // Event Visibility Panel Overlay
                                     if (visibilityState.panelOpen)
                                       const Positioned.fill(
