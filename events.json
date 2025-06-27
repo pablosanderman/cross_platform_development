@@ -10,8 +10,8 @@
     },
     "description": "Major paroxysmal eruption from Southeast crater with sustained lava fountaining reaching 800m height, strombolian activity, and lava flows extending 2.5km downslope. Aviation alert raised to RED.",
     "dateRange": {
-      "start": "2025-06-27T03:15:00Z",
-      "end": "2025-06-27T18:30:00Z"
+      "start": "2025-06-26T03:15:00Z",
+      "end": "2025-06-26T18:30:00Z"
     },
     "uniqueData": {
       "eruptionType": "Paroxysmal",
@@ -54,7 +54,7 @@
       {
         "id": "msg_etna_parox_001",
         "author": "field_team_alpha",
-        "ts": "2025-06-27T03:45:00+02:00",
+        "ts": "2025-06-26T03:45:00+02:00",
         "body": "🔴 BREAKING: Paroxysmal activity initiated at 05:15 local time. Lava fountains reaching unprecedented 800m height. Evacuating Piano Provenzana access immediately.",
         "replyTo": null,
         "attachments": [
@@ -64,7 +64,7 @@
       {
         "id": "msg_etna_parox_002",
         "author": "dr_volcanologist_italy",
-        "ts": "2025-06-27T04:20:00+02:00",
+        "ts": "2025-06-26T04:20:00+02:00",
         "body": "INGV confirms: This is the most intense paroxysm since February 2022. Tremor amplitude 10x above baseline. Activating full emergency monitoring protocol.",
         "replyTo": "msg_etna_parox_001",
         "attachments": [
@@ -74,7 +74,7 @@
       {
         "id": "msg_etna_parox_003",
         "author": "civil_protection_it",
-        "ts": "2025-06-27T05:00:00+02:00",
+        "ts": "2025-06-26T05:00:00+02:00",
         "body": "Aviation RED alert issued. Catania airport operations suspended as of 07:00. Tourist evacuation from Rifugio Sapienza area in progress.",
         "replyTo": null,
         "attachments": []
@@ -82,7 +82,7 @@
       {
         "id": "msg_etna_parox_004",
         "author": "aviation_meteorologist",
-        "ts": "2025-06-27T06:15:00+02:00",
+        "ts": "2025-06-26T06:15:00+02:00",
         "body": "Ash column reaching FL140 (4.2km), drifting NE toward Calabria. VAAC Toulouse issued SIGMET. Recommend avoiding airspace east of volcano.",
         "replyTo": "msg_etna_parox_003",
         "attachments": []
@@ -90,7 +90,7 @@
       {
         "id": "msg_etna_parox_005",
         "author": "prof_geophysics_us",
-        "ts": "2025-06-27T08:30:00+02:00",
+        "ts": "2025-06-26T08:30:00+02:00",
         "body": "Remarkable event! Thermal satellite data shows effusion rates of ~50 m³/s. This intensity suggests deeper magma involvement than typical SEC activity.",
         "replyTo": "msg_etna_parox_002",
         "attachments": []
@@ -98,7 +98,7 @@
       {
         "id": "msg_etna_parox_006",
         "author": "field_team_alpha",
-        "ts": "2025-06-27T14:45:00+02:00",
+        "ts": "2025-06-26T14:45:00+02:00",
         "body": "Activity declining since 14:00. Fountain height reduced to 200m. Lava flows still active but advancing slowly. Beginning damage assessment.",
         "replyTo": null,
         "attachments": [
@@ -108,7 +108,7 @@
       {
         "id": "msg_etna_parox_007",
         "author": "dr_volcanologist_italy",
-        "ts": "2025-06-27T20:30:00+02:00",
+        "ts": "2025-06-26T20:30:00+02:00",
         "body": "Paroxysm concluded at 20:30 local. Total lava volume estimated 3.2 million m³. No casualties reported. Excellent work by all teams involved. 🎯",
         "replyTo": "msg_etna_parox_006",
         "attachments": []
@@ -201,8 +201,8 @@
     },
     "description": "Significant acceleration in ground deformation detected through continuous GPS and InSAR monitoring. Weekly uplift rate increased to 8mm/week, highest since monitoring began.",
     "dateRange": {
-      "start": "2025-06-20T00:00:00Z",
-      "end": "2025-06-27T23:59:59Z"
+      "start": "2025-06-23T00:00:00Z",
+      "end": "2025-06-26T23:59:59Z"
     },
     "uniqueData": {
       "maxUpliftRateMmPerWeek": 8.0,
@@ -296,7 +296,7 @@
     },
     "description": "New eruptive fissure opened near La Fossa crater producing sustained effusive eruption with pahoehoe and aa lava flows threatening tourist areas and Port of Levante.",
     "dateRange": {
-      "start": "2025-06-24T12:30:00Z",
+      "start": "2025-06-26T12:30:00Z",
       "end": null
     },
     "uniqueData": {
@@ -389,8 +389,8 @@
     },
     "description": "Significant earthquake swarm in Albano region with 89 detected events over 36 hours, largest M3.8. Pattern consistent with hydrothermal system adjustments beneath volcanic complex.",
     "dateRange": {
-      "start": "2025-06-22T14:20:00Z",
-      "end": "2025-06-24T02:15:00Z"
+      "start": "2025-06-24T14:20:00Z",
+      "end": "2025-06-26T02:15:00Z"
     },
     "uniqueData": {
       "swarmType": "hydrothermal",
@@ -512,7 +512,7 @@
     },
     "description": "Significant ash emission event from Lipari reaching 6km altitude, dispersing toward Messina metropolitan area affecting air quality and aviation operations.",
     "dateRange": {
-      "start": "2025-06-21T09:15:00Z"
+      "start": "2025-06-23T09:15:00Z"
     },
     "uniqueData": {
       "ashColumnHeightKm": 6.0,
@@ -606,8 +606,8 @@
     },
     "description": "Increased deep seismic activity (15-25km depth) beneath Ischia with 34 events detected over 48 hours. INGV monitoring for potential volcanic unrest indicators.",
     "dateRange": {
-      "start": "2025-06-20T08:00:00Z",
-      "end": "2025-06-22T08:00:00Z"
+      "start": "2025-06-23T08:00:00Z",
+      "end": "2025-06-25T08:00:00Z"
     },
     "uniqueData": {
       "swarmType": "deep_volcanic",
@@ -716,7 +716,7 @@
     },
     "description": "Notable increase in volcanic tremor and submarine gas emission detected through seismic monitoring and satellite observations. Underwater fumarole activity shows significant increase.",
     "dateRange": {
-      "start": "2025-06-23T11:20:00Z"
+      "start": "2025-06-25T11:20:00Z"
     },
     "uniqueData": {
       "tremorAmplitude": "3.2x baseline",
@@ -798,7 +798,7 @@
     },
     "description": "Routine microseismic activity detected in Vesuvius monitoring network. 12 very small events (M<1.5) recorded over 24 hours. Activity within normal parameters for dormant volcano.",
     "dateRange": {
-      "start": "2025-06-27T00:00:00Z"
+      "start": "2025-06-26T00:00:00Z"
     },
     "uniqueData": {
       "maxMagnitude": 1.2,
@@ -929,8 +929,8 @@
     },
     "description": "Major explosive eruption from Northeast Crater producing 8km ash column with pyroclastic flows and significant volcanic lightning activity.",
     "dateRange": {
-      "start": "2025-06-21T06:30:00Z",
-      "end": "2025-06-21T23:45:00Z"
+      "start": "2025-06-23T06:30:00Z",
+      "end": "2025-06-23T23:45:00Z"
     },
     "uniqueData": {
       "ashColumnHeightKm": 8.2,
@@ -973,7 +973,7 @@
     },
     "description": "Vulcanian explosion from Northeast crater with ballistic projectiles reaching 1.8km from crater. Brief ash emission to 3km altitude.",
     "dateRange": {
-      "start": "2025-06-22T16:42:00Z"
+      "start": "2025-06-24T16:42:00Z"
     },
     "uniqueData": {
       "explosionType": "vulcanian",
@@ -1014,8 +1014,8 @@
     },
     "description": "Significant increase in lava lake activity with strombolian explosions and elevated SO2 emissions. Tourism access restricted above 2000m elevation.",
     "dateRange": {
-      "start": "2025-06-23T10:15:00Z",
-      "end": "2025-06-25T06:30:00Z"
+      "start": "2025-06-25T10:15:00Z",
+      "end": "2025-06-26T06:30:00Z"
     },
     "uniqueData": {
       "lavaLakeLevel": "high",
@@ -1120,7 +1120,7 @@
     },
     "description": "Increased fumarolic activity causing accelerated snow melting on Etna summit. Lahar risk elevated for downstream valleys.",
     "dateRange": {
-      "start": "2025-06-25T14:30:00Z"
+      "start": "2025-06-26T14:30:00Z"
     },
     "uniqueData": {
       "fumarolicActivity": "increased",
@@ -1165,8 +1165,8 @@
     },
     "description": "Continuous strombolian activity with frequent explosions every 2-5 minutes. Incandescent bomb ejection reaching 300m above crater rim.",
     "dateRange": {
-      "start": "2025-06-21T12:00:00Z",
-      "end": "2025-06-22T12:00:00Z"
+      "start": "2025-06-23T12:00:00Z",
+      "end": "2025-06-24T12:00:00Z"
     },
     "uniqueData": {
       "activityType": "persistent_strombolian",
@@ -1251,8 +1251,8 @@
     },
     "description": "Earthquake swarm in caldera region indicating potential caldera instability. 23 events M1.5-2.8 detected over 12 hours.",
     "dateRange": {
-      "start": "2025-06-27T08:00:00Z",
-      "end": "2025-06-27T20:00:00Z"
+      "start": "2025-06-26T08:00:00Z",
+      "end": "2025-06-26T20:00:00Z"
     },
     "uniqueData": {
       "swarmType": "caldera_instability",
@@ -1316,7 +1316,7 @@
     },
     "description": "Partial collapse of SE crater lava dome generating pyroclastic flow down southern flank. Block-and-ash flow traveled 3.2km from crater.",
     "dateRange": {
-      "start": "2025-06-22T11:25:00Z"
+      "start": "2025-06-24T11:25:00Z"
     },
     "uniqueData": {
       "collapseType": "partial_dome",
@@ -1357,8 +1357,8 @@
     },
     "description": "Rapid heating of Albano crater lake from 45°C to 78°C over 18 hours. Increased fumarolic activity and sulfur dioxide emissions detected.",
     "dateRange": {
-      "start": "2025-06-23T06:00:00Z",
-      "end": "2025-06-24T00:00:00Z"
+      "start": "2025-06-25T06:00:00Z",
+      "end": "2025-06-26T00:00:00Z"
     },
     "uniqueData": {
       "initialTemperature": 45,
