@@ -1,319 +1,1390 @@
 [
   {
-    "id": "ev_2025_01_15_etna_earthquake_001",
-    "title": "M 4.2 earthquake near Etna",
-    "type": "point",
+    "id": "ev_2025_06_27_etna_paroxysm_001",
+    "title": "Mount Etna paroxysmal eruption - SE crater",
+    "type": "period",
     "location": {
-      "name": "Sicily, Italy",
+      "name": "Mount Etna, Sicily",
       "lat": 37.7513,
       "lng": 14.9934
     },
-    "description": "Seismic event detected with magnitude 4.2 at shallow depth near Mount Etna's southeast crater",
+    "description": "Major paroxysmal eruption from Southeast crater with sustained lava fountaining reaching 800m height, strombolian activity, and lava flows extending 2.5km downslope. Aviation alert raised to RED.",
     "dateRange": {
-      "start": "2025-01-15T21:45:00Z"
+      "start": "2025-06-27T03:15:00Z",
+      "end": "2025-06-27T18:30:00Z"
     },
     "uniqueData": {
-      "magnitude": 4.2,
-      "depthKm": 10.5,
-      "region": "Etna",
-      "location": "Sicily, Italy"
+      "eruptionType": "Paroxysmal",
+      "maxFountainHeightM": 800,
+      "lavaFlowLengthKm": 2.5,
+      "vei": 2,
+      "alertLevel": "red",
+      "aviationCode": "RED",
+      "ashColumnHeightKm": 4.2,
+      "affectedSectors": [
+        "SE",
+        "E",
+        "NE"
+      ],
+      "evacuationZones": [
+        "Piano Provenzana access roads"
+      ]
     },
     "attachments": [
       {
-        "id": "att_etna_seismic_001",
-        "file": "seismic_readings_etna_jan15.png",
+        "id": "att_etna_thermal_20250627",
+        "file": "etna_thermal_cameras_paroxysm_jun27.mp4",
+        "mime": "video/mp4",
+        "label": "Real-time thermal camera footage"
+      },
+      {
+        "id": "att_etna_tremor_20250627",
+        "file": "etna_volcanic_tremor_jun27.png",
         "mime": "image/png",
-        "label": "Seismic readings chart"
+        "label": "Volcanic tremor amplitude"
+      },
+      {
+        "id": "att_etna_lava_flow_20250627",
+        "file": "etna_lava_flow_map_jun27.pdf",
+        "mime": "application/pdf",
+        "label": "Lava flow hazard map update"
       }
     ],
     "discussion": [
       {
-        "id": "msg_etna_001_001",
-        "author": "u_dr_rossi",
-        "ts": "2025-01-16T08:30:00+01:00",
-        "body": "This M 4.2 event shows typical characteristics of volcanic-tectonic earthquakes. The shallow depth and location suggest it's related to magma movement.",
+        "id": "msg_etna_parox_001",
+        "author": "field_team_alpha",
+        "ts": "2025-06-27T03:45:00+02:00",
+        "body": "🔴 BREAKING: Paroxysmal activity initiated at 05:15 local time. Lava fountains reaching unprecedented 800m height. Evacuating Piano Provenzana access immediately.",
+        "replyTo": null,
+        "attachments": [
+          "att_etna_thermal_20250627"
+        ]
+      },
+      {
+        "id": "msg_etna_parox_002",
+        "author": "dr_volcanologist_italy",
+        "ts": "2025-06-27T04:20:00+02:00",
+        "body": "INGV confirms: This is the most intense paroxysm since February 2022. Tremor amplitude 10x above baseline. Activating full emergency monitoring protocol.",
+        "replyTo": "msg_etna_parox_001",
+        "attachments": [
+          "att_etna_tremor_20250627"
+        ]
+      },
+      {
+        "id": "msg_etna_parox_003",
+        "author": "civil_protection_it",
+        "ts": "2025-06-27T05:00:00+02:00",
+        "body": "Aviation RED alert issued. Catania airport operations suspended as of 07:00. Tourist evacuation from Rifugio Sapienza area in progress.",
         "replyTo": null,
         "attachments": []
       },
       {
-        "id": "msg_etna_001_002",
-        "author": "u_dr_bianchi",
-        "ts": "2025-01-16T10:15:00+01:00",
-        "body": "Agreed. The seismic signature aligns with our recent InSAR data showing ground deformation in this sector.",
-        "replyTo": "msg_etna_001_001",
+        "id": "msg_etna_parox_004",
+        "author": "aviation_meteorologist",
+        "ts": "2025-06-27T06:15:00+02:00",
+        "body": "Ash column reaching FL140 (4.2km), drifting NE toward Calabria. VAAC Toulouse issued SIGMET. Recommend avoiding airspace east of volcano.",
+        "replyTo": "msg_etna_parox_003",
         "attachments": []
       },
       {
-        "id": "msg_etna_001_003",
-        "author": "u_prof_ferrari",
-        "ts": "2025-01-16T14:20:00+01:00",
-        "body": "I've updated the hazard assessment. Recommend increasing monitoring frequency for this sector.",
+        "id": "msg_etna_parox_005",
+        "author": "prof_geophysics_us",
+        "ts": "2025-06-27T08:30:00+02:00",
+        "body": "Remarkable event! Thermal satellite data shows effusion rates of ~50 m³/s. This intensity suggests deeper magma involvement than typical SEC activity.",
+        "replyTo": "msg_etna_parox_002",
+        "attachments": []
+      },
+      {
+        "id": "msg_etna_parox_006",
+        "author": "field_team_alpha",
+        "ts": "2025-06-27T14:45:00+02:00",
+        "body": "Activity declining since 14:00. Fountain height reduced to 200m. Lava flows still active but advancing slowly. Beginning damage assessment.",
         "replyTo": null,
-        "attachments": ["att_etna_hazard_update_001"]
+        "attachments": [
+          "att_etna_lava_flow_20250627"
+        ]
+      },
+      {
+        "id": "msg_etna_parox_007",
+        "author": "dr_volcanologist_italy",
+        "ts": "2025-06-27T20:30:00+02:00",
+        "body": "Paroxysm concluded at 20:30 local. Total lava volume estimated 3.2 million m³. No casualties reported. Excellent work by all teams involved. 🎯",
+        "replyTo": "msg_etna_parox_006",
+        "attachments": []
       }
     ]
   },
   {
-    "id": "ev_2025_01_15_stromboli_eruption_001",
-    "title": "Stromboli eruption phase",
-    "type": "period",
+    "id": "ev_2025_06_26_stromboli_explosion_001",
+    "title": "Stromboli major explosion event",
+    "type": "point",
     "location": {
       "name": "Stromboli, Aeolian Islands",
       "lat": 38.7890,
       "lng": 15.2130
     },
-    "description": "Extended strombolian activity with lava fountains and persistent explosive activity",
+    "description": "Major explosion from NE crater exceeded normal strombolian parameters, generating pyroclastic flow down Sciara del Fuoco and ballistic projectiles beyond crater area.",
     "dateRange": {
-      "start": "2025-01-15T00:00:00Z",
-      "end": "2025-01-15T23:59:59Z"
+      "start": "2025-06-26T15:42:00Z"
     },
     "uniqueData": {
-      "eruptionType": "Strombolian",
-      "maxAlertLevel": 3,
-      "vei": 2,
-      "description": "Extended strombolian activity with lava fountains"
+      "explosionType": "Major",
+      "craterSource": "NE crater",
+      "ballisticRange": 450,
+      "pyroclasticFlowLength": 800,
+      "alertLevel": "orange",
+      "evacuationRadius": 300,
+      "seismicMagnitude": 2.8
     },
     "attachments": [
       {
-        "id": "att_stromboli_timeline_001",
-        "file": "stromboli_activity_timeline_jan15.png",
-        "mime": "image/png",
-        "label": "Activity timeline"
-      },
-      {
-        "id": "att_stromboli_thermal_001",
-        "file": "thermal_camera_footage.mp4",
+        "id": "att_stromboli_explosion_20250626",
+        "file": "stromboli_major_explosion_sequence.mp4",
         "mime": "video/mp4",
-        "label": "Thermal camera footage"
-      }
-    ],
-    "discussion": [
-      {
-        "id": "msg_stromboli_001_001",
-        "author": "u_dr_moretti",
-        "ts": "2025-01-15T12:00:00+01:00",
-        "body": "Current activity shows sustained lava fountaining from the NE crater. Wind conditions are dispersing ash to the southeast.",
-        "replyTo": null,
-        "attachments": []
+        "label": "Explosion sequence - thermal cameras"
       },
       {
-        "id": "msg_stromboli_001_002",
-        "author": "u_dr_rossi",
-        "ts": "2025-01-15T15:30:00+01:00",
-        "body": "Explosion frequency has increased to ~15 per hour. This is above the baseline of 8-10/hour.",
-        "replyTo": "msg_stromboli_001_001",
-        "attachments": []
-      },
-      {
-        "id": "msg_stromboli_001_003",
-        "author": "u_prof_ferrari",
-        "ts": "2025-01-15T18:45:00+01:00",
-        "body": "Tourist access to crater rim should remain restricted. Activity level warrants continued orange alert status.",
-        "replyTo": null,
-        "attachments": []
-      }
-    ]
-  },
-  {
-    "id": "ev_2025_01_15_vulcano_gas_spike_001",
-    "title": "Gas emission spike at Vulcano",
-    "type": "point",
-    "location": {
-      "name": "La Fossa crater, Vulcano",
-      "lat": 38.4042,
-      "lng": 14.9619
-    },
-    "description": "Significant increase in SO2 emissions detected at La Fossa crater, 600% above background levels",
-    "dateRange": {
-      "start": "2025-01-15T08:30:00Z"
-    },
-    "uniqueData": {
-      "so2FluxTonsPerDay": 850,
-      "backgroundLevel": 120,
-      "increasePercent": 600,
-      "location": "La Fossa crater"
-    },
-    "attachments": [
-      {
-        "id": "att_vulcano_gas_001",
-        "file": "gas_flux_measurements_jan15.png",
+        "id": "att_stromboli_seismic_20250626",
+        "file": "stromboli_explosion_seismogram.png",
         "mime": "image/png",
-        "label": "Gas flux measurements"
+        "label": "Explosion seismogram"
       }
     ],
     "discussion": [
       {
-        "id": "msg_vulcano_001_001",
-        "author": "u_dr_bianchi",
-        "ts": "2025-01-15T10:45:00+01:00",
-        "body": "This is the highest SO2 flux we've recorded since 2018. Correlates with increased fumarole temperatures.",
+        "id": "msg_stromboli_exp_001",
+        "author": "stromboli_observatory",
+        "ts": "2025-06-26T17:50:00+02:00",
+        "body": "🚨 Major explosion at 17:42 local time. Ballistics reached 450m from crater - beyond normal safety perimeter. All tourist access suspended immediately.",
         "replyTo": null,
+        "attachments": [
+          "att_stromboli_explosion_20250626"
+        ]
+      },
+      {
+        "id": "msg_stromboli_exp_002",
+        "author": "civil_protection_it",
+        "ts": "2025-06-26T18:15:00+02:00",
+        "body": "Orange alert confirmed. Evacuating Pizzo sopra la Fossa area. Coast guard monitoring for potential tsunamigenic landslides in Sciara del Fuoco.",
+        "replyTo": "msg_stromboli_exp_001",
         "attachments": []
       },
       {
-        "id": "msg_vulcano_001_002",
-        "author": "u_dr_rossi",
-        "ts": "2025-01-15T14:20:00+01:00",
-        "body": "Wind direction is favorable - emissions dispersing offshore. No immediate health concerns for Porto di Levante.",
-        "replyTo": "msg_vulcano_001_001",
+        "id": "msg_stromboli_exp_003",
+        "author": "dr_volcanologist_italy",
+        "ts": "2025-06-26T19:30:00+02:00",
+        "body": "Seismic analysis confirms explosion magnitude 2.8. No signs of imminent larger-scale activity. Maintaining enhanced monitoring for next 48 hours.",
+        "replyTo": null,
+        "attachments": [
+          "att_stromboli_seismic_20250626"
+        ]
+      },
+      {
+        "id": "msg_stromboli_exp_004",
+        "author": "field_team_beta",
+        "ts": "2025-06-26T21:00:00+02:00",
+        "body": "Thermal surveys complete. No structural damage to monitoring equipment. Pyroclastic deposit thickness 5-8cm on upper Sciara del Fuoco.",
+        "replyTo": "msg_stromboli_exp_003",
         "attachments": []
       }
     ]
   },
   {
-    "id": "ev_2025_01_15_campi_flegrei_uplift_001",
-    "title": "Campi Flegrei ground uplift",
+    "id": "ev_2025_06_25_campi_flegrei_bradyseism_001",
+    "title": "Campi Flegrei accelerating ground uplift",
     "type": "period",
     "location": {
-      "name": "Campi Flegrei, Naples",
+      "name": "Campi Flegrei caldera, Naples",
       "lat": 40.8270,
       "lng": 14.1390
     },
-    "description": "Continued caldera-wide uplift detected through InSAR monitoring, reaching 3.2 cm maximum displacement",
+    "description": "Significant acceleration in ground deformation detected through continuous GPS and InSAR monitoring. Weekly uplift rate increased to 8mm/week, highest since monitoring began.",
     "dateRange": {
-      "start": "2025-01-15T00:00:00Z",
-      "end": "2025-01-15T23:59:59Z"
+      "start": "2025-06-20T00:00:00Z",
+      "end": "2025-06-27T23:59:59Z"
     },
     "uniqueData": {
-      "maxDisplacementCm": 3.2,
-      "measurementMethod": "InSAR",
+      "maxUpliftRateMmPerWeek": 8.0,
+      "totalUpliftCm": 18.3,
+      "monitoringMethod": "GPS + InSAR",
       "alertLevel": "yellow",
-      "description": "Continued caldera-wide uplift detected"
+      "seismicEventsCount": 147,
+      "maxMagnitude": 2.4,
+      "affectedZones": [
+        "Pozzuoli",
+        "Bagnoli",
+        "Solfatara"
+      ]
     },
     "attachments": [
       {
-        "id": "att_campi_insar_001",
-        "file": "insar_deformation_map_jan15.png",
+        "id": "att_campi_insar_20250625",
+        "file": "campi_flegrei_insar_deformation_jun25.png",
         "mime": "image/png",
-        "label": "InSAR deformation map"
+        "label": "InSAR deformation map - June 2025"
       },
       {
-        "id": "att_campi_report_001",
-        "file": "weekly_monitoring_report.pdf",
+        "id": "att_campi_gps_20250625",
+        "file": "campi_flegrei_gps_time_series.pdf",
         "mime": "application/pdf",
-        "label": "Weekly monitoring report"
+        "label": "GPS displacement time series"
+      },
+      {
+        "id": "att_campi_bulletin_20250625",
+        "file": "campi_flegrei_weekly_bulletin_25jun2025.pdf",
+        "mime": "application/pdf",
+        "label": "Weekly monitoring bulletin"
       }
     ],
     "discussion": [
       {
-        "id": "msg_campi_001_001",
-        "author": "u_prof_ferrari",
-        "ts": "2025-01-15T09:00:00+01:00",
-        "body": "Weekly displacement rate is accelerating. We're seeing 2-3mm/week compared to 1mm/week last month.",
+        "id": "msg_campi_brady_001",
+        "author": "dr_volcanologist_italy",
+        "ts": "2025-06-25T09:00:00+02:00",
+        "body": "⚠️ ALERT: Deformation rate has doubled in past month. 8mm/week is unprecedented in our monitoring history. Activating enhanced surveillance protocol.",
         "replyTo": null,
-        "attachments": ["att_campi_report_001"]
+        "attachments": [
+          "att_campi_insar_20250625",
+          "att_campi_gps_20250625"
+        ]
       },
       {
-        "id": "msg_campi_001_002", 
-        "author": "u_dr_moretti",
-        "ts": "2025-01-15T11:30:00+01:00",
-        "body": "Seismic data supports the InSAR observations. Low-frequency events are increasing in the central caldera.",
-        "replyTo": "msg_campi_001_001",
+        "id": "msg_campi_brady_002",
+        "author": "seismologist_ingv",
+        "ts": "2025-06-25T11:30:00+02:00",
+        "body": "147 earthquakes this week, largest M2.4. Deep LP events increasing - possible magma/fluid involvement. Correlates perfectly with deformation.",
+        "replyTo": "msg_campi_brady_001",
         "attachments": []
       },
       {
-        "id": "msg_campi_001_003",
-        "author": "u_dr_bianchi",
-        "ts": "2025-01-15T16:45:00+01:00",
-        "body": "Civil protection has been briefed. Yellow alert status remains appropriate but we're monitoring closely.",
+        "id": "msg_campi_brady_003",
+        "author": "civil_protection_it",
+        "ts": "2025-06-25T14:15:00+02:00",
+        "body": "Emergency response plans updated. Maintaining YELLOW alert but preparing contingencies for ORANGE. Public information campaign intensified.",
+        "replyTo": null,
+        "attachments": [
+          "att_campi_bulletin_20250625"
+        ]
+      },
+      {
+        "id": "msg_campi_brady_004",
+        "author": "prof_geophysics_us",
+        "ts": "2025-06-25T16:45:00+02:00",
+        "body": "Modeling suggests sill intrusion at 3-4km depth. If trend continues, may need to consider alert level escalation within 2-3 weeks.",
+        "replyTo": "msg_campi_brady_002",
+        "attachments": []
+      },
+      {
+        "id": "msg_campi_brady_005",
+        "author": "mayor_pozzuoli",
+        "ts": "2025-06-25T18:20:00+02:00",
+        "body": "Citizens reporting increased fumarole activity at Solfatara. Some structural damage to older buildings. Requesting additional monitoring resources.",
+        "replyTo": "msg_campi_brady_003",
+        "attachments": []
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_24_kilauea_fissure_001",
+    "title": "Vulcano new fissure eruption - La Fossa crater",
+    "type": "period",
+    "location": {
+      "name": "Vulcano, Aeolian Islands, Italy",
+      "lat": 38.4042,
+      "lng": 14.9621
+    },
+    "description": "New eruptive fissure opened near La Fossa crater producing sustained effusive eruption with pahoehoe and aa lava flows threatening tourist areas and Port of Levante.",
+    "dateRange": {
+      "start": "2025-06-24T12:30:00Z",
+      "end": null
+    },
+    "uniqueData": {
+      "fissureNumber": "Fissure VL-1",
+      "eruptionStyle": "effusive",
+      "lavaType": "pahoehoe + aa",
+      "effusionRateM3PerSec": 12.5,
+      "alertLevel": "warning",
+      "evacuatedTourists": 47,
+      "lavaFlowFrontKm": 1.8,
+      "coastalEntryActive": false
+    },
+    "attachments": [
+      {
+        "id": "att_kilauea_fissure_20250624",
+        "file": "kilauea_fissure8b_aerial_survey.mp4",
+        "mime": "video/mp4",
+        "label": "Aerial survey - new fissure"
+      },
+      {
+        "id": "att_kilauea_thermal_20250624",
+        "file": "kilauea_thermal_map_jun24.png",
+        "mime": "image/png",
+        "label": "Thermal satellite imagery"
+      },
+      {
+        "id": "att_kilauea_evacuation_20250624",
+        "file": "leilani_estates_evacuation_map.pdf",
+        "mime": "application/pdf",
+        "label": "Evacuation zone map"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_kilauea_fiss_001",
+        "author": "hvo_scientist",
+        "ts": "2025-06-24T15:45:00-10:00",
+        "body": "🌋 New fissure opened at 2:30 AM local time in Leilani Estates. Sustained lava production ~12.5 m³/s. Immediately activating evacuation protocols.",
+        "replyTo": null,
+        "attachments": [
+          "att_kilauea_fissure_20250624"
+        ]
+      },
+      {
+        "id": "msg_kilauea_fiss_002",
+        "author": "hawaii_civil_defense",
+        "ts": "2025-06-24T16:20:00-10:00",
+        "body": "Mandatory evacuation ordered for 47 homes in immediate threat zone. Pahoa Community Center activated as emergency shelter. Highway 130 remains open.",
+        "replyTo": "msg_kilauea_fiss_001",
+        "attachments": [
+          "att_kilauea_evacuation_20250624"
+        ]
+      },
+      {
+        "id": "msg_kilauea_fiss_003",
+        "author": "usgs_volcano_team",
+        "ts": "2025-06-24T18:00:00-10:00",
+        "body": "Lava flow advancing at 5-8 m/hr toward Pohoiki Road. Predominantly pahoehoe with some aa breakouts. No immediate threat to geothermal plant.",
+        "replyTo": null,
+        "attachments": [
+          "att_kilauea_thermal_20250624"
+        ]
+      },
+      {
+        "id": "msg_kilauea_fiss_004",
+        "author": "prof_volcanology_hawaii",
+        "ts": "2025-06-24T20:30:00-10:00",
+        "body": "Gas emissions elevated but within safe limits for most areas. SO2 concentrations highest downwind. Residents with respiratory conditions should avoid the area.",
+        "replyTo": "msg_kilauea_fiss_003",
+        "attachments": []
+      },
+      {
+        "id": "msg_kilauea_fiss_005",
+        "author": "hvo_scientist",
+        "ts": "2025-06-25T08:00:00-10:00",
+        "body": "24hr update: Fissure remains active. Lava flow front stalled 0.3km from Pohoiki Rd. Effusion rate stable. Continuing hourly monitoring flights.",
         "replyTo": null,
         "attachments": []
       }
     ]
   },
   {
-    "id": "ev_2025_01_15_etna_microswarm_001",
-    "title": "Etna microearthquake swarm",
+    "id": "ev_2025_06_22_yellowstone_swarm_001",
+    "title": "Colli Albani earthquake swarm - Albano region",
     "type": "grouped",
     "location": {
-      "name": "Mount Etna, Southeast crater",
-      "lat": 37.7513,
-      "lng": 14.9934
+      "name": "Colli Albani, Lazio, Italy",
+      "lat": 41.7300,
+      "lng": 12.7000
     },
-    "description": "Grouped event series with 5 related occurrences indicating potential pre-eruptive activity",
+    "description": "Significant earthquake swarm in Albano region with 89 detected events over 36 hours, largest M3.8. Pattern consistent with hydrothermal system adjustments beneath volcanic complex.",
     "dateRange": {
-      "start": "2025-01-15T00:15:00Z",
-      "end": "2025-01-15T06:00:00Z"
+      "start": "2025-06-22T14:20:00Z",
+      "end": "2025-06-24T02:15:00Z"
     },
     "uniqueData": {
-      "location": "Mount Etna, Southeast crater",
-      "swarmType": "pre-eruptive",
-      "region": "Sicily",
+      "swarmType": "hydrothermal",
+      "region": "Albano Crater Lake",
+      "alertLevel": "normal",
+      "geothermalChanges": true,
       "members": [
         {
-          "id": "evt-9001-1",
-          "timestamp": "2025-01-15T00:15:00Z",
-          "magnitude": 1.9,
-          "depth": 8.2
-        },
-        {
-          "id": "evt-9001-2",
-          "timestamp": "2025-01-15T01:43:00Z",
-          "magnitude": 2.3,
-          "depth": 9.1
-        },
-        {
-          "id": "evt-9001-3",
-          "timestamp": "2025-01-15T02:00:00Z",
-          "magnitude": 2.7,
-          "depth": 7.8
-        },
-        {
-          "id": "evt-9001-4",
-          "timestamp": "2025-01-15T03:22:00Z",
+          "id": "ys_2025_001",
+          "timestamp": "2025-06-22T14:20:00Z",
           "magnitude": 2.1,
-          "depth": 8.9
+          "depth": 2.3
         },
         {
-          "id": "evt-9001-5",
-          "timestamp": "2025-01-15T04:15:00Z",
-          "magnitude": 1.8,
-          "depth": 9.3
+          "id": "ys_2025_002",
+          "timestamp": "2025-06-22T16:45:00Z",
+          "magnitude": 2.8,
+          "depth": 1.8
+        },
+        {
+          "id": "ys_2025_003",
+          "timestamp": "2025-06-22T18:30:00Z",
+          "magnitude": 3.8,
+          "depth": 2.1
+        },
+        {
+          "id": "ys_2025_004",
+          "timestamp": "2025-06-22T22:15:00Z",
+          "magnitude": 2.4,
+          "depth": 2.7
+        },
+        {
+          "id": "ys_2025_005",
+          "timestamp": "2025-06-23T03:20:00Z",
+          "magnitude": 3.2,
+          "depth": 1.9
         }
       ],
       "aggregateData": {
-        "count": 5,
-        "minMagnitude": 1.8,
-        "maxMagnitude": 2.7,
-        "averageMagnitude": 2.16,
-        "minDepth": 7.8,
-        "maxDepth": 9.3,
-        "averageDepth": 8.66,
-        "duration": "5h 45m"
+        "count": 89,
+        "minMagnitude": 1.2,
+        "maxMagnitude": 3.8,
+        "averageMagnitude": 2.3,
+        "minDepth": 0.8,
+        "maxDepth": 4.2,
+        "averageDepth": 2.1,
+        "duration": "36h 55m"
       }
     },
     "attachments": [
       {
-        "id": "att_etna_swarm_001",
-        "file": "microseismic_cluster_analysis.pdf",
-        "mime": "application/pdf",
-        "label": "Cluster analysis report"
+        "id": "att_yellowstone_swarm_20250622",
+        "file": "yellowstone_norris_swarm_map.png",
+        "mime": "image/png",
+        "label": "Earthquake swarm location map"
+      },
+      {
+        "id": "att_yellowstone_thermal_20250622",
+        "file": "norris_thermal_changes_jun2025.jpg",
+        "mime": "image/jpeg",
+        "label": "Thermal anomaly satellite data"
       }
     ],
     "discussion": [
       {
-        "id": "msg_etna_swarm_001_001",
-        "author": "u_dr_moretti",
-        "ts": "2025-01-15T07:30:00+01:00",
-        "body": "This swarm pattern is consistent with dyke intrusion at shallow depth. Similar to the precursory activity we saw in 2023.",
+        "id": "msg_yellowstone_swarm_001",
+        "author": "yvo_seismologist",
+        "ts": "2025-06-22T18:45:00-06:00",
+        "body": "Earthquake swarm initiated in Norris region at 08:20 local. Already 23 events >M2.0. Largest so far M3.8. Typical hydrothermal signature.",
         "replyTo": null,
-        "attachments": ["att_etna_swarm_001"]
+        "attachments": [
+          "att_yellowstone_swarm_20250622"
+        ]
       },
       {
-        "id": "msg_etna_swarm_001_002",
-        "author": "u_dr_rossi",
-        "ts": "2025-01-15T09:15:00+01:00",
-        "body": "Agreed. The depth clustering around 8-9km suggests a common source. Should we increase network sensitivity?",
-        "replyTo": "msg_etna_swarm_001_001",
+        "id": "msg_yellowstone_swarm_002",
+        "author": "usgs_geologist",
+        "ts": "2025-06-22T21:30:00-06:00",
+        "body": "Alert level remains NORMAL. This type of swarm common in Norris - related to fluid movement in hydrothermal system, not magmatic processes.",
+        "replyTo": "msg_yellowstone_swarm_001",
         "attachments": []
       },
       {
-        "id": "msg_etna_swarm_001_003",
-        "author": "u_prof_ferrari",
-        "ts": "2025-01-15T12:00:00+01:00",
-        "body": "Yes, recommend activating additional temporary stations in the SE sector for better location accuracy.",
-        "replyTo": "msg_etna_swarm_001_002",
+        "id": "msg_yellowstone_swarm_003",
+        "author": "thermal_specialist",
+        "ts": "2025-06-23T09:15:00-06:00",
+        "body": "Satellite thermal data shows new hot spots in Norris Back Basin. Porcelain Basin temperatures increased 3-5°C. Consistent with swarm activity.",
+        "replyTo": null,
+        "attachments": [
+          "att_yellowstone_thermal_20250622"
+        ]
+      },
+      {
+        "id": "msg_yellowstone_swarm_004",
+        "author": "park_ranger_norris",
+        "ts": "2025-06-23T11:45:00-06:00",
+        "body": "Visitors reporting new steam vents near Echinus Geyser. Some boardwalks showing minor thermal expansion. Normal precautionary closures in effect.",
+        "replyTo": "msg_yellowstone_swarm_003",
         "attachments": []
+      },
+      {
+        "id": "msg_yellowstone_swarm_005",
+        "author": "yvo_seismologist",
+        "ts": "2025-06-24T08:00:00-06:00",
+        "body": "Swarm activity declining. Last significant event M2.4 at 02:15 GMT. Total 89 events catalogued. Monitoring continues but returning to routine levels.",
+        "replyTo": null,
+        "attachments": []
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_21_popocatepetl_ash_001",
+    "title": "Lipari ash emission - Messina impact",
+    "type": "point",
+    "location": {
+      "name": "Lipari, Aeolian Islands, Italy",
+      "lat": 38.4668,
+      "lng": 14.9477
+    },
+    "description": "Significant ash emission event from Lipari reaching 6km altitude, dispersing toward Messina metropolitan area affecting air quality and aviation operations.",
+    "dateRange": {
+      "start": "2025-06-21T09:15:00Z"
+    },
+    "uniqueData": {
+      "ashColumnHeightKm": 6.0,
+      "windDirection": "northeast",
+      "airQualityIndex": 178,
+      "alertLevel": "yellow_phase2",
+      "affectedPopulation": 250000,
+      "airportsClosed": [
+        "CTA",
+        "REG"
+      ],
+      "ashfallDepthMm": 2.3
+    },
+    "attachments": [
+      {
+        "id": "att_popo_ash_20250621",
+        "file": "popocatepetl_ash_column_satellite.jpg",
+        "mime": "image/jpeg",
+        "label": "Satellite image - ash column"
+      },
+      {
+        "id": "att_popo_dispersion_20250621",
+        "file": "ash_dispersion_model_mexico_city.png",
+        "mime": "image/png",
+        "label": "Ash dispersion forecast model"
+      },
+      {
+        "id": "att_popo_health_20250621",
+        "file": "health_advisory_ash_exposure.pdf",
+        "mime": "application/pdf",
+        "label": "Public health advisory"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_popo_ash_001",
+        "author": "cenapred_mexico",
+        "ts": "2025-06-21T11:30:00-06:00",
+        "body": "🚨 Major ash emission 11:15 local time. Column reaching 6km ASL, dispersing NE toward Mexico City. Yellow Alert Phase 2 activated. Avoid outdoor activities.",
+        "replyTo": null,
+        "attachments": [
+          "att_popo_ash_20250621"
+        ]
+      },
+      {
+        "id": "msg_popo_ash_002",
+        "author": "mexico_aviation",
+        "ts": "2025-06-21T12:15:00-06:00",
+        "body": "Mexico City International (MEX) and Toluca (TLC) airports suspending operations. Ash concentration exceeding safe limits for jet engines. Diversions to Guadalajara.",
+        "replyTo": "msg_popo_ash_001",
+        "attachments": []
+      },
+      {
+        "id": "msg_popo_ash_003",
+        "author": "health_ministry_mx",
+        "ts": "2025-06-21T13:45:00-06:00",
+        "body": "Air Quality Index now 178 (Unhealthy). Recommending N95 masks for outdoor exposure. Vulnerable populations should remain indoors. Monitoring PM2.5 levels.",
+        "replyTo": null,
+        "attachments": [
+          "att_popo_health_20250621"
+        ]
+      },
+      {
+        "id": "msg_popo_ash_004",
+        "author": "unam_volcanologist",
+        "ts": "2025-06-21T15:20:00-06:00",
+        "body": "Ash dispersion models show continued NE transport. Peak ashfall 2-3mm expected in Iztapalapa, Nezahualcóyotl. Should decrease by evening as winds shift.",
+        "replyTo": "msg_popo_ash_002",
+        "attachments": [
+          "att_popo_dispersion_20250621"
+        ]
+      },
+      {
+        "id": "msg_popo_ash_005",
+        "author": "mexico_city_emergency",
+        "ts": "2025-06-21T18:00:00-06:00",
+        "body": "Schools in affected eastern districts closed tomorrow as precaution. Street cleaning crews activated. Citizens should cover water tanks and vehicles.",
+        "replyTo": "msg_popo_ash_003",
+        "attachments": []
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_20_fuji_seismic_001",
+    "title": "Ischia deep seismic activity increase",
+    "type": "grouped",
+    "location": {
+      "name": "Ischia, Bay of Naples, Italy",
+      "lat": 40.7489,
+      "lng": 13.9019
+    },
+    "description": "Increased deep seismic activity (15-25km depth) beneath Ischia with 34 events detected over 48 hours. INGV monitoring for potential volcanic unrest indicators.",
+    "dateRange": {
+      "start": "2025-06-20T08:00:00Z",
+      "end": "2025-06-22T08:00:00Z"
+    },
+    "uniqueData": {
+      "swarmType": "deep_volcanic",
+      "region": "Bay of Naples",
+      "alertLevel": "green",
+      "ingvAlertLevel": "Green (Normal)",
+      "touristRestrictions": false,
+      "members": [
+        {
+          "id": "fuji_2025_001",
+          "timestamp": "2025-06-20T08:15:00Z",
+          "magnitude": 2.3,
+          "depth": 18.5
+        },
+        {
+          "id": "fuji_2025_002",
+          "timestamp": "2025-06-20T14:30:00Z",
+          "magnitude": 2.7,
+          "depth": 22.1
+        },
+        {
+          "id": "fuji_2025_003",
+          "timestamp": "2025-06-21T02:45:00Z",
+          "magnitude": 3.1,
+          "depth": 19.8
+        },
+        {
+          "id": "fuji_2025_004",
+          "timestamp": "2025-06-21T16:20:00Z",
+          "magnitude": 2.5,
+          "depth": 20.7
+        }
+      ],
+      "aggregateData": {
+        "count": 34,
+        "minMagnitude": 1.8,
+        "maxMagnitude": 3.1,
+        "averageMagnitude": 2.4,
+        "minDepth": 15.2,
+        "maxDepth": 25.8,
+        "averageDepth": 20.3,
+        "duration": "48h"
+      }
+    },
+    "attachments": [
+      {
+        "id": "att_fuji_seismic_20250620",
+        "file": "fuji_deep_seismicity_map_jun2025.png",
+        "mime": "image/png",
+        "label": "Deep seismicity location map"
+      },
+      {
+        "id": "att_fuji_jma_20250620",
+        "file": "jma_fuji_monitoring_bulletin.pdf",
+        "mime": "application/pdf",
+        "label": "JMA monitoring bulletin"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_fuji_seismic_001",
+        "author": "jma_seismologist",
+        "ts": "2025-06-20T17:00:00+09:00",
+        "body": "深部地震活動が増加中。過去48時間で34回観測。深度15-25kmの火山性地震の可能性。Level 1を維持、継続監視中。",
+        "replyTo": null,
+        "attachments": [
+          "att_fuji_seismic_20250620"
+        ]
+      },
+      {
+        "id": "msg_fuji_seismic_002",
+        "author": "tokyo_univ_volcano",
+        "ts": "2025-06-20T19:30:00+09:00",
+        "body": "Deep seismic activity increasing under Fuji. 34 events in 48hrs at 15-25km depth. Possibly magmatic but no immediate eruption threat. JMA maintains Level 1.",
+        "replyTo": "msg_fuji_seismic_001",
+        "attachments": []
+      },
+      {
+        "id": "msg_fuji_seismic_003",
+        "author": "shizuoka_prefecture",
+        "ts": "2025-06-21T09:00:00+09:00",
+        "body": "Prefecture emergency meeting held. Reviewing evacuation plans as precaution. Tourist activities around 5th station continue normally. No restrictions at this time.",
+        "replyTo": null,
+        "attachments": []
+      },
+      {
+        "id": "msg_fuji_seismic_004",
+        "author": "intl_volcano_expert",
+        "ts": "2025-06-21T14:15:00+09:00",
+        "body": "Historical precedent: Similar deep swarms occurred in 2000-2001 without eruption. However, Fuji hasn't erupted since 1707. Enhanced monitoring warranted.",
+        "replyTo": "msg_fuji_seismic_002",
+        "attachments": [
+          "att_fuji_jma_20250620"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_23_eyjafjallajokull_tremor_001",
+    "title": "Panarea increased volcanic tremor",
+    "type": "point",
+    "location": {
+      "name": "Panarea, Aeolian Islands, Italy",
+      "lat": 38.6297,
+      "lng": 15.0619
+    },
+    "description": "Notable increase in volcanic tremor and submarine gas emission detected through seismic monitoring and satellite observations. Underwater fumarole activity shows significant increase.",
+    "dateRange": {
+      "start": "2025-06-23T11:20:00Z"
+    },
+    "uniqueData": {
+      "tremorAmplitude": "3.2x baseline",
+      "submarineFumaroles": 2,
+      "gasEmissionRate": "moderate",
+      "alertLevel": "yellow",
+      "aviationCode": "GREEN",
+      "seaTemperatureChange": 4.5,
+      "geothermalActivity": true
+    },
+    "attachments": [
+      {
+        "id": "att_eyja_tremor_20250623",
+        "file": "eyjafjallajokull_tremor_amplitude.png",
+        "mime": "image/png",
+        "label": "Volcanic tremor amplitude"
+      },
+      {
+        "id": "att_eyja_ice_20250623",
+        "file": "ice_cauldron_satellite_image.jpg",
+        "mime": "image/jpeg",
+        "label": "Satellite image - ice cauldrons"
+      },
+      {
+        "id": "att_eyja_memo_20250623",
+        "file": "imo_eyjafjallajokull_assessment.pdf",
+        "mime": "application/pdf",
+        "label": "IMO volcano assessment"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_eyja_tremor_001",
+        "author": "imo_iceland",
+        "ts": "2025-06-23T14:30:00+00:00",
+        "body": "🇮🇸 Volcanic tremor increased 3.2x at Eyjafjallajökull. Two new ice cauldrons detected via SAR. Indicates sub-glacial geothermal activity. Aviation code remains GREEN.",
+        "replyTo": null,
+        "attachments": [
+          "att_eyja_tremor_20250623",
+          "att_eyja_ice_20250623"
+        ]
+      },
+      {
+        "id": "msg_eyja_tremor_002",
+        "author": "vaac_london",
+        "ts": "2025-06-23T15:45:00+00:00",
+        "body": "VAAC London monitoring closely. Remember 2010 impact on European aviation. Current activity sub-glacial only. No ash production detected. Maintaining GREEN status.",
+        "replyTo": "msg_eyja_tremor_001",
+        "attachments": []
+      },
+      {
+        "id": "msg_eyja_tremor_003",
+        "author": "univ_iceland_glaciol",
+        "ts": "2025-06-23T17:20:00+00:00",
+        "body": "Ice thickness reduced by 4.5m in cauldron areas. Consistent with geothermal heating. No indication of imminent explosive activity - ice cover remains substantial.",
+        "replyTo": null,
+        "attachments": [
+          "att_eyja_memo_20250623"
+        ]
+      },
+      {
+        "id": "msg_eyja_tremor_004",
+        "author": "eu_aviation_coord",
+        "ts": "2025-06-23T19:00:00+00:00",
+        "body": "European aviation authorities briefed. Contingency plans reviewed but no operational changes. Tourism to Iceland continues normally. Excellent monitoring by IMO team.",
+        "replyTo": "msg_eyja_tremor_002",
+        "attachments": []
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_27_vesuvius_microseismic_001",
+    "title": "Vesuvius microseismic activity - routine monitoring",
+    "type": "point",
+    "location": {
+      "name": "Mount Vesuvius, Naples",
+      "lat": 40.8213,
+      "lng": 14.4289
+    },
+    "description": "Routine microseismic activity detected in Vesuvius monitoring network. 12 very small events (M<1.5) recorded over 24 hours. Activity within normal parameters for dormant volcano.",
+    "dateRange": {
+      "start": "2025-06-27T00:00:00Z"
+    },
+    "uniqueData": {
+      "maxMagnitude": 1.2,
+      "eventCount": 12,
+      "alertLevel": "green",
+      "monitoringStatus": "routine",
+      "lastEruption": "1944-03-29",
+      "dormancyYears": 81,
+      "populationAtRisk": 600000
+    },
+    "attachments": [
+      {
+        "id": "att_vesuvius_micro_20250627",
+        "file": "vesuvius_microseismic_daily.png",
+        "mime": "image/png",
+        "label": "Daily microseismic summary"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_vesuvius_micro_001",
+        "author": "dr_volcanologist_italy",
+        "ts": "2025-06-27T08:30:00+02:00",
+        "body": "Daily Vesuvius report: 12 microseismic events M<1.5. Normal background activity for dormant stratovolcano. No changes in monitoring parameters.",
+        "replyTo": null,
+        "attachments": [
+          "att_vesuvius_micro_20250627"
+        ]
+      },
+      {
+        "id": "msg_vesuvius_micro_002",
+        "author": "napoli_civil_protection",
+        "ts": "2025-06-27T10:15:00+02:00",
+        "body": "Routine monitoring confirms GREEN status. Educational programs continue at Vesuvius National Park. Important to maintain vigilance given population density.",
+        "replyTo": "msg_vesuvius_micro_001",
+        "attachments": []
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_26_reykjanes_intrusion_001",
+    "title": "Vulsini magma intrusion",
+    "type": "period",
+    "location": {
+      "name": "Vulsini, Lazio, Italy",
+      "lat": 42.6000,
+      "lng": 11.9300
+    },
+    "description": "Magma intrusion detected beneath Vulsini volcanic complex with ground deformation and earthquake swarm. Pattern indicates renewed volcanic activity in this historically active region.",
+    "dateRange": {
+      "start": "2025-06-26T04:30:00Z",
+      "end": null
+    },
+    "uniqueData": {
+      "intrusionDepth": "3-5km",
+      "deformationMm": 15,
+      "earthquakeCount": 187,
+      "maxMagnitude": 4.1,
+      "alertLevel": "alert_phase",
+      "threatenedInfrastructure": [
+        "Bolsena Lake",
+        "Via Cassia",
+        "Montefiascone"
+      ],
+      "eruption_probability": "elevated"
+    },
+    "attachments": [
+      {
+        "id": "att_reykjanes_deform_20250626",
+        "file": "reykjanes_gps_deformation.png",
+        "mime": "image/png",
+        "label": "GPS deformation measurements"
+      },
+      {
+        "id": "att_reykjanes_intrusion_20250626",
+        "file": "magma_intrusion_model.pdf",
+        "mime": "application/pdf",
+        "label": "Magma intrusion modeling"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_reykjanes_intrusion_001",
+        "author": "imo_iceland",
+        "ts": "2025-06-26T08:45:00+00:00",
+        "body": "🔥 Magma intrusion detected Reykjanes Peninsula. 187 earthquakes, largest M4.1. GPS shows 15mm uplift. Similar to 2021-2024 pre-eruptive sequences. ALERT PHASE activated.",
+        "replyTo": null,
+        "attachments": [
+          "att_reykjanes_deform_20250626"
+        ]
+      },
+      {
+        "id": "msg_reykjanes_intrusion_002",
+        "author": "reykjavik_emergency",
+        "ts": "2025-06-26T10:20:00+00:00",
+        "body": "Blue Lagoon evacuated as precaution. Grindavik residents on standby for potential evacuation. Keflavik Airport operations normal but contingency plans activated.",
+        "replyTo": "msg_reykjanes_intrusion_001",
+        "attachments": []
+      },
+      {
+        "id": "msg_reykjanes_intrusion_003",
+        "author": "univ_iceland_volcano",
+        "ts": "2025-06-26T13:30:00+00:00",
+        "body": "Intrusion modeling suggests sill emplacement at 3-5km depth. 60% probability of surface eruption within 48-72 hours based on historical patterns.",
+        "replyTo": null,
+        "attachments": [
+          "att_reykjanes_intrusion_20250626"
+        ]
+      },
+      {
+        "id": "msg_reykjanes_intrusion_004",
+        "author": "iceland_met_office",
+        "ts": "2025-06-26T16:00:00+00:00",
+        "body": "Weather conditions favorable for monitoring. Clear skies allow optimal satellite and aerial observations. Wind patterns would disperse any potential gas emissions offshore.",
+        "replyTo": "msg_reykjanes_intrusion_003",
+        "attachments": []
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_21_krakatau_ash_001",
+    "title": "Etna Northeast Crater explosive eruption - ash column",
+    "type": "period",
+    "location": {
+      "name": "Mount Etna NE Crater, Sicily, Italy",
+      "lat": 37.7580,
+      "lng": 15.0010
+    },
+    "description": "Major explosive eruption from Northeast Crater producing 8km ash column with pyroclastic flows and significant volcanic lightning activity.",
+    "dateRange": {
+      "start": "2025-06-21T06:30:00Z",
+      "end": "2025-06-21T23:45:00Z"
+    },
+    "uniqueData": {
+      "ashColumnHeightKm": 8.2,
+      "pyroclasticFlows": true,
+      "volcanicLightning": true,
+      "alertLevel": "orange",
+      "aviationCode": "ORANGE",
+      "vei": 3,
+      "evacuationRadius": 5000
+    },
+    "attachments": [
+      {
+        "id": "att_krakatau_ash_20250621",
+        "file": "krakatau_ash_column_satellite.jpg",
+        "mime": "image/jpeg",
+        "label": "Satellite - ash column"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_krakatau_001",
+        "author": "indonesia_volcano_obs",
+        "ts": "2025-06-21T08:15:00+07:00",
+        "body": "🌋 Major eruption Anak Krakatau! 8km ash column with pyroclastic flows. Orange alert issued. Evacuation 5km radius in progress.",
+        "replyTo": null,
+        "attachments": [
+          "att_krakatau_ash_20250621"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_22_sakurajima_explosion_001",
+    "title": "Stromboli Northeast Crater vulcanian explosion",
+    "type": "point",
+    "location": {
+      "name": "Stromboli NE Crater, Aeolian Islands, Italy",
+      "lat": 38.7900,
+      "lng": 15.2150
+    },
+    "description": "Vulcanian explosion from Northeast crater with ballistic projectiles reaching 1.8km from crater. Brief ash emission to 3km altitude.",
+    "dateRange": {
+      "start": "2025-06-22T16:42:00Z"
+    },
+    "uniqueData": {
+      "explosionType": "vulcanian",
+      "ballisticRange": 1800,
+      "ashColumnHeightKm": 3.1,
+      "alertLevel": "level_3",
+      "evacuationZone": "2km radius"
+    },
+    "attachments": [
+      {
+        "id": "att_sakurajima_exp_20250622",
+        "file": "sakurajima_explosion_thermal.mp4",
+        "mime": "video/mp4",
+        "label": "Thermal camera explosion"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_sakurajima_001",
+        "author": "jma_kagoshima",
+        "ts": "2025-06-22T17:00:00+09:00",
+        "body": "爆発的噴火発生！弾道岩が1.8km飛散。警戒レベル3継続。",
+        "replyTo": null,
+        "attachments": [
+          "att_sakurajima_exp_20250622"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_23_villarrica_lava_lake_001",
+    "title": "Etna Central Crater lava lake activity surge",
+    "type": "period",
+    "location": {
+      "name": "Mount Etna Central Crater, Sicily, Italy",
+      "lat": 37.7500,
+      "lng": 14.9950
+    },
+    "description": "Significant increase in lava lake activity with strombolian explosions and elevated SO2 emissions. Tourism access restricted above 2000m elevation.",
+    "dateRange": {
+      "start": "2025-06-23T10:15:00Z",
+      "end": "2025-06-25T06:30:00Z"
+    },
+    "uniqueData": {
+      "lavaLakeLevel": "high",
+      "so2EmissionsTonnes": 450,
+      "strombolianActivity": true,
+      "alertLevel": "yellow",
+      "touristRestriction": "above_2000m"
+    },
+    "attachments": [
+      {
+        "id": "att_villarrica_lava_20250623",
+        "file": "villarrica_lava_lake_thermal.jpg",
+        "mime": "image/jpeg",
+        "label": "Thermal image - lava lake"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_villarrica_001",
+        "author": "sernageomin_chile",
+        "ts": "2025-06-23T13:20:00-04:00",
+        "body": "🔥 Actividad del lago de lava aumentada significativamente. SO2 450 ton/día. Acceso turístico restringido sobre 1200m altitud.",
+        "replyTo": null,
+        "attachments": [
+          "att_villarrica_lava_20250623"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_24_taal_phreatomagmatic_001",
+    "title": "Vulcano Porto phreatomagmatic eruption sequence",
+    "type": "grouped",
+    "location": {
+      "name": "Vulcano Porto, Aeolian Islands, Italy",
+      "lat": 38.4100,
+      "lng": 14.9600
+    },
+    "description": "Series of phreatomagmatic eruptions from Porto crater producing steam-laden ash plumes and minor ashfall on nearby communities.",
+    "dateRange": {
+      "start": "2025-06-24T04:20:00Z",
+      "end": "2025-06-24T18:45:00Z"
+    },
+    "uniqueData": {
+      "eruptionStyle": "phreatomagmatic",
+      "alertLevel": "level_2",
+      "ashfallCommunities": [
+        "Vulcano Porto",
+        "Gelso",
+        "Piano"
+      ],
+      "members": [
+        {
+          "id": "taal_2025_001",
+          "timestamp": "2025-06-24T04:20:00Z",
+          "magnitude": 2.1,
+          "depth": 1.2
+        },
+        {
+          "id": "taal_2025_002",
+          "timestamp": "2025-06-24T08:15:00Z",
+          "magnitude": 1.8,
+          "depth": 0.8
+        },
+        {
+          "id": "taal_2025_003",
+          "timestamp": "2025-06-24T14:30:00Z",
+          "magnitude": 2.3,
+          "depth": 1.5
+        }
+      ]
+    },
+    "attachments": [
+      {
+        "id": "att_taal_phreat_20250624",
+        "file": "taal_phreatomagmatic_sequence.mp4",
+        "mime": "video/mp4",
+        "label": "Eruption sequence video"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_taal_001",
+        "author": "phivolcs_taal",
+        "ts": "2025-06-24T09:30:00+08:00",
+        "body": "Phreatomagmatic eruptions ongoing. Alert Level 2 maintained. Minor ashfall reported in Agoncillo and Laurel municipalities.",
+        "replyTo": null,
+        "attachments": [
+          "att_taal_phreat_20250624"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_25_cotopaxi_lahar_001",
+    "title": "Etna lahar risk - snow melting",
+    "type": "point",
+    "location": {
+      "name": "Mount Etna Summit, Sicily, Italy",
+      "lat": 37.7510,
+      "lng": 14.9934
+    },
+    "description": "Increased fumarolic activity causing accelerated snow melting on Etna summit. Lahar risk elevated for downstream valleys.",
+    "dateRange": {
+      "start": "2025-06-25T14:30:00Z"
+    },
+    "uniqueData": {
+      "fumarolicActivity": "increased",
+      "snowMelting": "accelerated",
+      "laharRisk": "elevated",
+      "alertLevel": "yellow",
+      "threatenedValleys": [
+        "Valle del Bove",
+        "Alcantara",
+        "Simeto"
+      ]
+    },
+    "attachments": [
+      {
+        "id": "att_cotopaxi_glacier_20250625",
+        "file": "cotopaxi_glacier_melting_satellite.jpg",
+        "mime": "image/jpeg",
+        "label": "Satellite - glacier melting"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_cotopaxi_001",
+        "author": "ig_ecuador",
+        "ts": "2025-06-25T11:45:00-05:00",
+        "body": "Actividad fumarólica incrementada causando derretimiento glaciar acelerado. Riesgo de lahares elevado para valles río abajo.",
+        "replyTo": null,
+        "attachments": [
+          "att_cotopaxi_glacier_20250625"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_21_yasur_persistent_activity_001",
+    "title": "Stromboli persistent strombolian activity",
+    "type": "period",
+    "location": {
+      "name": "Stromboli Central Crater, Aeolian Islands, Italy",
+      "lat": 38.7890,
+      "lng": 15.2130
+    },
+    "description": "Continuous strombolian activity with frequent explosions every 2-5 minutes. Incandescent bomb ejection reaching 300m above crater rim.",
+    "dateRange": {
+      "start": "2025-06-21T12:00:00Z",
+      "end": "2025-06-22T12:00:00Z"
+    },
+    "uniqueData": {
+      "activityType": "persistent_strombolian",
+      "explosionInterval": "2-5_minutes",
+      "bombEjectionHeight": 300,
+      "alertLevel": "level_2",
+      "touristAccess": "restricted_400m"
+    },
+    "attachments": [
+      {
+        "id": "att_yasur_stromb_20250621",
+        "file": "yasur_strombolian_timelapse.mp4",
+        "mime": "video/mp4",
+        "label": "24hr strombolian timelapse"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_yasur_001",
+        "author": "vanuatu_geology",
+        "ts": "2025-06-21T16:30:00+11:00",
+        "body": "Yasur maintaining persistent strombolian activity. Explosions every 2-5 minutes with bombs to 300m height. Tourist access restricted to 400m minimum.",
+        "replyTo": null,
+        "attachments": [
+          "att_yasur_stromb_20250621"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_26_masaya_gas_emission_001",
+    "title": "Vesuvius increased gas emission",
+    "type": "point",
+    "location": {
+      "name": "Mount Vesuvius, Naples, Italy",
+      "lat": 40.8213,
+      "lng": 14.4289
+    },
+    "description": "Significant increase in SO2 gas emissions from Vesuvius crater fumaroles. Wind patterns carrying gases toward Naples metropolitan area.",
+    "dateRange": {
+      "start": "2025-06-26T09:45:00Z"
+    },
+    "uniqueData": {
+      "so2EmissionsTonnes": 2800,
+      "windDirection": "northwest",
+      "airQualityImpact": "moderate",
+      "alertLevel": "yellow",
+      "affectedAreas": [
+        "Naples",
+        "Torre del Greco"
+      ]
+    },
+    "attachments": [
+      {
+        "id": "att_masaya_gas_20250626",
+        "file": "masaya_so2_satellite_measurement.png",
+        "mime": "image/png",
+        "label": "SO2 satellite measurements"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_masaya_001",
+        "author": "ineter_nicaragua",
+        "ts": "2025-06-26T07:15:00-06:00",
+        "body": "Emisiones SO2 incrementadas significativamente - 2800 ton/día. Vientos hacia NW afectan calidad aire Managua. Alerta Amarilla activada.",
+        "replyTo": null,
+        "attachments": [
+          "att_masaya_gas_20250626"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_27_arenal_seismic_swarm_001",
+    "title": "Campi Flegrei seismic swarm - caldera instability",
+    "type": "grouped",
+    "location": {
+      "name": "Campi Flegrei Caldera, Naples, Italy",
+      "lat": 40.8270,
+      "lng": 14.1390
+    },
+    "description": "Earthquake swarm in caldera region indicating potential caldera instability. 23 events M1.5-2.8 detected over 12 hours.",
+    "dateRange": {
+      "start": "2025-06-27T08:00:00Z",
+      "end": "2025-06-27T20:00:00Z"
+    },
+    "uniqueData": {
+      "swarmType": "caldera_instability",
+      "location": "central_caldera",
+      "alertLevel": "yellow",
+      "members": [
+        {
+          "id": "arenal_2025_001",
+          "timestamp": "2025-06-27T08:15:00Z",
+          "magnitude": 2.1,
+          "depth": 2.5
+        },
+        {
+          "id": "arenal_2025_002",
+          "timestamp": "2025-06-27T12:30:00Z",
+          "magnitude": 2.8,
+          "depth": 1.8
+        },
+        {
+          "id": "arenal_2025_003",
+          "timestamp": "2025-06-27T16:45:00Z",
+          "magnitude": 2.3,
+          "depth": 2.1
+        }
+      ],
+      "aggregateData": {
+        "count": 23,
+        "maxMagnitude": 2.8,
+        "averageDepth": 2.1
+      }
+    },
+    "attachments": [
+      {
+        "id": "att_arenal_swarm_20250627",
+        "file": "arenal_seismic_swarm_map.png",
+        "mime": "image/png",
+        "label": "Seismic swarm location map"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_arenal_001",
+        "author": "rsn_costa_rica",
+        "ts": "2025-06-27T14:20:00-06:00",
+        "body": "Enjambre sísmico flanco oeste Arenal. 23 eventos M1.5-2.8 en 12 horas. Posible inestabilidad del edificio volcánico. Monitoreo intensificado.",
+        "replyTo": null,
+        "attachments": [
+          "att_arenal_swarm_20250627"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_22_colima_dome_collapse_001",
+    "title": "Etna lava dome partial collapse",
+    "type": "point",
+    "location": {
+      "name": "Mount Etna SE Crater, Sicily, Italy",
+      "lat": 37.7470,
+      "lng": 15.0020
+    },
+    "description": "Partial collapse of SE crater lava dome generating pyroclastic flow down southern flank. Block-and-ash flow traveled 3.2km from crater.",
+    "dateRange": {
+      "start": "2025-06-22T11:25:00Z"
+    },
+    "uniqueData": {
+      "collapseType": "partial_dome",
+      "pyroclasticFlowLength": 3200,
+      "flankDirection": "southern",
+      "alertLevel": "orange",
+      "evacuationRadius": 12000
+    },
+    "attachments": [
+      {
+        "id": "att_colima_collapse_20250622",
+        "file": "colima_dome_collapse_sequence.mp4",
+        "mime": "video/mp4",
+        "label": "Dome collapse sequence"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_colima_001",
+        "author": "unam_colima_obs",
+        "ts": "2025-06-22T13:45:00-06:00",
+        "body": "Colapso parcial domo sumital generó flujo piroclástico 3.2km flanco sur. Alerta Naranja activada. Evacuación 12km radio en curso.",
+        "replyTo": null,
+        "attachments": [
+          "att_colima_collapse_20250622"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_23_aso_crater_lake_heating_001",
+    "title": "Albano crater lake temperature surge",
+    "type": "period",
+    "location": {
+      "name": "Albano Lake, Colli Albani, Italy",
+      "lat": 41.7440,
+      "lng": 12.6640
+    },
+    "description": "Rapid heating of Albano crater lake from 45°C to 78°C over 18 hours. Increased fumarolic activity and sulfur dioxide emissions detected.",
+    "dateRange": {
+      "start": "2025-06-23T06:00:00Z",
+      "end": "2025-06-24T00:00:00Z"
+    },
+    "uniqueData": {
+      "initialTemperature": 45,
+      "peakTemperature": 78,
+      "heatingRate": "1.8C_per_hour",
+      "so2Increase": "300%",
+      "alertLevel": "level_2"
+    },
+    "attachments": [
+      {
+        "id": "att_aso_heating_20250623",
+        "file": "aso_crater_lake_thermal.jpg",
+        "mime": "image/jpeg",
+        "label": "Thermal image - crater lake"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_aso_001",
+        "author": "jma_kumamoto",
+        "ts": "2025-06-23T15:30:00+09:00",
+        "body": "中岳火口湖温度急上昇！45°Cから78°Cまで18時間で上昇。SO2も3倍増。警戒レベル2継続中。",
+        "replyTo": null,
+        "attachments": [
+          "att_aso_heating_20250623"
+        ]
       }
     ]
   }

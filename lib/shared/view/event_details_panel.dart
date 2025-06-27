@@ -94,8 +94,12 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       return;
     }
 
+    // Load the event with merged discussions (JSON + SharedPreferences)
+    context.read<DiscussionCubit>().loadEventDiscussion(selectedEvent.id);
+
     setState(() {
-      _event = selectedEvent;
+      _event =
+          selectedEvent; // This will be updated by the BlocListener when discussion loads
       _isLoading = false;
       // Initialize reply visibility state
       for (final message in selectedEvent.topLevelMessages) {
@@ -116,7 +120,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
           setState(() {
             _event = discussionState.currentEvent;
           });
-        } else if (discussionState.isFailure && discussionState.errorMessage != null) {
+        } else if (discussionState.isFailure &&
+            discussionState.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(discussionState.errorMessage!),
@@ -517,17 +522,17 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     return BlocBuilder<NavigationBloc, NavigationState>(
       builder: (context, navState) {
         final currentSource = navState.detailsSource;
-        
+
         // Dynamic button text and icon based on where the event details were opened from
         final String buttonText;
         final IconData buttonIcon;
-        
+
         if (currentSource == EventDetailsSource.timeline) {
           // Opened from timeline → button should go to map
           buttonText = 'View on Map';
           buttonIcon = Icons.map;
         } else if (currentSource == EventDetailsSource.map) {
-          // Opened from map → button should go to timeline  
+          // Opened from map → button should go to timeline
           buttonText = 'View on Timeline';
           buttonIcon = Icons.timeline;
         } else {
@@ -535,7 +540,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
           buttonText = 'View on Map';
           buttonIcon = Icons.map;
         }
-        
+
         return Row(
           children: [
             ElevatedButton.icon(
@@ -573,7 +578,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1A73E8),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -586,7 +594,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                   final comparisonBloc = context.read<ComparisonBloc>();
                   final state = comparisonBloc.state;
 
-                  if (!state.isEventInComparison(selectedEvent.id) && !state.isAtMaxCapacity) {
+                  if (!state.isEventInComparison(selectedEvent.id) &&
+                      !state.isAtMaxCapacity) {
                     comparisonBloc.add(AddEventToComparison(selectedEvent));
                   }
                 }
@@ -596,7 +605,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF4A4D52),
                 side: const BorderSide(color: Color(0xFF4A4D52)),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -742,13 +754,17 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                 ),
                 child: IconButton(
                   onPressed: () {
-                    final replyText = _replyControllers[parentMessageId]?.text.trim();
-                    if (replyText != null && replyText.isNotEmpty && _event != null) {
+                    final replyText = _replyControllers[parentMessageId]?.text
+                        .trim();
+                    if (replyText != null &&
+                        replyText.isNotEmpty &&
+                        _event != null) {
                       context.read<DiscussionCubit>().addReply(
                         eventId: _event!.id,
                         parentMessageId: parentMessageId,
                         body: replyText,
-                        authorId: 'current_user', // TODO: Get actual current user ID
+                        authorId:
+                            'current_user', // TODO: Get actual current user ID
                       );
                       setState(() {
                         _showReplyField[parentMessageId] = false;
@@ -854,6 +870,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               onPressed: () {
                 setState(() {
                   _showReplyField[message.id] = true;
+                  // Automatically expand replies section so user can see the reply field
+                  _repliesVisible[message.id] = true;
                   // Initialize if needed
                   if (!_replyControllers.containsKey(message.id)) {
                     _replyControllers[message.id] = TextEditingController();
@@ -975,6 +993,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                         final parentId = reply.replyTo ?? reply.id;
                         setState(() {
                           _showReplyField[parentId] = true;
+                          // Ensure the replies section is expanded so user can see the reply field
+                          _repliesVisible[parentId] = true;
                           // Initialize if needed
                           if (!_replyControllers.containsKey(parentId)) {
                             _replyControllers[parentId] =
@@ -1030,7 +1050,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
   }
 
   Widget _buildReplyBodyWithMentions(String body) {
-    final mentionRegex = RegExp(r'@([a-zA-Z0-9_]+(?:\s+[a-zA-Z0-9_]+)*)');
+    final mentionRegex = RegExp(r'@([a-zA-Z0-9_]+)');
     final matches = mentionRegex.allMatches(body);
 
     if (matches.isEmpty) {
@@ -1174,7 +1194,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                       context.read<DiscussionCubit>().addMessage(
                         eventId: _event!.id,
                         body: messageText,
-                        authorId: 'current_user', // TODO: Get actual current user ID
+                        authorId:
+                            'current_user', // TODO: Get actual current user ID
                       );
                       _mainComposerController.clear();
                     }
@@ -1194,7 +1215,6 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       ),
     );
   }
-
 
   String _formatCompactDateTime(DateTime dateTime) {
     // Format for compact timeline display: "12/03 14:30"

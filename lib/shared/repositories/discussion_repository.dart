@@ -9,9 +9,8 @@ import 'events_repository.dart';
 /// {@endtemplate}
 class DiscussionRepository {
   /// {@macro discussion_repository}
-  const DiscussionRepository({
-    EventsRepository? eventsRepository,
-  }) : _eventsRepository = eventsRepository ?? const EventsRepository();
+  const DiscussionRepository({EventsRepository? eventsRepository})
+    : _eventsRepository = eventsRepository ?? const EventsRepository();
 
   final EventsRepository _eventsRepository;
   static const String _eventsKey = 'events_data';
@@ -26,53 +25,54 @@ class DiscussionRepository {
   Future<Map<String, List<DiscussionMessage>>> _loadDiscussions() async {
     final prefs = await SharedPreferences.getInstance();
     final storedData = prefs.getString(_discussionsKey);
-    
+
     if (storedData != null) {
       final data = jsonDecode(storedData) as Map<String, dynamic>;
       final discussions = <String, List<DiscussionMessage>>{};
-      
+
       for (final entry in data.entries) {
         final messages = (entry.value as List<dynamic>)
             .map((m) => DiscussionMessage.fromJson(m as Map<String, dynamic>))
             .toList();
         discussions[entry.key] = messages;
       }
-      
+
       return discussions;
     }
-    
+
     return {};
   }
 
   /// Save discussions to persistent storage
-  Future<void> _saveDiscussions(Map<String, List<DiscussionMessage>> discussions) async {
+  Future<void> _saveDiscussions(
+    Map<String, List<DiscussionMessage>> discussions,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final data = <String, dynamic>{};
-    
+
     for (final entry in discussions.entries) {
       data[entry.key] = entry.value.map((m) => m.toJson()).toList();
     }
-    
+
     await prefs.setString(_discussionsKey, jsonEncode(data));
   }
-
 
   /// Add a new message to an event's discussion
   Future<bool> addMessage(String eventId, DiscussionMessage message) async {
     try {
       // Load existing discussions
       final discussions = await _loadDiscussions();
-      
+
       // Get current messages for this event (or empty list if none)
       final currentMessages = discussions[eventId] ?? <DiscussionMessage>[];
-      
+
       // Add the new message
       final updatedMessages = [...currentMessages, message];
       discussions[eventId] = updatedMessages;
-      
+
       // Save back to persistent storage
       await _saveDiscussions(discussions);
-      
+
       return true;
     } catch (e) {
       // Error adding message
@@ -81,22 +81,26 @@ class DiscussionRepository {
   }
 
   /// Add a reply to an existing message in an event's discussion
-  Future<bool> addReply(String eventId, String parentMessageId, DiscussionMessage reply) async {
+  Future<bool> addReply(
+    String eventId,
+    String parentMessageId,
+    DiscussionMessage reply,
+  ) async {
     try {
       // Load existing discussions
       final discussions = await _loadDiscussions();
-      
+
       // Get current messages for this event (or empty list if none)
       final currentMessages = discussions[eventId] ?? <DiscussionMessage>[];
-      
+
       // Create a reply message with the parentMessageId set as replyTo
       final replyMessage = reply.copyWith(replyTo: parentMessageId);
       final updatedMessages = [...currentMessages, replyMessage];
       discussions[eventId] = updatedMessages;
-      
+
       // Save back to persistent storage
       await _saveDiscussions(discussions);
-      
+
       return true;
     } catch (e) {
       return false;
@@ -104,14 +108,18 @@ class DiscussionRepository {
   }
 
   /// Add an attachment to an event's discussion
-  Future<bool> addAttachment(String eventId, EventAttachment attachment, String authorId) async {
+  Future<bool> addAttachment(
+    String eventId,
+    EventAttachment attachment,
+    String authorId,
+  ) async {
     try {
       // Load existing discussions
       final discussions = await _loadDiscussions();
-      
+
       // Get current messages for this event (or empty list if none)
       final currentMessages = discussions[eventId] ?? <DiscussionMessage>[];
-      
+
       // Create a new message with the attachment
       final attachmentMessage = DiscussionMessage(
         id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
@@ -121,13 +129,13 @@ class DiscussionRepository {
         replyTo: null,
         attachments: [attachment.id],
       );
-      
+
       final updatedMessages = [...currentMessages, attachmentMessage];
       discussions[eventId] = updatedMessages;
-      
+
       // Save back to persistent storage
       await _saveDiscussions(discussions);
-      
+
       return true;
     } catch (e) {
       return false;
@@ -140,7 +148,7 @@ class DiscussionRepository {
       // Load the event from main repository
       final events = await _loadEvents();
       Event? event;
-      
+
       try {
         event = events.firstWhere((e) => e.id == eventId);
       } catch (e) {
@@ -159,13 +167,24 @@ class DiscussionRepository {
           discussion: const [],
         );
       }
-      
-      // Load discussions for this event
+
+      // Load discussions for this event from SharedPreferences (user-added comments)
       final discussions = await _loadDiscussions();
-      final eventDiscussions = discussions[eventId] ?? <DiscussionMessage>[];
-      
-      // Return the event with the loaded discussions
-      return event.copyWith(discussion: eventDiscussions);
+      final userAddedDiscussions =
+          discussions[eventId] ?? <DiscussionMessage>[];
+
+      // Merge original JSON discussion with user-added discussions
+      final originalDiscussion = event.discussion;
+      final mergedDiscussion = [
+        ...originalDiscussion, // Keep all original comments from JSON
+        ...userAddedDiscussions, // Add user comments from SharedPreferences
+      ];
+
+      // Sort all messages by timestamp to maintain chronological order
+      mergedDiscussion.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+      // Return the event with the merged discussions
+      return event.copyWith(discussion: mergedDiscussion);
     } catch (e) {
       // Error getting event with discussion
       return null;

@@ -9,10 +9,13 @@ part 'discussion_state.dart';
 enum DiscussionStatus {
   /// Initial state
   initial,
+
   /// Loading state
   loading,
+
   /// Success state
   success,
+
   /// Failure state
   failure,
 }
@@ -22,10 +25,9 @@ enum DiscussionStatus {
 /// {@endtemplate}
 class DiscussionCubit extends Cubit<DiscussionState> {
   /// {@macro discussion_cubit}
-  DiscussionCubit({
-    required DiscussionRepository discussionRepository,
-  })  : _discussionRepository = discussionRepository,
-        super(const DiscussionState());
+  DiscussionCubit({required DiscussionRepository discussionRepository})
+    : _discussionRepository = discussionRepository,
+      super(const DiscussionState());
 
   final DiscussionRepository _discussionRepository;
 
@@ -51,22 +53,36 @@ class DiscussionCubit extends Cubit<DiscussionState> {
       final success = await _discussionRepository.addMessage(eventId, message);
 
       if (success) {
-        final updatedEvent = await _discussionRepository.getEventWithDiscussion(eventId);
-        emit(state.copyWith(
-          status: DiscussionStatus.success,
-          currentEvent: updatedEvent,
-        ));
+        final updatedEvent = await _discussionRepository.getEventWithDiscussion(
+          eventId,
+        );
+        // If we have a current event, preserve its data and only update the discussion
+        // This prevents losing original event data when the repository creates a fallback event
+        final eventToEmit = state.currentEvent != null && updatedEvent != null
+            ? state.currentEvent!.copyWith(discussion: updatedEvent.discussion)
+            : updatedEvent;
+
+        emit(
+          state.copyWith(
+            status: DiscussionStatus.success,
+            currentEvent: eventToEmit,
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          status: DiscussionStatus.failure,
-          errorMessage: 'Failed to add message',
-        ));
+        emit(
+          state.copyWith(
+            status: DiscussionStatus.failure,
+            errorMessage: 'Failed to add message',
+          ),
+        );
       }
     } catch (e) {
-      emit(state.copyWith(
-        status: DiscussionStatus.failure,
-        errorMessage: 'Error adding message: $e',
-      ));
+      emit(
+        state.copyWith(
+          status: DiscussionStatus.failure,
+          errorMessage: 'Error adding message: $e',
+        ),
+      );
     }
   }
 
@@ -90,25 +106,43 @@ class DiscussionCubit extends Cubit<DiscussionState> {
         attachments: attachments,
       );
 
-      final success = await _discussionRepository.addReply(eventId, parentMessageId, reply);
+      final success = await _discussionRepository.addReply(
+        eventId,
+        parentMessageId,
+        reply,
+      );
 
       if (success) {
-        final updatedEvent = await _discussionRepository.getEventWithDiscussion(eventId);
-        emit(state.copyWith(
-          status: DiscussionStatus.success,
-          currentEvent: updatedEvent,
-        ));
+        final updatedEvent = await _discussionRepository.getEventWithDiscussion(
+          eventId,
+        );
+        // If we have a current event, preserve its data and only update the discussion
+        // This prevents losing original event data when the repository creates a fallback event
+        final eventToEmit = state.currentEvent != null && updatedEvent != null
+            ? state.currentEvent!.copyWith(discussion: updatedEvent.discussion)
+            : updatedEvent;
+
+        emit(
+          state.copyWith(
+            status: DiscussionStatus.success,
+            currentEvent: eventToEmit,
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          status: DiscussionStatus.failure,
-          errorMessage: 'Failed to add reply',
-        ));
+        emit(
+          state.copyWith(
+            status: DiscussionStatus.failure,
+            errorMessage: 'Failed to add reply',
+          ),
+        );
       }
     } catch (e) {
-      emit(state.copyWith(
-        status: DiscussionStatus.failure,
-        errorMessage: 'Error adding reply: $e',
-      ));
+      emit(
+        state.copyWith(
+          status: DiscussionStatus.failure,
+          errorMessage: 'Error adding reply: $e',
+        ),
+      );
     }
   }
 
@@ -121,25 +155,43 @@ class DiscussionCubit extends Cubit<DiscussionState> {
     emit(state.copyWith(status: DiscussionStatus.loading));
 
     try {
-      final success = await _discussionRepository.addAttachment(eventId, attachment, authorId);
+      final success = await _discussionRepository.addAttachment(
+        eventId,
+        attachment,
+        authorId,
+      );
 
       if (success) {
-        final updatedEvent = await _discussionRepository.getEventWithDiscussion(eventId);
-        emit(state.copyWith(
-          status: DiscussionStatus.success,
-          currentEvent: updatedEvent,
-        ));
+        final updatedEvent = await _discussionRepository.getEventWithDiscussion(
+          eventId,
+        );
+        // If we have a current event, preserve its data and only update the discussion
+        // This prevents losing original event data when the repository creates a fallback event
+        final eventToEmit = state.currentEvent != null && updatedEvent != null
+            ? state.currentEvent!.copyWith(discussion: updatedEvent.discussion)
+            : updatedEvent;
+
+        emit(
+          state.copyWith(
+            status: DiscussionStatus.success,
+            currentEvent: eventToEmit,
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          status: DiscussionStatus.failure,
-          errorMessage: 'Failed to add attachment',
-        ));
+        emit(
+          state.copyWith(
+            status: DiscussionStatus.failure,
+            errorMessage: 'Failed to add attachment',
+          ),
+        );
       }
     } catch (e) {
-      emit(state.copyWith(
-        status: DiscussionStatus.failure,
-        errorMessage: 'Error adding attachment: $e',
-      ));
+      emit(
+        state.copyWith(
+          status: DiscussionStatus.failure,
+          errorMessage: 'Error adding attachment: $e',
+        ),
+      );
     }
   }
 
@@ -149,23 +201,26 @@ class DiscussionCubit extends Cubit<DiscussionState> {
 
     try {
       final event = await _discussionRepository.getEventWithDiscussion(eventId);
-      
+
       if (event != null) {
-        emit(state.copyWith(
-          status: DiscussionStatus.success,
-          currentEvent: event,
-        ));
+        emit(
+          state.copyWith(status: DiscussionStatus.success, currentEvent: event),
+        );
       } else {
-        emit(state.copyWith(
-          status: DiscussionStatus.failure,
-          errorMessage: 'Event not found',
-        ));
+        emit(
+          state.copyWith(
+            status: DiscussionStatus.failure,
+            errorMessage: 'Event not found',
+          ),
+        );
       }
     } catch (e) {
-      emit(state.copyWith(
-        status: DiscussionStatus.failure,
-        errorMessage: 'Error loading event discussion: $e',
-      ));
+      emit(
+        state.copyWith(
+          status: DiscussionStatus.failure,
+          errorMessage: 'Error loading event discussion: $e',
+        ),
+      );
     }
   }
 
