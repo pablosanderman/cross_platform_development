@@ -83,25 +83,26 @@ class _MyAppState extends State<MyApp> {
                                         availableWidth,
                                         constraints.maxHeight,
                                       ),
-                                    // Floating Action Buttons
-                                    Positioned(
-                                      bottom: 16,
-                                      right: 16,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const EventVisibilityFab(),
-                                          const SizedBox(height: 8),
-                                          AddEventFab(
-                                            onPressed: () {
-                                              setState(() {
-                                                _showAddEventOverlay = true;
-                                              });
-                                            },
-                                          ),
-                                        ],
+                                    // Floating Action Buttons - hidden when event details are open
+                                    if (!navState.showEventDetails)
+                                      Positioned(
+                                        bottom: 16,
+                                        right: 16,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const EventVisibilityFab(),
+                                            const SizedBox(height: 8),
+                                            AddEventFab(
+                                              onPressed: () {
+                                                setState(() {
+                                                  _showAddEventOverlay = true;
+                                                });
+                                              },
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
                                     // Add Event Overlay
                                     if (_showAddEventOverlay)
                                       AddEventOverlay(
@@ -110,14 +111,16 @@ class _MyAppState extends State<MyApp> {
                                             _showAddEventOverlay = false;
                                           });
                                           if (eventData != null) {
-                                            context.read<TimelineCubit>().addEvent(
-                                              eventData['title'],
-                                              eventData['description'],
-                                              eventData['startTime'],
-                                              eventData['endTime'],
-                                              eventData['latitude'],
-                                              eventData['longitude'],
-                                            );
+                                            context
+                                                .read<TimelineCubit>()
+                                                .addEvent(
+                                                  eventData['title'],
+                                                  eventData['description'],
+                                                  eventData['startTime'],
+                                                  eventData['endTime'],
+                                                  eventData['latitude'],
+                                                  eventData['longitude'],
+                                                );
                                           }
                                         },
                                         onCancel: () {

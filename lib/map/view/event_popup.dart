@@ -181,7 +181,9 @@ class EventPopup extends StatelessWidget {
                                           GestureDetector(
                                             onTap: () {
                                               // Hide popup without clearing selection and show event details
-                                              context.read<MapCubit>().closePopup();
+                                              context
+                                                  .read<MapCubit>()
+                                                  .closePopup();
                                               context
                                                   .read<NavigationBloc>()
                                                   .add(
@@ -297,12 +299,22 @@ class EventPopup extends StatelessWidget {
         return formatter.format(event.effectiveStartTime);
       case EventType.period:
         final start = formatter.format(event.effectiveStartTime);
-        final end = formatter.format(event.effectiveEndTime!);
-        return '$start - $end';
+        final endTime = event.effectiveEndTime;
+        if (endTime != null) {
+          final end = formatter.format(endTime);
+          return '$start - $end';
+        } else {
+          return start; // Fallback to just start date if no end time
+        }
       case EventType.grouped:
         final start = formatter.format(event.effectiveStartTime);
-        final end = formatter.format(event.effectiveEndTime!);
-        return '$start - $end';
+        final endTime = event.effectiveEndTime;
+        if (endTime != null) {
+          final end = formatter.format(endTime);
+          return '$start - $end';
+        } else {
+          return start; // Fallback to just start date if no end time
+        }
     }
   }
 
