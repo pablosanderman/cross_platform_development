@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
-import '../../navigation/navigation.dart';
 import '../../timeline/timeline.dart';
+import '../utils/event_search_utils.dart';
 
 /// Search delegate for full-screen event search using showSearch()
 class EventSearchDelegate extends SearchDelegate<Event?> {
@@ -18,13 +17,22 @@ class EventSearchDelegate extends SearchDelegate<Event?> {
   ThemeData appBarTheme(BuildContext context) {
     return Theme.of(context).copyWith(
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color.fromARGB(255, 175, 169, 169),
+        backgroundColor: Color.fromARGB(255, 40, 40, 40),
         foregroundColor: Colors.white,
-        elevation: 0,
+        elevation: 4,
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       inputDecorationTheme: const InputDecorationTheme(
         hintStyle: TextStyle(color: Colors.grey),
         border: InputBorder.none,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      textTheme: const TextTheme(
+        titleLarge: TextStyle(color: Colors.white, fontSize: 18),
       ),
     );
   }
@@ -32,20 +40,21 @@ class EventSearchDelegate extends SearchDelegate<Event?> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-          showSuggestions(context);
-        },
-      ),
+      if (query.isNotEmpty)
+        IconButton(
+          icon: const Icon(Icons.clear, color: Colors.white),
+          onPressed: () {
+            query = '';
+            showSuggestions(context);
+          },
+        ),
     ];
   }
 
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.arrow_back),
+      icon: const Icon(Icons.arrow_back, color: Colors.white),
       onPressed: () => close(context, null),
     );
   }
@@ -64,15 +73,31 @@ class EventSearchDelegate extends SearchDelegate<Event?> {
     final filteredEvents = query.isEmpty
         ? events
         : events
-              .where(
-                (event) =>
-                    event.title.toLowerCase().contains(query.toLowerCase()),
-              )
+              .where((event) => EventSearchUtils.filterEvent(event, query))
               .toList();
 
     if (filteredEvents.isEmpty) {
-      return const Center(
-        child: Text('No events found', style: TextStyle(color: Colors.grey)),
+      return Container(
+        color: const Color.fromARGB(255, 30, 30, 30),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                query.isEmpty ? Icons.search : Icons.search_off,
+                size: 64,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                query.isEmpty
+                    ? 'Start typing to search events'
+                    : 'No events found',
+                style: TextStyle(color: Colors.grey.shade400, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
@@ -82,31 +107,28 @@ class EventSearchDelegate extends SearchDelegate<Event?> {
         itemCount: filteredEvents.length,
         itemBuilder: (context, index) {
           final event = filteredEvents[index];
-          final start = event.startTime != null
-              ? DateFormat('HH:mm:ss').format(event.startTime!)
-              : "No Start";
-          final end = event.endTime != null
-              ? DateFormat('HH:mm:ss').format(event.endTime!)
-              : "No End";
-
-          return ListTile(
-            title: Text(
-              event.title,
-              style: const TextStyle(color: Colors.white),
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 45, 45, 45),
+              borderRadius: BorderRadius.circular(8),
             ),
-            subtitle: Text(
-              "Date: $start --- $end",
-              style: const TextStyle(color: Colors.grey),
+            child: EventListTile(
+              event: event,
+              titleStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+              subtitleStyle: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: 14,
+              ),
+              onTap: () {
+                EventSearchUtils.selectEvent(context, event);
+                close(context, event);
+              },
             ),
-            onTap: () {
-              // Navigate to timeline and select event
-              context.read<NavigationBloc>().add(ShowTimeline());
-              context.read<TimelineCubit>().scrollToEvent(event);
-              context.read<TimelineCubit>().selectEvent(event);
-
-              // Close search and return
-              close(context, event);
-            },
           );
         },
       ),
