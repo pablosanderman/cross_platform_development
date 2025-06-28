@@ -229,7 +229,7 @@ class _GeneralInformationTable extends StatelessWidget {
               ),
               _buildGeneralInfoRow(
                 'Description',
-                (event) => event.description ?? '—',
+                (event) => event.description,
               ),
               _buildGeneralInfoRow(
                 'Region',

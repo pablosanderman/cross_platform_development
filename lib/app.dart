@@ -317,23 +317,38 @@ class _MyAppState extends State<MyApp> {
     double availableWidth,
     double availableHeight,
   ) {
-    // Calculate minimum and maximum widths for event details
-    final minDetailsWidth = 400.0;
-    final maxDetailsWidth =
-        availableWidth - 350.0; // Leave at least 350px for main content
-
-    // Calculate event details width based on split ratio
-    final eventDetailsWidth = (availableWidth * navState.eventDetailsSplitRatio)
-        .clamp(minDetailsWidth, maxDetailsWidth);
+    // Calculate event details width
+    final double eventDetailsWidth;
+    
+    if (PlatformUtils.isMobile) {
+      // On mobile, use full width for event details
+      eventDetailsWidth = availableWidth;
+    } else {
+      // On desktop, use split view with minimum/maximum constraints
+      final minDetailsWidth = 400.0;
+      final maxDetailsWidth = availableWidth - 350.0; // Leave at least 350px for main content
+      
+      // Ensure maxDetailsWidth is not less than minDetailsWidth
+      final safeMaxWidth = maxDetailsWidth < minDetailsWidth ? availableWidth : maxDetailsWidth;
+      
+      eventDetailsWidth = (availableWidth * navState.eventDetailsSplitRatio)
+          .clamp(minDetailsWidth, safeMaxWidth);
+    }
 
     double overlayLeft;
 
-    if (navState.detailsSource == EventDetailsSource.timeline) {
-      // Timeline source: Show event details on right side
-      overlayLeft = availableWidth - eventDetailsWidth;
-    } else {
-      // Map source: Show event details on left side
+    if (PlatformUtils.isMobile) {
+      // On mobile, always show overlay from left side (full screen)
       overlayLeft = 0;
+    } else {
+      // On desktop, position based on source
+      if (navState.detailsSource == EventDetailsSource.timeline) {
+        // Timeline source: Show event details on right side
+        overlayLeft = availableWidth - eventDetailsWidth;
+      } else {
+        // Map source: Show event details on left side
+        overlayLeft = 0;
+      }
     }
 
     return Stack(

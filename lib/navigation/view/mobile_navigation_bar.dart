@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/utc_timer/utc_timer.dart';
 import 'package:cross_platform_development/navigation/navigation.dart';
-import 'package:cross_platform_development/search/search.dart';
 import 'package:cross_platform_development/timeline/timeline.dart';
-import 'package:cross_platform_development/search/widget/generic_search_widget.dart';
-import 'package:cross_platform_development/shared/models/models.dart';
 import 'package:intl/intl.dart';
 import 'package:cross_platform_development/comparison/comparison.dart';
 
@@ -138,7 +135,7 @@ class _NavIconButton extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
-        child: Container(
+        child: SizedBox(
           width: 40,
           height: 40,
           child: Icon(icon, color: Colors.white, size: 20),
@@ -161,7 +158,7 @@ class _VSButton extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
-        child: Container(
+        child: SizedBox(
           width: 40,
           height: 40,
           child: const Center(
