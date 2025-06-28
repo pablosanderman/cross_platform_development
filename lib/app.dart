@@ -29,15 +29,9 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: PlatformUtils.isDesktop 
-          ? WindowBorder(
-              color: borderColor,
-              width: 1,
-              child: _buildBody(),
-            )
-          : SafeArea(
-              child: _buildBody(),
-            ),
+        body: PlatformUtils.isDesktop
+            ? WindowBorder(color: borderColor, width: 1, child: _buildBody())
+            : SafeArea(child: _buildBody()),
       ),
       routes: {'/comparison': (context) => const ComparisonResultsPage()},
     );
@@ -49,115 +43,113 @@ class _MyAppState extends State<MyApp> {
         const NavigationView(),
         BlocBuilder<NavigationBloc, NavigationState>(
           builder: (context, navState) {
-                  // If we're on page 0, show the timeline/map split-screen with all overlays
-                  if (navState.currentPageIndex == 0) {
-                    return Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final availableWidth = constraints.maxWidth;
+            // If we're on page 0, show the timeline/map split-screen with all overlays
+            if (navState.currentPageIndex == 0) {
+              return Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final availableWidth = constraints.maxWidth;
 
-                          // Always build the standard timeline/map layout
-                          // Event details will be shown as overlay if needed
-                          // Now with resizable split view support
+                    // Always build the standard timeline/map layout
+                    // Event details will be shown as overlay if needed
+                    // Now with resizable split view support
 
-                          final bothVisible =
-                              navState.showTimeline && navState.showMap;
+                    final bothVisible =
+                        navState.showTimeline && navState.showMap;
 
-                          // Wrap everything with EventVisibility and Comparison features
-                          return BlocBuilder<
-                            EventVisibilityCubit,
-                            EventVisibilityState
-                          >(
-                            builder: (context, visibilityState) {
-                              return ComparisonPage(
-                                child: Stack(
-                                  children: [
-                                    // Main layout - either resizable split view or single view
-                                    if (bothVisible)
-                                      // Both visible: use platform-appropriate layout
-                                      PlatformUtils.isMobile
-                                        ? _buildMobileVerticalSplit()
-                                        : ResizableSplitView(
-                                            leftChild: const TimelinePage(),
-                                            rightChild: const MapPage(),
-                                            splitRatio: navState.splitRatio,
-                                            minLeftWidth: 350.0,
-                                            minRightWidth: 350.0,
-                                          )
-                                    else
-                                      // Only one component visible: use simple layout
-                                      _buildSingleViewLayout(
-                                        navState,
-                                        constraints,
-                                        availableWidth,
-                                      ),
-                                    // Event details overlay
-                                    if (navState.showEventDetails)
-                                      _buildEventDetailsOverlay(
-                                        navState,
-                                        availableWidth,
-                                        constraints.maxHeight,
-                                      ),
-                                    // Floating Action Buttons - positioned based on platform
-                                    if (!navState.showEventDetails)
-                                      ..._buildFABs(navState),
-                                    // Add Event Overlay
-                                    if (_showAddEventOverlay)
-                                      AddEventOverlay(
-                                        onSubmitted: (eventData) {
-                                          setState(() {
-                                            _showAddEventOverlay = false;
-                                          });
-                                          if (eventData != null) {
-                                            context
-                                                .read<TimelineCubit>()
-                                                .addEvent(
-                                                  eventData['title'],
-                                                  eventData['description'],
-                                                  eventData['startTime'],
-                                                  eventData['endTime'],
-                                                  eventData['latitude'],
-                                                  eventData['longitude'],
-                                                );
-                                          }
-                                        },
-                                        onCancel: () {
-                                          setState(() {
-                                            _showAddEventOverlay = false;
-                                          });
-                                        },
-                                      ),
-                                    // Event Visibility Panel Overlay
-                                    if (visibilityState.panelOpen)
-                                      const Positioned.fill(
-                                        child: EventVisibilityPanel(),
-                                      ),
-                                  ],
+                    // Wrap everything with EventVisibility and Comparison features
+                    return BlocBuilder<
+                      EventVisibilityCubit,
+                      EventVisibilityState
+                    >(
+                      builder: (context, visibilityState) {
+                        return ComparisonPage(
+                          child: Stack(
+                            children: [
+                              // Main layout - either resizable split view or single view
+                              if (bothVisible)
+                                // Both visible: use platform-appropriate layout
+                                PlatformUtils.isMobile
+                                    ? _buildMobileVerticalSplit()
+                                    : ResizableSplitView(
+                                        leftChild: const TimelinePage(),
+                                        rightChild: const MapPage(),
+                                        splitRatio: navState.splitRatio,
+                                        minLeftWidth: 350.0,
+                                        minRightWidth: 350.0,
+                                      )
+                              else
+                                // Only one component visible: use simple layout
+                                _buildSingleViewLayout(
+                                  navState,
+                                  constraints,
+                                  availableWidth,
                                 ),
-                              );
-                            },
-                          );
-                        },
-                      ),
+                              // Event details overlay
+                              if (navState.showEventDetails)
+                                _buildEventDetailsOverlay(
+                                  navState,
+                                  availableWidth,
+                                  constraints.maxHeight,
+                                ),
+                              // Floating Action Buttons - positioned based on platform
+                              if (!navState.showEventDetails)
+                                ..._buildFABs(navState),
+                              // Add Event Overlay
+                              if (_showAddEventOverlay)
+                                AddEventOverlay(
+                                  onSubmitted: (eventData) {
+                                    setState(() {
+                                      _showAddEventOverlay = false;
+                                    });
+                                    if (eventData != null) {
+                                      context.read<TimelineCubit>().addEvent(
+                                        eventData['title'],
+                                        eventData['description'],
+                                        eventData['startTime'],
+                                        eventData['endTime'],
+                                        eventData['latitude'],
+                                        eventData['longitude'],
+                                      );
+                                    }
+                                  },
+                                  onCancel: () {
+                                    setState(() {
+                                      _showAddEventOverlay = false;
+                                    });
+                                  },
+                                ),
+                              // Event Visibility Panel Overlay
+                              if (visibilityState.panelOpen)
+                                const Positioned.fill(
+                                  child: EventVisibilityPanel(),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
                     );
-                  } else {
-                    // For other pages, use the nav_item system - wrap in Expanded for consistent layout
-                    final currentIndex = navState.currentPageIndex == 1
-                        ? navState.currentPageIndex - 1
-                        : navState.currentPageIndex;
+                  },
+                ),
+              );
+            } else {
+              // For other pages, use the nav_item system - wrap in Expanded for consistent layout
+              final currentIndex = navState.currentPageIndex == 1
+                  ? navState.currentPageIndex - 1
+                  : navState.currentPageIndex;
 
-                    return Expanded(
-                      child: BlocBuilder<NavItemsCubit, NavItemsState>(
-                        builder: (context, itemsState) {
-                          return itemsState.items[currentIndex].page;
-                        },
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
-          );
+              return Expanded(
+                child: BlocBuilder<NavItemsCubit, NavItemsState>(
+                  builder: (context, itemsState) {
+                    return itemsState.items[currentIndex].page;
+                  },
+                ),
+              );
+            }
+          },
+        ),
+      ],
+    );
   }
 
   /// Build vertical split layout for mobile (map top, timeline bottom) with resize handle
@@ -182,7 +174,7 @@ class _MyAppState extends State<MyApp> {
         // Timeline/Map pills centered at bottom (mobile design)
         Positioned(
           bottom: 16,
-          left: 0,
+          left: 104, // Match the right spacing to center pills perfectly
           right: 104, // Leave space for FABs on the right (2 FABs + padding)
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -190,7 +182,8 @@ class _MyAppState extends State<MyApp> {
               _TimelineMapPill(
                 label: 'Timeline',
                 isActive: navState.showTimeline,
-                onTap: () => context.read<NavigationBloc>().add(ToggleTimeline()),
+                onTap: () =>
+                    context.read<NavigationBloc>().add(ToggleTimeline()),
               ),
               const SizedBox(width: 12),
               _TimelineMapPill(
@@ -311,18 +304,21 @@ class _MyAppState extends State<MyApp> {
   ) {
     // Calculate event details width
     final double eventDetailsWidth;
-    
+
     if (PlatformUtils.isMobile) {
       // On mobile, use full width for event details
       eventDetailsWidth = availableWidth;
     } else {
       // On desktop, use split view with minimum/maximum constraints
       final minDetailsWidth = 400.0;
-      final maxDetailsWidth = availableWidth - 350.0; // Leave at least 350px for main content
-      
+      final maxDetailsWidth =
+          availableWidth - 350.0; // Leave at least 350px for main content
+
       // Ensure maxDetailsWidth is not less than minDetailsWidth
-      final safeMaxWidth = maxDetailsWidth < minDetailsWidth ? availableWidth : maxDetailsWidth;
-      
+      final safeMaxWidth = maxDetailsWidth < minDetailsWidth
+          ? availableWidth
+          : maxDetailsWidth;
+
       eventDetailsWidth = (availableWidth * navState.eventDetailsSplitRatio)
           .clamp(minDetailsWidth, safeMaxWidth);
     }
@@ -491,10 +487,12 @@ class _VerticalResizableSplitView extends StatefulWidget {
   });
 
   @override
-  State<_VerticalResizableSplitView> createState() => _VerticalResizableSplitViewState();
+  State<_VerticalResizableSplitView> createState() =>
+      _VerticalResizableSplitViewState();
 }
 
-class _VerticalResizableSplitViewState extends State<_VerticalResizableSplitView> {
+class _VerticalResizableSplitViewState
+    extends State<_VerticalResizableSplitView> {
   double? _initialRatio;
   double? _startY;
   double? _availableHeight;
@@ -507,7 +505,8 @@ class _VerticalResizableSplitViewState extends State<_VerticalResizableSplitView
         _availableHeight = availableHeight;
 
         // Calculate effective heights based on split ratio
-        final contentHeight = availableHeight - _VerticalResizableSplitView.dividerHeight;
+        final contentHeight =
+            availableHeight - _VerticalResizableSplitView.dividerHeight;
         final topHeight = contentHeight * widget.splitRatio;
         final bottomHeight = contentHeight * (1.0 - widget.splitRatio);
 
@@ -541,23 +540,31 @@ class _VerticalResizableSplitViewState extends State<_VerticalResizableSplitView
                 },
                 onDragUpdate: (details) {
                   if (_initialRatio != null && _availableHeight != null) {
-                    final deltaY = details.globalPosition.dy - (_startY ?? details.globalPosition.dy);
+                    final deltaY =
+                        details.globalPosition.dy -
+                        (_startY ?? details.globalPosition.dy);
                     if (_startY == null) {
                       _startY = details.globalPosition.dy;
                       return;
                     }
 
                     // Calculate new ratio based on drag delta
-                    final contentHeight = _availableHeight! - _VerticalResizableSplitView.dividerHeight;
+                    final contentHeight =
+                        _availableHeight! -
+                        _VerticalResizableSplitView.dividerHeight;
                     final deltaRatio = deltaY / contentHeight;
                     final newRatio = _initialRatio! + deltaRatio;
 
                     // Apply minimum height constraints
                     final minTopRatio = widget.minTopHeight / contentHeight;
-                    final minBottomRatio = widget.minBottomHeight / contentHeight;
+                    final minBottomRatio =
+                        widget.minBottomHeight / contentHeight;
                     final maxTopRatio = 1.0 - minBottomRatio;
 
-                    final constrainedRatio = newRatio.clamp(minTopRatio, maxTopRatio);
+                    final constrainedRatio = newRatio.clamp(
+                      minTopRatio,
+                      maxTopRatio,
+                    );
 
                     // Update the mobile split ratio via NavigationBloc
                     context.read<NavigationBloc>().add(
