@@ -6,18 +6,22 @@ import 'package:intl/intl.dart';
 import '../../timeline/timeline.dart';
 import '../widget/generic_search_widget.dart';
 
+/// Pure search widget that works on any platform
+/// Can be used in navbar (desktop) or as full-screen page (mobile)
 class EventSearchView extends StatelessWidget {
-  const EventSearchView({super.key});
+  final bool fullScreen;
+
+  const EventSearchView({super.key, this.fullScreen = false});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TimelineCubit, TimelineState>(
       builder: (context, timelineState) {
         if (timelineState.events.isEmpty) {
-          return const CircularProgressIndicator(); // or placeholder
+          return const Center(child: CircularProgressIndicator());
         }
 
-        return GenericSearchBar<Event>(
+        final searchWidget = GenericSearchBar<Event>(
           loadItems: () => timelineState.events,
           filter: (event, query) =>
               event.title.toLowerCase().contains(query.toLowerCase()),
@@ -32,12 +36,42 @@ class EventSearchView extends StatelessWidget {
           },
           itemTitle: (event) => event.title,
           onItemSelected: (event) {
+            // Navigate to timeline and select event
             context.read<NavigationBloc>().add(ShowTimeline());
             context.read<TimelineCubit>().scrollToEvent(event);
             context.read<TimelineCubit>().selectEvent(event);
+
+            // If full-screen, navigate back after selection
+            if (fullScreen) {
+              Navigator.of(context).pop();
+            }
           },
           leadingIcon: const Icon(Icons.search),
+          fullScreen: fullScreen,
         );
+
+        // If full-screen, wrap in Scaffold with app bar
+        if (fullScreen) {
+          return Scaffold(
+            backgroundColor: const Color.fromARGB(255, 30, 30, 30),
+            appBar: AppBar(
+              backgroundColor: const Color.fromARGB(255, 40, 40, 40),
+              foregroundColor: Colors.white,
+              title: const Text('Search Events'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: searchWidget,
+            ),
+          );
+        }
+
+        // Regular widget for navbar/component usage
+        return searchWidget;
       },
     );
   }
