@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/utc_timer/utc_timer.dart';
 import 'package:cross_platform_development/navigation/navigation.dart';
-import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/comparison/comparison.dart';
+import 'package:cross_platform_development/timeline/timeline.dart';
 import 'package:cross_platform_development/search/search.dart';
 
-/// Mobile navigation bar with direct full-screen search navigation
+/// Mobile navigation bar with direct showSearch() navigation
 class MobileNavigationBar extends StatelessWidget {
   const MobileNavigationBar({super.key});
 
@@ -66,11 +66,14 @@ class MobileNavigationBar extends StatelessWidget {
                     _NavIconButton(
                       icon: Icons.search,
                       onTap: () {
-                        // Navigate directly to full-screen EventSearchView
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const EventSearchView(fullScreen: true),
+                        // Use showSearch() for immediate full-screen search
+                        final timelineState = context
+                            .read<TimelineCubit>()
+                            .state;
+                        showSearch(
+                          context: context,
+                          delegate: EventSearchDelegate(
+                            events: timelineState.events,
                           ),
                         );
                       },
