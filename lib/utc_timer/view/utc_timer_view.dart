@@ -23,34 +23,52 @@ class UtcTimerView extends StatelessWidget {
           ),
           child: SizedBox(
             width: PlatformUtils.isMobile ? 70.0 : 120.0, // Increased mobile width to fix overflow
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Time on top
-                Text(
-                  formattedTime,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: PlatformUtils.isMobile ? 14 : 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                  ),
+            child: PlatformUtils.isMobile
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Time on top
+                    Text(
+                      formattedTime,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    // UTC label below
+                    Text(
+                      'UTC',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey.shade300,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Time and UTC on same line for desktop
+                    Text(
+                      '$formattedTime UTC',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
-                // UTC label below
-                Text(
-                  'UTC',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: PlatformUtils.isMobile ? 10 : 12,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.grey.shade300,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
           ),
         );
       },
