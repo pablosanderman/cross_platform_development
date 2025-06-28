@@ -8,6 +8,7 @@ import 'groups/groups.dart';
 import 'navigation/navigation.dart';
 import 'navigation/nav_item/nav_item.dart';
 import 'shared/shared.dart';
+import 'shared/discussion/cubit/discussion_cubit.dart';
 import 'app.dart';
 import 'map/map.dart';
 import 'comparison/comparison.dart';
@@ -17,16 +18,18 @@ void main() {
 
   // Create repositories and services
   final eventsRepository = const EventsRepository();
+  final discussionRepository = const DiscussionRepository();
   final recentlyViewedService = RecentlyViewedService();
 
   // Create NavigationBloc first
   final navigationBloc = NavigationBloc();
 
   // Create TimelineCubit first (without MapCubit dependency for now)
-  final timelineCubit = TimelineCubit();
+  final timelineCubit = TimelineCubit(eventsRepository: eventsRepository);
 
   // Create MapCubit with NavigationBloc and TimelineCubit
   final mapCubit = MapCubit(
+    eventsRepository: eventsRepository,
     navigationBloc: navigationBloc,
     timelineCubit: timelineCubit,
   );
@@ -40,6 +43,11 @@ void main() {
     recentlyViewedService: recentlyViewedService,
   );
 
+  // Create DiscussionCubit
+  final discussionCubit = DiscussionCubit(
+    discussionRepository: discussionRepository,
+  );
+
   runApp(
     MultiBlocProvider(
       providers: [
@@ -50,6 +58,7 @@ void main() {
         BlocProvider(create: (_) => GroupsBloc()),
         BlocProvider(create: (_) => EventVisibilityCubit()),
         BlocProvider.value(value: comparisonBloc),
+        BlocProvider.value(value: discussionCubit),
       ],
       child: const MyApp(),
     ),

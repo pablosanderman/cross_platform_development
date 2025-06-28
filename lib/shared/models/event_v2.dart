@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'discussion.dart';
+import 'event.dart';
 
 /// {@template event_location}
 /// Represents the location information for an event
@@ -91,12 +92,12 @@ class EventDateRange extends Equatable {
   List<Object?> get props => [start, end];
 }
 
-/// {@template event_v2}
-/// Updated event model supporting the new schema with discussions and attachments
+/// {@template event}
+/// Event model supporting discussions, attachments, and rich geological data
 /// {@endtemplate}
-class EventV2 extends Equatable {
-  /// {@macro event_v2}
-  const EventV2({
+class Event extends Equatable {
+  /// {@macro event}
+  const Event({
     required this.id,
     required this.title,
     required this.type,
@@ -115,7 +116,7 @@ class EventV2 extends Equatable {
   final String title;
 
   /// Type of event (point, period, grouped)
-  final String type;
+  final EventType type;
 
   /// Location information for the event
   final EventLocation location;
@@ -168,12 +169,57 @@ class EventV2 extends Equatable {
     }
   }
 
-  /// Creates an EventV2 from JSON
-  factory EventV2.fromJson(Map<String, dynamic> json) {
-    return EventV2(
+  // Backward compatibility properties for legacy Event model
+  
+  /// Legacy properties getter - maps to uniqueData
+  Map<String, dynamic>? get properties => uniqueData.isNotEmpty ? uniqueData : null;
+  
+  /// Legacy aggregateData getter - looks for aggregateData in uniqueData
+  Map<String, dynamic>? get aggregateData => uniqueData['aggregateData'] as Map<String, dynamic>?;
+  
+  /// Legacy members getter - looks for members in uniqueData
+  List<GroupMember>? get members {
+    final membersData = uniqueData['members'] as List<dynamic>?;
+    if (membersData == null) return null;
+    
+    return membersData.map((memberData) {
+      if (memberData is Map<String, dynamic>) {
+        return GroupMember.fromJson(memberData);
+      }
+      // If it's already a GroupMember, return as-is
+      return memberData as GroupMember;
+    }).toList();
+  }
+  
+  /// Legacy duration getter - calculated from date range
+  Duration? get duration => dateRange.hasDuration 
+      ? dateRange.end!.difference(dateRange.start) 
+      : null;
+  
+  /// Legacy displayDescription getter - maps to description
+  String get displayDescription => description;
+  
+  /// Legacy latitude getter - maps to location.lat
+  double? get latitude => location.lat;
+  
+  /// Legacy longitude getter - maps to location.lng
+  double? get longitude => location.lng;
+  
+  /// Legacy startTime getter - maps to dateRange.start
+  DateTime get startTime => dateRange.start;
+  
+  /// Legacy endTime getter - maps to dateRange.end
+  DateTime? get endTime => dateRange.end;
+
+  /// Creates an Event from JSON
+  factory Event.fromJson(Map<String, dynamic> json) {
+    return Event(
       id: json['id'] as String,
       title: json['title'] as String,
-      type: json['type'] as String,
+      type: EventType.values.firstWhere(
+        (e) => e.name.toLowerCase() == (json['type'] as String).toLowerCase(),
+        orElse: () => EventType.point, // Default fallback
+      ),
       location: EventLocation.fromJson(json['location'] as Map<String, dynamic>),
       description: json['description'] as String,
       dateRange: EventDateRange.fromJson(json['dateRange'] as Map<String, dynamic>),
@@ -187,12 +233,12 @@ class EventV2 extends Equatable {
     );
   }
 
-  /// Converts EventV2 to JSON
+  /// Converts Event to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
-      'type': type,
+      'type': type.name,
       'location': location.toJson(),
       'description': description,
       'dateRange': dateRange.toJson(),
@@ -202,11 +248,11 @@ class EventV2 extends Equatable {
     };
   }
 
-  /// Creates a copy of this EventV2 with the given fields replaced
-  EventV2 copyWith({
+  /// Creates a copy of this Event with the given fields replaced
+  Event copyWith({
     String? id,
     String? title,
-    String? type,
+    EventType? type,
     EventLocation? location,
     String? description,
     EventDateRange? dateRange,
@@ -214,7 +260,7 @@ class EventV2 extends Equatable {
     List<EventAttachment>? attachments,
     List<DiscussionMessage>? discussion,
   }) {
-    return EventV2(
+    return Event(
       id: id ?? this.id,
       title: title ?? this.title,
       type: type ?? this.type,

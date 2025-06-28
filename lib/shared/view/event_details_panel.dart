@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cross_platform_development/shared/models/models.dart';
 import 'package:cross_platform_development/shared/repositories/repositories.dart';
+import 'package:cross_platform_development/shared/discussion/cubit/discussion_cubit.dart';
 import 'package:cross_platform_development/navigation/navigation.dart';
 import 'package:cross_platform_development/comparison/comparison.dart';
 import 'package:cross_platform_development/map/map.dart';
@@ -20,11 +21,9 @@ class EventDetailsPanel extends StatefulWidget {
 
 class _EventDetailsPanelState extends State<EventDetailsPanel> {
   final UsersRepository _usersRepository = const UsersRepository();
-  final GroupsRepository _groupsRepository = const GroupsRepository();
 
-  EventV2? _event;
+  Event? _event;
   List<User> _users = [];
-  List<Group> _groups = [];
   bool _isLoading = true;
   String? _error;
 
@@ -67,11 +66,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
 
       // Load supporting data
       final users = await _usersRepository.loadUsers();
-      final groups = await _groupsRepository.loadGroups();
+      // Note: groups loaded by repository but not currently displayed in UI
 
       setState(() {
         _users = users;
-        _groups = groups;
       });
 
       // Load event data when navigation state changes
@@ -96,275 +94,51 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       return;
     }
 
-    try {
-      // Convert the old Event to EventV2 on the fly
-      final eventV2 = _convertEventToV2(selectedEvent);
+    // Load the event with merged discussions (JSON + SharedPreferences)
+    context.read<DiscussionCubit>().loadEventDiscussion(selectedEvent.id);
 
-      setState(() {
-        _event = eventV2;
-        _isLoading = false;
-        // Initialize reply visibility state
-        for (final message in eventV2.topLevelMessages) {
-          final replies = eventV2.getRepliesTo(message.id);
-          if (replies.isNotEmpty) {
-            _repliesVisible[message.id] = false; // Start collapsed
-          }
+    setState(() {
+      _event =
+          selectedEvent; // This will be updated by the BlocListener when discussion loads
+      _isLoading = false;
+      // Initialize reply visibility state
+      for (final message in selectedEvent.topLevelMessages) {
+        final replies = selectedEvent.getRepliesTo(message.id);
+        if (replies.isNotEmpty) {
+          _repliesVisible[message.id] = false; // Start collapsed
         }
-      });
-    } catch (e) {
-      setState(() {
-        _error = 'Failed to load event: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
-  EventV2 _convertEventToV2(Event oldEvent) {
-    // Convert old Event model to new EventV2 model
-    return EventV2(
-      id: oldEvent.id,
-      title: oldEvent.title,
-      type: oldEvent.type.name,
-      location: EventLocation(
-        name: _extractLocationName(oldEvent),
-        lat: oldEvent.latitude,
-        lng: oldEvent.longitude,
-      ),
-      description: oldEvent.displayDescription,
-      dateRange: EventDateRange(
-        start: oldEvent.effectiveStartTime,
-        end: oldEvent.effectiveEndTime,
-      ),
-      uniqueData: _extractUniqueData(oldEvent),
-      attachments: _generateSampleAttachments(oldEvent),
-      discussion: _generateSampleDiscussion(oldEvent),
-    );
-  }
-
-  String _extractLocationName(Event oldEvent) {
-    if (oldEvent.properties != null) {
-      final location = oldEvent.properties!['location']?.toString();
-      final region = oldEvent.properties!['region']?.toString();
-
-      if (location != null && region != null) {
-        return '$location, $region';
-      } else if (location != null) {
-        return location;
-      } else if (region != null) {
-        return region;
       }
-    }
-    return 'Unknown Location';
-  }
-
-  Map<String, dynamic> _extractUniqueData(Event oldEvent) {
-    final uniqueData = <String, dynamic>{};
-
-    // Add properties if they exist
-    if (oldEvent.properties != null) {
-      uniqueData.addAll(oldEvent.properties!);
-    }
-
-    // Add aggregate data if it exists
-    if (oldEvent.aggregateData != null) {
-      uniqueData['aggregateData'] = oldEvent.aggregateData!;
-    }
-
-    // Add members data for grouped events
-    if (oldEvent.members != null) {
-      uniqueData['members'] = oldEvent.members!
-          .map(
-            (m) => {
-              'id': m.id,
-              'timestamp': m.timestamp.toIso8601String(),
-              ...m.data,
-            },
-          )
-          .toList();
-    }
-
-    return uniqueData;
-  }
-
-  List<EventAttachment> _generateSampleAttachments(Event oldEvent) {
-    final attachments = <EventAttachment>[];
-
-    // Generate sample attachments based on event type and properties
-    switch (oldEvent.type) {
-      case EventType.point:
-        if (oldEvent.properties?.containsKey('magnitude') == true) {
-          attachments.add(
-            EventAttachment(
-              id: '${oldEvent.id}_seismic_data',
-              file: 'seismic_readings.png',
-              mime: 'image/png',
-              label: 'Seismic readings chart',
-            ),
-          );
-        }
-        if (oldEvent.properties?.containsKey('ashHeightKm') == true) {
-          attachments.add(
-            EventAttachment(
-              id: '${oldEvent.id}_ash_plume',
-              file: 'ash_plume_satellite.jpg',
-              mime: 'image/jpeg',
-              label: 'Satellite ash plume image',
-            ),
-          );
-        }
-        break;
-
-      case EventType.period:
-        attachments.add(
-          EventAttachment(
-            id: '${oldEvent.id}_timeline_chart',
-            file: 'activity_timeline.png',
-            mime: 'image/png',
-            label: 'Activity timeline',
-          ),
-        );
-        if (oldEvent.properties?.containsKey('so2FluxTonsPerDay') == true) {
-          attachments.add(
-            EventAttachment(
-              id: '${oldEvent.id}_gas_report',
-              file: 'gas_emission_report.pdf',
-              mime: 'application/pdf',
-              label: 'Gas emission analysis',
-            ),
-          );
-        }
-        break;
-
-      case EventType.grouped:
-        attachments.add(
-          EventAttachment(
-            id: '${oldEvent.id}_cluster_analysis',
-            file: 'cluster_analysis.pdf',
-            mime: 'application/pdf',
-            label: 'Cluster analysis report',
-          ),
-        );
-        break;
-    }
-
-    return attachments;
-  }
-
-  List<DiscussionMessage> _generateSampleDiscussion(Event oldEvent) {
-    final discussions = <DiscussionMessage>[];
-    final now = DateTime.now();
-
-    // Generate realistic discussion based on event type and properties
-    switch (oldEvent.type) {
-      case EventType.point:
-        if (oldEvent.properties?.containsKey('magnitude') == true) {
-          final magnitude = oldEvent.properties!['magnitude'];
-          discussions.add(
-            DiscussionMessage(
-              id: '${oldEvent.id}_msg_001',
-              author: 'u_dr_rossi',
-              timestamp: now.subtract(const Duration(hours: 4)),
-              body:
-                  'M $magnitude event detected. Depth and location suggest volcanic-tectonic origin. Recommend continued monitoring.',
-              replyTo: null,
-              attachments: [],
-            ),
-          );
-
-          discussions.add(
-            DiscussionMessage(
-              id: '${oldEvent.id}_msg_002',
-              author: 'u_dr_bianchi',
-              timestamp: now.subtract(const Duration(hours: 2)),
-              body:
-                  'Agreed. The waveform characteristics match previous pre-eruptive sequences.',
-              replyTo: '${oldEvent.id}_msg_001',
-              attachments: [],
-            ),
-          );
-        }
-        break;
-
-      case EventType.period:
-        discussions.add(
-          DiscussionMessage(
-            id: '${oldEvent.id}_msg_001',
-            author: 'u_prof_ferrari',
-            timestamp: now.subtract(const Duration(hours: 6)),
-            body:
-                'Extended period of activity observed. All monitoring parameters show sustained elevation.',
-            replyTo: null,
-            attachments: [],
-          ),
-        );
-
-        if (oldEvent.properties?.containsKey('so2FluxTonsPerDay') == true) {
-          discussions.add(
-            DiscussionMessage(
-              id: '${oldEvent.id}_msg_002',
-              author: 'u_dr_moretti',
-              timestamp: now.subtract(const Duration(hours: 3)),
-              body:
-                  'SO₂ flux measurements confirm significant degassing. Wind conditions are dispersing emissions safely offshore.',
-              replyTo: '${oldEvent.id}_msg_001',
-              attachments: ['${oldEvent.id}_gas_report'],
-            ),
-          );
-        }
-        break;
-
-      case EventType.grouped:
-        discussions.add(
-          DiscussionMessage(
-            id: '${oldEvent.id}_msg_001',
-            author: 'u_dr_moretti',
-            timestamp: now.subtract(const Duration(hours: 8)),
-            body:
-                'Swarm pattern analysis shows clustering consistent with magma intrusion. Depth distribution suggests common source.',
-            replyTo: null,
-            attachments: ['${oldEvent.id}_cluster_analysis'],
-          ),
-        );
-
-        discussions.add(
-          DiscussionMessage(
-            id: '${oldEvent.id}_msg_002',
-            author: 'u_dr_rossi',
-            timestamp: now.subtract(const Duration(hours: 5)),
-            body:
-                'Migration pattern indicates possible dyke propagation. Should we deploy additional temporary stations?',
-            replyTo: '${oldEvent.id}_msg_001',
-            attachments: [],
-          ),
-        );
-
-        discussions.add(
-          DiscussionMessage(
-            id: '${oldEvent.id}_msg_003',
-            author: 'u_prof_ferrari',
-            timestamp: now.subtract(const Duration(hours: 1)),
-            body:
-                'Yes, recommend deployment of 3 additional seismometers in the affected sector for better location accuracy.',
-            replyTo: '${oldEvent.id}_msg_002',
-            attachments: [],
-          ),
-        );
-        break;
-    }
-
-    return discussions;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<NavigationBloc, NavigationState>(
-      listener: (context, state) {
-        final currentEventId = state.selectedEventForDetails?.id;
-        if (currentEventId != _event?.id) {
-          _loadEventData();
+    return BlocListener<DiscussionCubit, DiscussionState>(
+      listener: (context, discussionState) {
+        // Update the event when discussion state changes
+        if (discussionState.isSuccess && discussionState.currentEvent != null) {
+          setState(() {
+            _event = discussionState.currentEvent;
+          });
+        } else if (discussionState.isFailure &&
+            discussionState.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(discussionState.errorMessage!),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       },
-      child: Container(color: Colors.white, child: _buildContent()),
+      child: BlocListener<NavigationBloc, NavigationState>(
+        listener: (context, state) {
+          final currentEventId = state.selectedEventForDetails?.id;
+          if (currentEventId != _event?.id) {
+            _loadEventData();
+          }
+        },
+        child: Container(color: Colors.white, child: _buildContent()),
+      ),
     );
   }
 
@@ -587,9 +361,9 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
 
   Widget _buildTypeChip() {
     final colors = {
-      'point': Colors.blue,
-      'period': Colors.green,
-      'grouped': Colors.purple,
+      EventType.point: Colors.blue,
+      EventType.period: Colors.green,
+      EventType.grouped: Colors.purple,
     };
 
     final color = colors[_event!.type] ?? Colors.grey;
@@ -602,7 +376,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
         border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Text(
-        _event!.type.toUpperCase(),
+        _event!.type.name.toUpperCase(),
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
@@ -748,17 +522,17 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     return BlocBuilder<NavigationBloc, NavigationState>(
       builder: (context, navState) {
         final currentSource = navState.detailsSource;
-        
+
         // Dynamic button text and icon based on where the event details were opened from
         final String buttonText;
         final IconData buttonIcon;
-        
+
         if (currentSource == EventDetailsSource.timeline) {
           // Opened from timeline → button should go to map
           buttonText = 'View on Map';
           buttonIcon = Icons.map;
         } else if (currentSource == EventDetailsSource.map) {
-          // Opened from map → button should go to timeline  
+          // Opened from map → button should go to timeline
           buttonText = 'View on Timeline';
           buttonIcon = Icons.timeline;
         } else {
@@ -766,7 +540,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
           buttonText = 'View on Map';
           buttonIcon = Icons.map;
         }
-        
+
         return Row(
           children: [
             ElevatedButton.icon(
@@ -804,7 +578,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1A73E8),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -817,7 +594,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                   final comparisonBloc = context.read<ComparisonBloc>();
                   final state = comparisonBloc.state;
 
-                  if (!state.isEventInComparison(selectedEvent.id) && !state.isAtMaxCapacity) {
+                  if (!state.isEventInComparison(selectedEvent.id) &&
+                      !state.isAtMaxCapacity) {
                     comparisonBloc.add(AddEventToComparison(selectedEvent));
                   }
                 }
@@ -827,7 +605,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF4A4D52),
                 side: const BorderSide(color: Color(0xFF4A4D52)),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -973,17 +754,23 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                 ),
                 child: IconButton(
                   onPressed: () {
-                    // TODO: Implement actual reply posting
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Reply posting feature coming soon!'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                    setState(() {
-                      _showReplyField[parentMessageId] = false;
-                      _replyControllers[parentMessageId]?.clear();
-                    });
+                    final replyText = _replyControllers[parentMessageId]?.text
+                        .trim();
+                    if (replyText != null &&
+                        replyText.isNotEmpty &&
+                        _event != null) {
+                      context.read<DiscussionCubit>().addReply(
+                        eventId: _event!.id,
+                        parentMessageId: parentMessageId,
+                        body: replyText,
+                        authorId:
+                            'current_user', // TODO: Get actual current user ID
+                      );
+                      setState(() {
+                        _showReplyField[parentMessageId] = false;
+                        _replyControllers[parentMessageId]?.clear();
+                      });
+                    }
                   },
                   icon: const Icon(Icons.send, color: Colors.white, size: 16),
                   tooltip: 'Post reply',
@@ -1083,6 +870,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
               onPressed: () {
                 setState(() {
                   _showReplyField[message.id] = true;
+                  // Automatically expand replies section so user can see the reply field
+                  _repliesVisible[message.id] = true;
                   // Initialize if needed
                   if (!_replyControllers.containsKey(message.id)) {
                     _replyControllers[message.id] = TextEditingController();
@@ -1204,6 +993,8 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                         final parentId = reply.replyTo ?? reply.id;
                         setState(() {
                           _showReplyField[parentId] = true;
+                          // Ensure the replies section is expanded so user can see the reply field
+                          _repliesVisible[parentId] = true;
                           // Initialize if needed
                           if (!_replyControllers.containsKey(parentId)) {
                             _replyControllers[parentId] =
@@ -1259,7 +1050,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
   }
 
   Widget _buildReplyBodyWithMentions(String body) {
-    final mentionRegex = RegExp(r'@([a-zA-Z0-9_]+(?:\s+[a-zA-Z0-9_]+)*)');
+    final mentionRegex = RegExp(r'@([a-zA-Z0-9_]+)');
     final matches = mentionRegex.allMatches(body);
 
     if (matches.isEmpty) {
@@ -1398,13 +1189,16 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                 ),
                 child: IconButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Post message feature coming soon!'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                    _mainComposerController.clear();
+                    final messageText = _mainComposerController.text.trim();
+                    if (messageText.isNotEmpty && _event != null) {
+                      context.read<DiscussionCubit>().addMessage(
+                        eventId: _event!.id,
+                        body: messageText,
+                        authorId:
+                            'current_user', // TODO: Get actual current user ID
+                      );
+                      _mainComposerController.clear();
+                    }
                   },
                   icon: const Icon(Icons.send, color: Colors.white, size: 18),
                   tooltip: 'Post message',
@@ -1420,10 +1214,6 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
         ],
       ),
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   String _formatCompactDateTime(DateTime dateTime) {

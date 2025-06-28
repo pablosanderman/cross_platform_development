@@ -6,7 +6,7 @@ enum EventType { point, period, grouped }
 DateTime? _parseNullableDate(dynamic value) =>
     value == null ? null : DateTime.parse(value as String);
 
-class Event extends Equatable {
+class LegacyEvent extends Equatable {
   final String id;
   final EventType type;
   final String title;
@@ -22,7 +22,7 @@ class Event extends Equatable {
   final double? latitude;
   final double? longitude;
 
-  const Event({
+  const LegacyEvent({
     required this.id,
     required this.type,
     required this.title,
@@ -39,13 +39,13 @@ class Event extends Equatable {
     this.longitude,
   });
 
-  factory Event.fromJson(Map<String, dynamic> json) {
+  factory LegacyEvent.fromJson(Map<String, dynamic> json) {
     final typeString = json['type'] as String;
     final type = EventType.values.firstWhere(
       (e) => e.name.toUpperCase() == typeString.toUpperCase(),
     );
 
-    return Event(
+    return LegacyEvent(
       id: json['id'],
       type: type,
       title: json['title'],

@@ -6,7 +6,6 @@ import 'package:cross_platform_development/shared/shared.dart';
 import '../../comparison/comparison.dart';
 import 'package:cross_platform_development/navigation/navigation.dart';
 
-
 /// {@template timeline_view}
 /// A [StatelessWidget] which reacts to the provided
 /// [TimelineCubit] state and notifies it in response to user input.
@@ -66,7 +65,7 @@ class _TimelineViewState extends State<TimelineView>
             listener: (context, state) {
               if (state.scrollToEvent != null) {
                 _scrollToEventAnimated(state.scrollToEvent!, state);
-            // Clear the scroll event after handling
+                // Clear the scroll event after handling
                 _timelineCubit!.clearScrollToEvent();
               }
             },
@@ -76,7 +75,7 @@ class _TimelineViewState extends State<TimelineView>
                   return const Center(child: CircularProgressIndicator());
                 }
 
-            // Calculate consistent dimensions based on time and content
+                // Calculate consistent dimensions based on time and content
                 final dimensions = _TimelineDimensions.calculate(
                   visibleStart: state.visibleStart,
                   visibleEnd: state.visibleEnd,
@@ -84,12 +83,12 @@ class _TimelineViewState extends State<TimelineView>
                 );
                 return Column(
                   children: [
-                        // Sticky ruler header
+                    // Sticky ruler header
                     _StickyRuler(
                       dimensions: dimensions,
                       transformationController: _transformationController,
                     ),
-                        // Timeline content with drag and drop functionality
+                    // Timeline content with drag and drop functionality
                     Expanded(
                       child: _DraggableTimelineContent(
                         rows: state.rows,
@@ -109,7 +108,10 @@ class _TimelineViewState extends State<TimelineView>
                         },
                         onDragAccepted: (draggedIndex, targetIndex) {
                           if (targetIndex >= 0 && targetIndex != draggedIndex) {
-                            _timelineCubit!.reorderRows(draggedIndex, targetIndex);
+                            _timelineCubit!.reorderRows(
+                              draggedIndex,
+                              targetIndex,
+                            );
                           }
                           setState(() {
                             _draggedRowIndex = null;
@@ -130,6 +132,7 @@ class _TimelineViewState extends State<TimelineView>
       ),
     );
   }
+
   /// Animate the timeline to show a specific event
   void _scrollToEventAnimated(Event event, TimelineState state) {
     // Calculate dimensions to get pixel positions
@@ -181,11 +184,11 @@ class _TimelineViewState extends State<TimelineView>
     // Create animation that interpolates between current and target matrix
     final animation = Matrix4Tween(begin: currentMatrix, end: targetMatrix)
         .animate(
-      CurvedAnimation(
-        parent: _scrollAnimationController!,
-        curve: Curves.easeInOut,
-      ),
-    );
+          CurvedAnimation(
+            parent: _scrollAnimationController!,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     // Listen to animation updates
     animation.addListener(() {
@@ -196,8 +199,6 @@ class _TimelineViewState extends State<TimelineView>
     _scrollAnimationController!.forward();
   }
 }
-
-
 
 /// Responsive dimensions calculator for timeline
 class _TimelineDimensions {
@@ -289,16 +290,28 @@ class _TimelineDimensions {
     const periodEventFontWeight = FontWeight.w500;
     const groupEventFontWeight = FontWeight.w500;
 
-    // Timeline height based on actual row heights with extra padding for zoom-out
-    final baseTimelineHeight = rows.fold<double>(
+    // Calculate timeline height with minimum row guarantee
+    const minDesiredRows = 20;
+    const standardRowHeight = 75.0; // Default row height
+    final minDesiredHeight = minDesiredRows * standardRowHeight; // 750px
+
+    // Calculate actual content height
+    final actualContentHeight = rows.fold<double>(
       0.0,
       (sum, row) => sum + row.height,
     );
 
-    // Add significant padding to allow for more zoom-out flexibility
-    // This ensures users can always zoom out beyond the content bounds
-    final timelineHeight =
-        baseTimelineHeight * 2.0; // Double the height for zoom-out room
+    // Add padding to reach minimum 10 rows worth of space
+    final paddingNeeded = (minDesiredHeight - actualContentHeight).clamp(
+      0.0,
+      double.infinity,
+    );
+    final baseTimelineHeight = actualContentHeight + paddingNeeded;
+
+    // Add extra padding for zoom-out flexibility
+    final timelineHeight = baseTimelineHeight + 300.0; // Extra zoom-out room
+
+    // Debug: Print timeline dimensions and scale info
 
     return _TimelineDimensions._(
       visibleStart: visibleStart,
@@ -317,7 +330,7 @@ class _TimelineDimensions {
       eventPadding: eventPadding,
       eventBorderRadius: eventBorderRadius,
       eventOpacity: 0.9,
-      minScale: 0.1, // Allow more zoom-out
+      minScale: 0.1,
       maxScale: 4.0,
       defaultEventDuration: const Duration(hours: 2),
       memberCircleSize: memberCircleSize,
@@ -354,6 +367,8 @@ class _StickyRuler extends StatelessWidget {
             final matrix = transformationController.value;
             final translation = matrix.getTranslation();
             final scale = matrix.getMaxScaleOnAxis();
+
+            // Debug: Print current scale/zoom level
 
             return SizedBox(
               height: dimensions.rulerHeight,
@@ -427,6 +442,8 @@ class _AnimatedTimelineContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Debug: Print zoom limits
+
     return InteractiveViewer(
       transformationController: transformationController,
       minScale: dimensions.minScale,
