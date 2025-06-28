@@ -1387,5 +1387,918 @@
         ]
       }
     ]
+  },
+  {
+    "id": "ev_2025_06_23_etna_new_crater_001",
+    "title": "Mount Etna new crater formation - Southwest flank",
+    "type": "point",
+    "location": {
+      "name": "Mount Etna SW flank, Sicily, Italy",
+      "lat": 37.7320,
+      "lng": 14.9810
+    },
+    "description": "New crater formation on Southwest flank at 2400m elevation with initial explosive activity and gas emissions. Minor lava spattering observed.",
+    "dateRange": {
+      "start": "2025-06-23T14:20:00Z"
+    },
+    "uniqueData": {
+      "craterType": "new_formation",
+      "elevation": 2400,
+      "explosiveActivity": "minor",
+      "gasEmissions": "moderate",
+      "alertLevel": "yellow",
+      "accessRestriction": "3km_radius"
+    },
+    "attachments": [
+      {
+        "id": "att_etna_new_crater_20250623",
+        "file": "etna_sw_crater_formation.jpg",
+        "mime": "image/jpeg",
+        "label": "New crater formation aerial view"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_etna_new_001",
+        "author": "ingv_catania",
+        "ts": "2025-06-23T16:30:00+02:00",
+        "body": "🆕 Nuova bocca eruttiva formata sul fianco SW dell'Etna a 2400m. Attività esplosiva minore con emissioni gassose moderate. Accesso limitato nel raggio di 3km.",
+        "replyTo": null,
+        "attachments": [
+          "att_etna_new_crater_20250623"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_23_stromboli_lava_overflow_001",
+    "title": "Stromboli lava overflow - Sciara del Fuoco",
+    "type": "period",
+    "location": {
+      "name": "Stromboli, Sciara del Fuoco, Italy",
+      "lat": 38.7860,
+      "lng": 15.2110
+    },
+    "description": "Lava overflow from summit crater flowing down Sciara del Fuoco depression. Effusive activity with lava reaching 400m from crater.",
+    "dateRange": {
+      "start": "2025-06-23T21:45:00Z",
+      "end": "2025-06-24T08:30:00Z"
+    },
+    "uniqueData": {
+      "overflowVolume": 85000,
+      "lavaFlowLength": 400,
+      "effusionRate": 3.2,
+      "alertLevel": "orange",
+      "marineEntry": false,
+      "evacuationZone": "coastal_areas"
+    },
+    "attachments": [
+      {
+        "id": "att_stromboli_overflow_20250623",
+        "file": "stromboli_lava_overflow_thermal.mp4",
+        "mime": "video/mp4",
+        "label": "Lava overflow thermal footage"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_stromboli_overflow_001",
+        "author": "stromboli_guide_assoc",
+        "ts": "2025-06-23T23:15:00+02:00",
+        "body": "🌋 Trabocco lavico in corso lungo la Sciara del Fuoco. Colata raggiunge 400m dal cratere. Escursioni serali sospese per sicurezza.",
+        "replyTo": null,
+        "attachments": [
+          "att_stromboli_overflow_20250623"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_24_vulcano_fumarole_increase_001",
+    "title": "Vulcano fumarole temperature increase - La Fossa",
+    "type": "period",
+    "location": {
+      "name": "Vulcano La Fossa crater, Aeolian Islands, Italy",
+      "lat": 38.4050,
+      "lng": 14.9620
+    },
+    "description": "Significant temperature increase in La Fossa crater fumaroles from 480°C to 620°C. Enhanced sulfur dioxide emissions affecting Porto area.",
+    "dateRange": {
+      "start": "2025-06-24T09:00:00Z",
+      "end": "2025-06-24T20:30:00Z"
+    },
+    "uniqueData": {
+      "initialTemperature": 480,
+      "peakTemperature": 620,
+      "so2Concentration": 450,
+      "alertLevel": "yellow",
+      "affectedAreas": [
+        "Porto di Levante",
+        "Piano"
+      ],
+      "healthAdvisory": "respiratory_precaution"
+    },
+    "attachments": [
+      {
+        "id": "att_vulcano_fumarole_20250624",
+        "file": "vulcano_fumarole_thermal_analysis.png",
+        "mime": "image/png",
+        "label": "Fumarole temperature analysis"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_vulcano_fumarole_001",
+        "author": "ingv_palermo",
+        "ts": "2025-06-24T11:45:00+02:00",
+        "body": "📈 Incremento significativo temperatura fumarole La Fossa: da 480°C a 620°C. SO2 elevato a Porto. Raccomandazioni per persone con problemi respiratori.",
+        "replyTo": null,
+        "attachments": [
+          "att_vulcano_fumarole_20250624"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_24_campi_flegrei_earthquake_001",
+    "title": "Campi Flegrei earthquake swarm - Pozzuoli area",
+    "type": "grouped",
+    "location": {
+      "name": "Pozzuoli, Campi Flegrei, Italy",
+      "lat": 40.8200,
+      "lng": 14.1200
+    },
+    "description": "Earthquake swarm in Pozzuoli area with 34 events in 6 hours. Largest magnitude 3.1 felt by local population. Related to ongoing bradyseism.",
+    "dateRange": {
+      "start": "2025-06-24T16:00:00Z",
+      "end": "2025-06-24T22:00:00Z"
+    },
+    "uniqueData": {
+      "swarmType": "bradyseismic",
+      "eventCount": 34,
+      "maxMagnitude": 3.1,
+      "averageDepth": 2.8,
+      "alertLevel": "yellow",
+      "feltReports": 127,
+      "structuralDamage": "minor",
+      "members": [
+        {
+          "id": "cf_2025_001",
+          "timestamp": "2025-06-24T16:15:00Z",
+          "magnitude": 2.4,
+          "depth": 2.5
+        },
+        {
+          "id": "cf_2025_002",
+          "timestamp": "2025-06-24T18:30:00Z",
+          "magnitude": 3.1,
+          "depth": 2.1
+        },
+        {
+          "id": "cf_2025_003",
+          "timestamp": "2025-06-24T20:45:00Z",
+          "magnitude": 2.8,
+          "depth": 3.2
+        }
+      ]
+    },
+    "attachments": [
+      {
+        "id": "att_campi_earthquake_20250624",
+        "file": "pozzuoli_earthquake_swarm_map.png",
+        "mime": "image/png",
+        "label": "Earthquake swarm epicenter map"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_campi_earthquake_001",
+        "author": "osservatorio_vesuviano",
+        "ts": "2025-06-24T19:00:00+02:00",
+        "body": "🔴 Sciame sismico in corso area Pozzuoli. 34 eventi in 6 ore, max M3.1 avvertito dalla popolazione. Correlato al bradisismo in atto. Monitoraggio intensificato.",
+        "replyTo": null,
+        "attachments": [
+          "att_campi_earthquake_20250624"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_25_vesuvius_gas_anomaly_001",
+    "title": "Mount Vesuvius gas emission anomaly",
+    "type": "point",
+    "location": {
+      "name": "Mount Vesuvius crater, Naples, Italy",
+      "lat": 40.8213,
+      "lng": 14.4289
+    },
+    "description": "Unusual increase in volcanic gas emissions from Vesuvius crater. CO2 flux increased by 400% above baseline levels.",
+    "dateRange": {
+      "start": "2025-06-25T07:30:00Z"
+    },
+    "uniqueData": {
+      "co2FluxIncrease": 400,
+      "h2sDetection": true,
+      "soilTemperature": 38,
+      "alertLevel": "yellow",
+      "monitoringIntensification": true,
+      "publicHealthRisk": "low"
+    },
+    "attachments": [
+      {
+        "id": "att_vesuvius_gas_20250625",
+        "file": "vesuvius_gas_emission_spectrometry.pdf",
+        "mime": "application/pdf",
+        "label": "Gas emission spectrometry analysis"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_vesuvius_gas_001",
+        "author": "unina_vulcanologia",
+        "ts": "2025-06-25T09:45:00+02:00",
+        "body": "⚠️ Anomalia emissioni gassose Vesuvio. Flusso CO2 aumentato del 400%. Rilevato H2S. Intensificato monitoraggio geochimico. Rischio sanitario basso.",
+        "replyTo": null,
+        "attachments": [
+          "att_vesuvius_gas_20250625"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_25_colli_albani_swarm_001",
+    "title": "Colli Albani seismic swarm - Frascati area",
+    "type": "grouped",
+    "location": {
+      "name": "Frascati, Colli Albani, Italy",
+      "lat": 41.8080,
+      "lng": 12.6790
+    },
+    "description": "Seismic swarm affecting Frascati and Castelli Romani area. 18 events recorded with magnitudes ranging from 1.8 to 2.9.",
+    "dateRange": {
+      "start": "2025-06-25T13:15:00Z",
+      "end": "2025-06-25T21:30:00Z"
+    },
+    "uniqueData": {
+      "swarmType": "volcanic_tectonic",
+      "eventCount": 18,
+      "maxMagnitude": 2.9,
+      "averageDepth": 8.5,
+      "alertLevel": "green",
+      "feltReports": 45,
+      "historicalContext": "normal_activity",
+      "members": [
+        {
+          "id": "ca_2025_001",
+          "timestamp": "2025-06-25T14:20:00Z",
+          "magnitude": 2.3,
+          "depth": 7.8
+        },
+        {
+          "id": "ca_2025_002",
+          "timestamp": "2025-06-25T17:45:00Z",
+          "magnitude": 2.9,
+          "depth": 9.2
+        }
+      ]
+    },
+    "attachments": [
+      {
+        "id": "att_colli_swarm_20250625",
+        "file": "colli_albani_seismic_analysis.png",
+        "mime": "image/png",
+        "label": "Seismic swarm analysis"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_colli_swarm_001",
+        "author": "ingv_roma",
+        "ts": "2025-06-25T16:30:00+02:00",
+        "body": "Sciame sismico Colli Albani area Frascati. 18 eventi registrati M1.8-2.9. Profondità media 8.5km. Attività nella norma per il distretto vulcanico.",
+        "replyTo": null,
+        "attachments": [
+          "att_colli_swarm_20250625"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_25_ischia_hydrothermal_001",
+    "title": "Ischia hydrothermal system perturbation",
+    "type": "period",
+    "location": {
+      "name": "Ischia Island, Naples, Italy",
+      "lat": 40.7320,
+      "lng": 13.9050
+    },
+    "description": "Perturbation in Ischia's hydrothermal system with temperature increases in thermal springs and new gas emissions in Forio area.",
+    "dateRange": {
+      "start": "2025-06-25T11:00:00Z",
+      "end": "2025-06-26T02:00:00Z"
+    },
+    "uniqueData": {
+      "springTemperatureIncrease": 15,
+      "newGasVents": 3,
+      "co2Concentration": 8500,
+      "alertLevel": "yellow",
+      "affectedSprings": [
+        "Nitrodi",
+        "Olmitello",
+        "Citara"
+      ],
+      "evacuationPrecaution": false
+    },
+    "attachments": [
+      {
+        "id": "att_ischia_hydrothermal_20250625",
+        "file": "ischia_thermal_monitoring.jpg",
+        "mime": "image/jpeg",
+        "label": "Thermal spring monitoring"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_ischia_hydro_001",
+        "author": "osservatorio_vesuviano",
+        "ts": "2025-06-25T13:45:00+02:00",
+        "body": "🌡️ Perturbazione sistema idrotermale Ischia. Aumento 15°C sorgenti termali, nuove emissioni gassose area Forio. Monitoraggio potenziato.",
+        "replyTo": null,
+        "attachments": [
+          "att_ischia_hydrothermal_20250625"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_26_pantelleria_seismic_001",
+    "title": "Pantelleria volcanic seismic activity",
+    "type": "point",
+    "location": {
+      "name": "Pantelleria Island, Sicily, Italy",
+      "lat": 36.7700,
+      "lng": 12.0170
+    },
+    "description": "Volcanic earthquake magnitude 3.4 recorded beneath Pantelleria Island. First significant seismic event in 18 months.",
+    "dateRange": {
+      "start": "2025-06-26T04:42:00Z"
+    },
+    "uniqueData": {
+      "magnitude": 3.4,
+      "depth": 12.5,
+      "volcanicOrigin": true,
+      "alertLevel": "green",
+      "feltIntensity": "III",
+      "lastSignificantEvent": "2023-12-15",
+      "structuralDamage": "none"
+    },
+    "attachments": [
+      {
+        "id": "att_pantelleria_seismic_20250626",
+        "file": "pantelleria_earthquake_waveform.png",
+        "mime": "image/png",
+        "label": "Earthquake waveform analysis"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_pantelleria_seismic_001",
+        "author": "ingv_palermo",
+        "ts": "2025-06-26T06:15:00+02:00",
+        "body": "Terremoto vulcanico M3.4 Pantelleria alle 06:42 locali. Primo evento significativo in 18 mesi. Profondità 12.5km, intensità III. Nessun danno.",
+        "replyTo": null,
+        "attachments": [
+          "att_pantelleria_seismic_20250626"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_26_lipari_thermal_001",
+    "title": "Lipari thermal anomaly - Monte Pilato",
+    "type": "point",
+    "location": {
+      "name": "Monte Pilato, Lipari, Aeolian Islands, Italy",
+      "lat": 38.4890,
+      "lng": 14.9530
+    },
+    "description": "Thermal anomaly detected on Monte Pilato via satellite imagery. Ground temperature increase of 12°C in obsidian flow area.",
+    "dateRange": {
+      "start": "2025-06-26T10:15:00Z"
+    },
+    "uniqueData": {
+      "thermalAnomalySize": 450,
+      "temperatureIncrease": 12,
+      "location": "obsidian_flow",
+      "alertLevel": "green",
+      "gasEmissions": "none_detected",
+      "fieldVerification": "scheduled"
+    },
+    "attachments": [
+      {
+        "id": "att_lipari_thermal_20250626",
+        "file": "lipari_thermal_satellite.jpg",
+        "mime": "image/jpeg",
+        "label": "Satellite thermal anomaly"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_lipari_thermal_001",
+        "author": "unict_remote_sensing",
+        "ts": "2025-06-26T12:30:00+02:00",
+        "body": "Anomalia termica rilevata Monte Pilato via satellite. Aumento 12°C area colata obsidiana. Sopralluogo programmato per verifica campo.",
+        "replyTo": null,
+        "attachments": [
+          "att_lipari_thermal_20250626"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_23_tyrrhenian_submarine_001",
+    "title": "Tyrrhenian Sea submarine volcanic activity",
+    "type": "period",
+    "location": {
+      "name": "Marsili Seamount, Tyrrhenian Sea, Italy",
+      "lat": 39.2500,
+      "lng": 14.4000
+    },
+    "description": "Submarine volcanic activity detected at Marsili seamount. Increased seismic activity and water column anomalies recorded by oceanographic instruments.",
+    "dateRange": {
+      "start": "2025-06-23T18:30:00Z",
+      "end": "2025-06-24T14:00:00Z"
+    },
+    "uniqueData": {
+      "depthToSeafloor": 450,
+      "seismicEvents": 12,
+      "waterColumnAnomalies": true,
+      "alertLevel": "yellow",
+      "shippingAdvisory": "navigation_caution",
+      "tsunamiThreat": "minimal"
+    },
+    "attachments": [
+      {
+        "id": "att_marsili_submarine_20250623",
+        "file": "marsili_bathymetric_analysis.png",
+        "mime": "image/png",
+        "label": "Bathymetric change analysis"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_marsili_submarine_001",
+        "author": "cnr_ismar",
+        "ts": "2025-06-23T20:45:00+02:00",
+        "body": "🌊 Attività vulcanica sottomarina rilevata seamount Marsili. 12 eventi sismici + anomalie colonna d'acqua. Emesso avviso navigazione.",
+        "replyTo": null,
+        "attachments": [
+          "att_marsili_submarine_20250623"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_24_etna_lava_tube_001",
+    "title": "Mount Etna lava tube formation - Northeast flank",
+    "type": "period",
+    "location": {
+      "name": "Mount Etna NE flank, Sicily, Italy",
+      "lat": 37.7650,
+      "lng": 15.0080
+    },
+    "description": "New lava tube system formation on Northeast flank allowing efficient lava transport. Tube extends 2.1km from source vent.",
+    "dateRange": {
+      "start": "2025-06-24T22:00:00Z",
+      "end": "2025-06-25T18:30:00Z"
+    },
+    "uniqueData": {
+      "tubeLength": 2100,
+      "efficiencyIncrease": 85,
+      "lavaTransportRate": 18.5,
+      "alertLevel": "orange",
+      "touristImpact": "trail_closure",
+      "breakoutPoints": 3
+    },
+    "attachments": [
+      {
+        "id": "att_etna_tube_20250624",
+        "file": "etna_tube_thermal_mapping.mp4",
+        "mime": "video/mp4",
+        "label": "Lava tube thermal mapping"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_etna_tube_001",
+        "author": "ct_alpine_guides",
+        "ts": "2025-06-25T08:00:00+02:00",
+        "body": "📍 Formazione nuovo sistema tunnel lavico fianco NE. Tubo lungo 2.1km con 3 punti breakout. Sentieri escursionistici temporaneamente chiusi.",
+        "replyTo": null,
+        "attachments": [
+          "att_etna_tube_20250624"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_25_stromboli_landslide_001",
+    "title": "Stromboli minor landslide - Sciara del Fuoco",
+    "type": "point",
+    "location": {
+      "name": "Stromboli Sciara del Fuoco, Italy",
+      "lat": 38.7840,
+      "lng": 15.2090
+    },
+    "description": "Minor landslide on Sciara del Fuoco slope removing approximately 15,000 m³ of volcanic debris. Event triggered by recent lava accumulation.",
+    "dateRange": {
+      "start": "2025-06-25T16:25:00Z"
+    },
+    "uniqueData": {
+      "landslideVolume": 15000,
+      "triggerMechanism": "lava_accumulation",
+      "slopeAngle": 35,
+      "alertLevel": "yellow",
+      "marineImpact": "minor_waves",
+      "evacuationRequired": false
+    },
+    "attachments": [
+      {
+        "id": "att_stromboli_landslide_20250625",
+        "file": "sciara_landslide_aerial.jpg",
+        "mime": "image/jpeg",
+        "label": "Landslide aerial survey"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_stromboli_landslide_001",
+        "author": "dpc_sicilia",
+        "ts": "2025-06-25T17:45:00+02:00",
+        "body": "Frana minore Sciara del Fuoco, volume ~15.000 m³. Causata da accumulo lavico recente. Onde minori generate, nessuna evacuazione necessaria.",
+        "replyTo": null,
+        "attachments": [
+          "att_stromboli_landslide_20250625"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_26_vulcano_mud_pool_001",
+    "title": "Vulcano mud pool temperature surge",
+    "type": "point",
+    "location": {
+      "name": "Vulcano Fanghi thermali, Aeolian Islands, Italy",
+      "lat": 38.4110,
+      "lng": 14.9580
+    },
+    "description": "Significant temperature increase in therapeutic mud pools from 42°C to 68°C. Tourist access temporarily suspended for safety.",
+    "dateRange": {
+      "start": "2025-06-26T11:30:00Z"
+    },
+    "uniqueData": {
+      "initialTemperature": 42,
+      "peakTemperature": 68,
+      "temperatureRise": 26,
+      "alertLevel": "yellow",
+      "touristSuspension": true,
+      "healthRisk": "moderate"
+    },
+    "attachments": [
+      {
+        "id": "att_vulcano_mud_20250626",
+        "file": "vulcano_mud_pool_thermal.png",
+        "mime": "image/png",
+        "label": "Mud pool thermal measurements"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_vulcano_mud_001",
+        "author": "comune_lipari",
+        "ts": "2025-06-26T13:15:00+02:00",
+        "body": "⚠️ Aumento temperatura fanghi termali da 42°C a 68°C. Accesso turistico sospeso per sicurezza. Monitoraggio continuo in corso.",
+        "replyTo": null,
+        "attachments": [
+          "att_vulcano_mud_20250626"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_23_campi_flegrei_deformation_001",
+    "title": "Campi Flegrei rapid ground deformation",
+    "type": "period",
+    "location": {
+      "name": "Campi Flegrei caldera center, Italy",
+      "lat": 40.8300,
+      "lng": 14.1350
+    },
+    "description": "Rapid ground deformation detected with 15mm uplift recorded in 24 hours. Highest deformation rate since monitoring network establishment.",
+    "dateRange": {
+      "start": "2025-06-23T00:00:00Z",
+      "end": "2025-06-24T00:00:00Z"
+    },
+    "uniqueData": {
+      "upliftAmount": 15,
+      "deformationRate": "15mm_per_day",
+      "maxStrain": 125,
+      "alertLevel": "orange",
+      "recordBreaking": true,
+      "infrastructureImpact": "minor_cracks"
+    },
+    "attachments": [
+      {
+        "id": "att_campi_deformation_20250623",
+        "file": "campi_gps_deformation_24h.pdf",
+        "mime": "application/pdf",
+        "label": "24h GPS deformation data"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_campi_deformation_001",
+        "author": "ingv_osservatorio",
+        "ts": "2025-06-23T08:30:00+02:00",
+        "body": "🚨 Deformazione rapida caldera Campi Flegrei: 15mm in 24h! Massimo tasso mai registrato. Alerta ARANCIONE. Crepe minori infrastrutture.",
+        "replyTo": null,
+        "attachments": [
+          "att_campi_deformation_20250623"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_24_vesuvius_micro_earthquakes_001",
+    "title": "Mount Vesuvius micro-earthquake sequence",
+    "type": "grouped",
+    "location": {
+      "name": "Mount Vesuvius, Naples, Italy",
+      "lat": 40.8200,
+      "lng": 14.4280
+    },
+    "description": "Sequence of micro-earthquakes beneath Vesuvius with magnitudes 0.8-1.4. Unusual cluster pattern suggests fluid movement at depth.",
+    "dateRange": {
+      "start": "2025-06-24T12:30:00Z",
+      "end": "2025-06-24T19:45:00Z"
+    },
+    "uniqueData": {
+      "eventCount": 28,
+      "magnitudeRange": "0.8-1.4",
+      "averageDepth": 4.2,
+      "alertLevel": "green",
+      "pattern": "fluid_movement",
+      "monitoringIncrease": true,
+      "members": [
+        {
+          "id": "ves_2025_001",
+          "timestamp": "2025-06-24T13:15:00Z",
+          "magnitude": 1.2,
+          "depth": 3.8
+        },
+        {
+          "id": "ves_2025_002",
+          "timestamp": "2025-06-24T16:20:00Z",
+          "magnitude": 1.4,
+          "depth": 4.5
+        }
+      ]
+    },
+    "attachments": [
+      {
+        "id": "att_vesuvius_micro_20250624",
+        "file": "vesuvius_microseismic_pattern.png",
+        "mime": "image/png",
+        "label": "Micro-earthquake pattern analysis"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_vesuvius_micro_001",
+        "author": "unina_geofisica",
+        "ts": "2025-06-24T15:45:00+02:00",
+        "body": "Sequenza microsismica Vesuvio: 28 eventi M0.8-1.4 in 7 ore. Pattern suggerisce movimento fluidi profondi. Monitoraggio potenziato.",
+        "replyTo": null,
+        "attachments": [
+          "att_vesuvius_micro_20250624"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_25_etna_ash_emission_001",
+    "title": "Mount Etna ash emission - Central Crater",
+    "type": "period",
+    "location": {
+      "name": "Mount Etna Central Crater, Sicily, Italy",
+      "lat": 37.7510,
+      "lng": 14.9940
+    },
+    "description": "Intermittent ash emissions from Central Crater reaching 3.5km altitude. Ash dispersion toward southeast affecting Zafferana area.",
+    "dateRange": {
+      "start": "2025-06-25T08:45:00Z",
+      "end": "2025-06-25T16:20:00Z"
+    },
+    "uniqueData": {
+      "emissionHeight": 3500,
+      "windDirection": "southeast",
+      "ashfallAreas": [
+        "Zafferana",
+        "Fleri",
+        "Santa Venerina"
+      ],
+      "alertLevel": "yellow",
+      "aviationCode": "YELLOW",
+      "schoolClosure": false
+    },
+    "attachments": [
+      {
+        "id": "att_etna_ash_20250625",
+        "file": "etna_ash_dispersion_model.png",
+        "mime": "image/png",
+        "label": "Ash dispersion forecast model"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_etna_ash_001",
+        "author": "aeroporto_catania",
+        "ts": "2025-06-25T10:30:00+02:00",
+        "body": "✈️ Emissioni cenere Etna quota 3.5km, direzione SE. Codice aviazione GIALLO. Voli regolari ma monitoraggio intensificato.",
+        "replyTo": null,
+        "attachments": [
+          "att_etna_ash_20250625"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_26_stromboli_gas_puff_001",
+    "title": "Stromboli enhanced gas puffing activity",
+    "type": "period",
+    "location": {
+      "name": "Stromboli summit craters, Italy",
+      "lat": 38.7890,
+      "lng": 15.2130
+    },
+    "description": "Enhanced gas puffing activity from all three summit craters. Increased frequency and intensity of gas emissions without explosive activity.",
+    "dateRange": {
+      "start": "2025-06-26T05:00:00Z",
+      "end": "2025-06-26T23:59:59Z"
+    },
+    "uniqueData": {
+      "puffingFrequency": "every_30_seconds",
+      "activeCraters": 3,
+      "gasComposition": "H2O_CO2_SO2",
+      "alertLevel": "green",
+      "explosiveActivity": false,
+      "touristImpact": "none"
+    },
+    "attachments": [
+      {
+        "id": "att_stromboli_puff_20250626",
+        "file": "stromboli_gas_puffing_timelapse.mp4",
+        "mime": "video/mp4",
+        "label": "Gas puffing timelapse"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_stromboli_puff_001",
+        "author": "guide_stromboli",
+        "ts": "2025-06-26T12:00:00+02:00",
+        "body": "Attività degassamento intensificata tutti e 3 i crateri sommitali. Puff ogni 30 secondi senza attività esplosiva. Spettacolo naturale normale.",
+        "replyTo": null,
+        "attachments": [
+          "att_stromboli_puff_20250626"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_26_vulcano_beach_heating_001",
+    "title": "Vulcano beach sand heating - Levante Bay",
+    "type": "point",
+    "location": {
+      "name": "Levante Bay beach, Vulcano, Italy",
+      "lat": 38.4080,
+      "lng": 14.9610
+    },
+    "description": "Anomalous heating of beach sand in Levante Bay area. Sand temperatures reaching 55°C creating natural foot spa conditions.",
+    "dateRange": {
+      "start": "2025-06-26T15:00:00Z"
+    },
+    "uniqueData": {
+      "sandTemperature": 55,
+      "heatedAreaSize": 200,
+      "geothermalOrigin": true,
+      "alertLevel": "green",
+      "touristAttraction": true,
+      "safetyPrecautions": "foot_protection"
+    },
+    "attachments": [
+      {
+        "id": "att_vulcano_beach_20250626",
+        "file": "vulcano_beach_thermal_map.jpg",
+        "mime": "image/jpeg",
+        "label": "Beach thermal mapping"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_vulcano_beach_001",
+        "author": "pro_loco_vulcano",
+        "ts": "2025-06-26T17:30:00+02:00",
+        "body": "🏖️ Riscaldamento sabbia spiaggia Levante: 55°C su 200m². Origine geotermica naturale. Attrazione turistica unica! Protezione piedi consigliata.",
+        "replyTo": null,
+        "attachments": [
+          "att_vulcano_beach_20250626"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_26_etna_summit_glow_001",
+    "title": "Mount Etna summit crater glow intensification",
+    "type": "point",
+    "location": {
+      "name": "Mount Etna summit area, Sicily, Italy",
+      "lat": 37.7510,
+      "lng": 14.9934
+    },
+    "description": "Significant intensification of crater glow visible from Catania. Increased magma level in summit conduit system without surface eruption.",
+    "dateRange": {
+      "start": "2025-06-26T20:30:00Z"
+    },
+    "uniqueData": {
+      "glowIntensity": "high",
+      "magmaLevel": "elevated",
+      "visibilityRange": "45km",
+      "alertLevel": "yellow",
+      "eruptionProbability": "30%_next_48h",
+      "touristInterest": "high"
+    },
+    "attachments": [
+      {
+        "id": "att_etna_glow_20250626",
+        "file": "etna_summit_glow_night.jpg",
+        "mime": "image/jpeg",
+        "label": "Summit glow night photography"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_etna_glow_001",
+        "author": "fotografo_etna",
+        "ts": "2025-06-26T22:00:00+02:00",
+        "body": "🔥 Bagliore cratere sommitale intensificato! Visibile da Catania. Livello magmatico elevato. 30% probabilità eruzione prossime 48h. Spettacolo magnifico!",
+        "replyTo": null,
+        "attachments": [
+          "att_etna_glow_20250626"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ev_2025_06_24_salina_thermal_springs_001",
+    "title": "Salina thermal springs temperature anomaly",
+    "type": "point",
+    "location": {
+      "name": "Salina Island thermal springs, Aeolian Islands, Italy",
+      "lat": 38.5640,
+      "lng": 14.8420
+    },
+    "description": "Unusual temperature increase in coastal thermal springs on Salina Island. Springs temperature rose from 28°C to 42°C in submarine vents near Rinella.",
+    "dateRange": {
+      "start": "2025-06-24T18:45:00Z"
+    },
+    "uniqueData": {
+      "initialTemperature": 28,
+      "peakTemperature": 42,
+      "springLocation": "submarine_coastal",
+      "alertLevel": "green",
+      "touristSafety": "no_restrictions",
+      "gasEmissions": "minimal_h2s"
+    },
+    "attachments": [
+      {
+        "id": "att_salina_springs_20250624",
+        "file": "salina_thermal_springs_monitoring.jpg",
+        "mime": "image/jpeg",
+        "label": "Thermal spring temperature monitoring"
+      }
+    ],
+    "discussion": [
+      {
+        "id": "msg_salina_springs_001",
+        "author": "unime_geologia",
+        "ts": "2025-06-24T20:30:00+02:00",
+        "body": "Incremento temperatura sorgenti termali Salina area Rinella: da 28°C a 42°C. Fenomeno localizzato, nessuna restrizione turistica. Emissioni H2S minime.",
+        "replyTo": null,
+        "attachments": [
+          "att_salina_springs_20250624"
+        ]
+      }
+    ]
   }
 ]
