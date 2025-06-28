@@ -32,8 +32,10 @@ class _MobileNavigationBarState extends State<MobileNavigationBar> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Stack(
             children: [
-              Row(
-                children: [
+              Align(
+                alignment: Alignment.center,
+                child: Row(
+                  children: [
                   // Left: UTC Clock only
                   BlocProvider(
                     create: (_) => UtcTimeCubit(),
@@ -91,6 +93,7 @@ class _MobileNavigationBarState extends State<MobileNavigationBar> {
                     ),
                   ),
                 ],
+                ),
               ),
 
               // Search overlay
