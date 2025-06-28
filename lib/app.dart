@@ -141,15 +141,17 @@ class _MyAppState extends State<MyApp> {
                       ),
                     );
                   } else {
-                    // For other pages, use the nav_item system - no Expanded wrapper
+                    // For other pages, use the nav_item system - wrap in Expanded for consistent layout
                     final currentIndex = navState.currentPageIndex == 1
                         ? navState.currentPageIndex - 1
                         : navState.currentPageIndex;
 
-                    return BlocBuilder<NavItemsCubit, NavItemsState>(
-                      builder: (context, itemsState) {
-                        return itemsState.items[currentIndex].page;
-                      },
+                    return Expanded(
+                      child: BlocBuilder<NavItemsCubit, NavItemsState>(
+                        builder: (context, itemsState) {
+                          return itemsState.items[currentIndex].page;
+                        },
+                      ),
                     );
                   }
                 },

@@ -31,7 +31,7 @@ class RemoveMember extends GroupsEvent {
 }
 
 class ChooseGroup extends GroupsEvent {
-  final Group chosenGroup;
+  final Group? chosenGroup;
   ChooseGroup(this.chosenGroup) : super();
 }
 
@@ -42,5 +42,6 @@ class ChangeGroupMemberRole extends GroupsEvent {
 
   ChangeGroupMemberRole({required this.group, required this.userId, required this.newRole});
 }
+
 
 

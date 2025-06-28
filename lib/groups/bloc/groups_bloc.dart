@@ -110,7 +110,11 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
   }
 
   void _setChosenGroup(ChooseGroup event, Emitter<GroupsState> emit) {
-    emit(state.copyWith(chosenGroup: event.chosenGroup));
+    if (event.chosenGroup == null) {
+      emit(state.copyWith(clearChosenGroup: true));
+    } else {
+      emit(state.copyWith(chosenGroup: event.chosenGroup));
+    }
   }
 
   Future<void> _handleCreateGroup(
@@ -215,4 +219,5 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
       groupIds: newGroupIds,
     );
   }
+
 }

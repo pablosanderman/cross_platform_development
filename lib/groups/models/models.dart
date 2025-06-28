@@ -160,6 +160,7 @@ class Group {
     }
   }
 
+
   // Add single group to Groups.json
   static Future<void> addGroupToFile(Group group) async {
     try {
@@ -307,6 +308,7 @@ class User {
       throw Exception('Failed to load users: $e');
     }
   }
+
 
   // Add single person to Users.json
   static Future<void> addUserToFile(User person) async {

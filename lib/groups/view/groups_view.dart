@@ -23,27 +23,15 @@ class GroupsView extends StatefulWidget {
 class _GroupsViewState extends State<GroupsView> {
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: PlatformUtils.isMobile
-        ? Column(
-            children: [
-              // On mobile: stack vertically
-              Expanded(flex: 1, child: LeftSide()),
-              Container(
-                height: 1,
-                color: Colors.grey.withValues(alpha: 0.3),
-              ),
-              Expanded(flex: 1, child: RightSide()),
-            ],
-          )
-        : Row(
-            children: [
-              // On desktop: side by side
-              Expanded(flex: 1, child: LeftSide()),
-              Expanded(flex: 3, child: RightSide()),
-            ],
-          ),
-    );
+    return PlatformUtils.isMobile
+      ? const SafeArea(child: MobileGroupsNavigation())
+      : Row(
+          children: [
+            // On desktop: side by side
+            Expanded(flex: 1, child: LeftSide()),
+            Expanded(flex: 3, child: RightSide()),
+          ],
+        );
   }
 
   @override
@@ -64,6 +52,58 @@ class _GroupsViewState extends State<GroupsView> {
   }
 }
 
+class MobileGroupsNavigation extends StatelessWidget {
+  const MobileGroupsNavigation({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<GroupsBloc, GroupsState>(
+      builder: (context, state) {
+        // Debug: print('Mobile navigation - chosen group: ${state.chosenGroup?.name ?? 'none'}');
+        // Show RightSide (members list) when a group is selected
+        if (state.chosenGroup != null) {
+          return const MobileRightSideWrapper();
+        }
+        // Show LeftSide (groups list) by default
+        return LeftSide();
+      },
+    );
+  }
+}
+
+class MobileRightSideWrapper extends StatelessWidget {
+  const MobileRightSideWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<GroupsBloc, GroupsState>(
+      builder: (context, state) {
+        return Stack(
+          children: [
+            // Use existing RightSide component
+            RightSide(),
+            // Add back button overlay for mobile
+            Positioned(
+              top: 16,
+              left: 16,
+              child: FloatingActionButton(
+                mini: true,
+                backgroundColor: Colors.black54,
+                onPressed: () {
+                  // Navigate back to groups list by clearing selected group
+                  // Debug: print('Back button pressed - clearing selected group');
+                  context.read<GroupsBloc>().add(ChooseGroup(null));
+                },
+                child: const Icon(Icons.arrow_back, color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class LeftSide extends StatelessWidget {
   LeftSide({super.key});
 
@@ -71,28 +111,65 @@ class LeftSide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.expand(
-      child: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            height: MediaQuery.of(context).size.height,
-            color: backgroundStartColor,
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: backgroundStartColor,
             child: BlocBuilder<GroupsBloc, GroupsState>(
               builder: (context, groupState) {
+                // Debug information  
+                // print('Groups loaded: ${groupState.groups.length}');
+                // print('Users loaded: ${groupState.users.length}');
+                // print('Logged in user: ${FakeAccount.loggedInUser?.firstName}');
+                
+                final userGroups = groupState.groups
+                    .where(
+                      (group) =>
+                          FakeAccount.loggedInUser != null &&
+                          group.groupMemberIds.keys.contains(
+                            FakeAccount.loggedInUser?.id,
+                          ),
+                    )
+                    .toList();
+                
+                // print('Filtered user groups: ${userGroups.length}');
+                
+                if (userGroups.isEmpty && FakeAccount.loggedInUser != null) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'No groups found for ${FakeAccount.loggedInUser!.firstName}.\nTap + to create a group.',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                  );
+                } else if (userGroups.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Loading groups...',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                
                 return ListView(
                   padding: PlatformUtils.isMobile 
                     ? const EdgeInsets.all(8.0)
                     : EdgeInsets.zero,
-                  children: groupState.groups
-                      .where(
-                        (group) =>
-                            FakeAccount.loggedInUser != null &&
-                            group.groupMemberIds.keys.contains(
-                              FakeAccount.loggedInUser?.id,
-                            ),
-                      )
-                      .map((group) {
+                  children: [
+                    ...userGroups.map((group) {
                         return Container(
                           margin: PlatformUtils.isMobile 
                             ? const EdgeInsets.symmetric(vertical: 4.0)
@@ -172,8 +249,8 @@ class LeftSide extends StatelessWidget {
                             ],
                           ),
                         );
-                      })
-                      .toList(),
+                      }),
+                  ],
                 );
               },
             ),
@@ -199,7 +276,6 @@ class LeftSide extends StatelessWidget {
             ),
           ),
         ],
-      ),
     );
   }
 
@@ -257,8 +333,7 @@ class RightSide extends StatelessWidget {
   );
   @override
   Widget build(BuildContext context) {
-    return SizedBox.expand(
-      child: BlocBuilder<GroupsBloc, GroupsState>(
+    return BlocBuilder<GroupsBloc, GroupsState>(
         builder: (context, groupState) {
           if (groupState.chosenGroup == null) return Container();
           final groupMemberIds =
@@ -266,6 +341,8 @@ class RightSide extends StatelessWidget {
           return Stack(
             children: [
               Container(
+                width: double.infinity,
+                height: double.infinity,
                 color: backgroundStartColor,
                 child: ListView(
                   padding: PlatformUtils.isMobile 
@@ -358,8 +435,7 @@ class RightSide extends StatelessWidget {
             ],
           );
         },
-      ),
-    );
+      );
   }
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
