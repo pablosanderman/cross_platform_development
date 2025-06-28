@@ -10,6 +10,7 @@ import 'navigation/navigation.dart';
 import 'comparison/comparison.dart';
 import 'widgets/add_event/add_event_fab.dart';
 import 'widgets/add_event/add_event_overlay.dart';
+import 'shared/utils/platform_utils.dart';
 
 const borderColor = Color(0xFF805306);
 
@@ -28,14 +29,26 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: WindowBorder(
-          color: borderColor,
-          width: 1,
-          child: Column(
-            children: [
-              const NavigationView(),
-              BlocBuilder<NavigationBloc, NavigationState>(
-                builder: (context, navState) {
+        body: PlatformUtils.isDesktop 
+          ? WindowBorder(
+              color: borderColor,
+              width: 1,
+              child: _buildBody(),
+            )
+          : SafeArea(
+              child: _buildBody(),
+            ),
+      ),
+      routes: {'/comparison': (context) => const ComparisonResultsPage()},
+    );
+  }
+
+  Widget _buildBody() {
+    return Column(
+      children: [
+        const NavigationView(),
+        BlocBuilder<NavigationBloc, NavigationState>(
+          builder: (context, navState) {
                   // If we're on page 0, show the timeline/map split-screen with all overlays
                   if (navState.currentPageIndex == 0) {
                     return Expanded(
@@ -61,14 +74,16 @@ class _MyAppState extends State<MyApp> {
                                   children: [
                                     // Main layout - either resizable split view or single view
                                     if (bothVisible)
-                                      // Both visible: use resizable split view
-                                      ResizableSplitView(
-                                        leftChild: const TimelinePage(),
-                                        rightChild: const MapPage(),
-                                        splitRatio: navState.splitRatio,
-                                        minLeftWidth: 350.0,
-                                        minRightWidth: 350.0,
-                                      )
+                                      // Both visible: use platform-appropriate layout
+                                      PlatformUtils.isMobile
+                                        ? _buildMobileVerticalSplit()
+                                        : ResizableSplitView(
+                                            leftChild: const TimelinePage(),
+                                            rightChild: const MapPage(),
+                                            splitRatio: navState.splitRatio,
+                                            minLeftWidth: 350.0,
+                                            minRightWidth: 350.0,
+                                          )
                                     else
                                       // Only one component visible: use simple layout
                                       _buildSingleViewLayout(
@@ -83,26 +98,9 @@ class _MyAppState extends State<MyApp> {
                                         availableWidth,
                                         constraints.maxHeight,
                                       ),
-                                    // Floating Action Buttons - hidden when event details are open
+                                    // Floating Action Buttons - positioned based on platform
                                     if (!navState.showEventDetails)
-                                      Positioned(
-                                        bottom: 16,
-                                        right: 16,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const EventVisibilityFab(),
-                                            const SizedBox(height: 8),
-                                            AddEventFab(
-                                              onPressed: () {
-                                                setState(() {
-                                                  _showAddEventOverlay = true;
-                                                });
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                      ..._buildFABs(navState),
                                     // Add Event Overlay
                                     if (_showAddEventOverlay)
                                       AddEventOverlay(
@@ -157,11 +155,101 @@ class _MyAppState extends State<MyApp> {
                 },
               ),
             ],
+          );
+  }
+
+  /// Build vertical split layout for mobile (map top, timeline bottom)
+  Widget _buildMobileVerticalSplit() {
+    return Column(
+      children: [
+        // Map on top (40% of available height)
+        const Expanded(
+          flex: 4,
+          child: MapPage(),
+        ),
+        // Divider
+        Container(
+          height: 2,
+          color: Colors.grey.withValues(alpha: 0.3),
+        ),
+        // Timeline on bottom (60% of available height)
+        const Expanded(
+          flex: 6,
+          child: TimelinePage(),
+        ),
+      ],
+    );
+  }
+
+  /// Build FABs positioned for mobile vs desktop
+  List<Widget> _buildFABs(NavigationState navState) {
+    if (PlatformUtils.isMobile) {
+      return [
+        // Timeline/Map pills centered at bottom (mobile design)
+        Positioned(
+          bottom: 16,
+          left: 0,
+          right: 104, // Leave space for FABs on the right (2 FABs + padding)
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _TimelineMapPill(
+                label: 'Timeline',
+                isActive: navState.showTimeline,
+                onTap: () => context.read<NavigationBloc>().add(ToggleTimeline()),
+              ),
+              const SizedBox(width: 12),
+              _TimelineMapPill(
+                label: 'Map',
+                isActive: navState.showMap,
+                onTap: () => context.read<NavigationBloc>().add(ToggleMap()),
+              ),
+            ],
           ),
         ),
-      ),
-      routes: {'/comparison': (context) => const ComparisonResultsPage()},
-    );
+        // Eye/Add buttons in absolute bottom right corner
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const EventVisibilityFab(),
+              const SizedBox(height: 8),
+              AddEventFab(
+                onPressed: () {
+                  setState(() {
+                    _showAddEventOverlay = true;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ];
+    } else {
+      // Desktop: Keep original positioning
+      return [
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const EventVisibilityFab(),
+              const SizedBox(height: 8),
+              AddEventFab(
+                onPressed: () {
+                  setState(() {
+                    _showAddEventOverlay = true;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ];
+    }
   }
 
   /// Build single view layout when only timeline or map is visible
@@ -368,6 +456,52 @@ class _EventDetailsResizeDividerState
                     : Colors.grey.withValues(alpha: 0.3),
                 width: 1,
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Timeline/Map pill widget for mobile design
+class _TimelineMapPill extends StatelessWidget {
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _TimelineMapPill({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isActive ? Colors.blue : Colors.grey.shade300,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Colors.white : Colors.grey.shade700,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
             ),
           ),
         ),

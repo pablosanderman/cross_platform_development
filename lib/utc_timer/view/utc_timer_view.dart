@@ -2,6 +2,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:cross_platform_development/utc_timer/cubit/utc_timer_cubit.dart';
+import 'package:cross_platform_development/shared/utils/platform_utils.dart';
 
 class UtcTimerView extends StatelessWidget {
   const UtcTimerView({super.key});
@@ -11,29 +12,44 @@ class UtcTimerView extends StatelessWidget {
     // Use BlocBuilder to listen for DateTime updates from UtcTimeCubit.
     return BlocBuilder<UtcTimeCubit, DateTime>(
       builder: (context, currentTimeUtc) {
-        // Format the UTC time for a compact display in the navigation bar.
-        // We'll show only hours, minutes, and seconds to save space.
-        final String formattedTime = DateFormat(
-          'HH:mm:ss'
-          ' UTC',
-        ).format(currentTimeUtc);
+        // Format the time only (without UTC label)
+        final String formattedTime = DateFormat('HH:mm:ss').format(currentTimeUtc);
 
         return Container(
           // Add some padding around the time to give it breathing room.
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-
+          padding: EdgeInsets.symmetric(
+            horizontal: PlatformUtils.isMobile ? 6.0 : 10.0, 
+            vertical: 4.0,
+          ),
           child: SizedBox(
-            width: 120.0, // Fixed width to prevent layout shifts
-            child: Text(
-              formattedTime,
-              textAlign:
-                  TextAlign.center, // Center the text within the fixed width
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                letterSpacing: 0.8,
-              ),
+            width: PlatformUtils.isMobile ? 70.0 : 120.0, // Increased mobile width to fix overflow
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Time on top
+                Text(
+                  formattedTime,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: PlatformUtils.isMobile ? 14 : 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                // UTC label below
+                Text(
+                  'UTC',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: PlatformUtils.isMobile ? 10 : 12,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey.shade300,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
           ),
         );

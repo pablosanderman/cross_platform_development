@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../handle_fake_account.dart';
+import '../../shared/utils/platform_utils.dart';
 import '../bloc/groups_bloc.dart';
 import '../bloc/groups_event.dart';
 import '../bloc/groups_state.dart';
@@ -23,12 +24,25 @@ class _GroupsViewState extends State<GroupsView> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Row(
-        children: [
-          Expanded(flex: 1, child: LeftSide()),
-          Expanded(flex: 3, child: RightSide()),
-        ],
-      ),
+      child: PlatformUtils.isMobile
+        ? Column(
+            children: [
+              // On mobile: stack vertically
+              Expanded(flex: 1, child: LeftSide()),
+              Container(
+                height: 1,
+                color: Colors.grey.withValues(alpha: 0.3),
+              ),
+              Expanded(flex: 1, child: RightSide()),
+            ],
+          )
+        : Row(
+            children: [
+              // On desktop: side by side
+              Expanded(flex: 1, child: LeftSide()),
+              Expanded(flex: 3, child: RightSide()),
+            ],
+          ),
     );
   }
 
@@ -67,6 +81,9 @@ class LeftSide extends StatelessWidget {
             child: BlocBuilder<GroupsBloc, GroupsState>(
               builder: (context, groupState) {
                 return ListView(
+                  padding: PlatformUtils.isMobile 
+                    ? const EdgeInsets.all(8.0)
+                    : EdgeInsets.zero,
                   children: groupState.groups
                       .where(
                         (group) =>
@@ -76,22 +93,62 @@ class LeftSide extends StatelessWidget {
                             ),
                       )
                       .map((group) {
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: ListTile(
-                                title: Text(group.name),
-                                onTap: () {
-                                  context.read<GroupsBloc>().add(
-                                    ChooseGroup(group),
-                                  );
-                                },
+                        return Container(
+                          margin: PlatformUtils.isMobile 
+                            ? const EdgeInsets.symmetric(vertical: 4.0)
+                            : EdgeInsets.zero,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: ListTile(
+                                  title: Text(
+                                    group.name,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                  onTap: () {
+                                    context.read<GroupsBloc>().add(
+                                      ChooseGroup(group),
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                            Column(
-                              children: [
+                              if (!PlatformUtils.isMobile) ...[
+                                Column(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.logout),
+                                      onPressed: () {
+                                        if (FakeAccount.loggedInUser != null) {
+                                          context.read<GroupsBloc>().add(
+                                            RemoveMember(
+                                              group.id,
+                                              FakeAccount.loggedInUser!,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                    const Text("Leave"),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () {
+                                        context.read<GroupsBloc>().add(
+                                          DeleteGroup(group.id),
+                                        );
+                                      },
+                                    ),
+                                    const Text("Delete"),
+                                  ],
+                                ),
+                              ] else ...[
+                                // Mobile: Just icons without text
                                 IconButton(
-                                  icon: const Icon(Icons.logout),
+                                  icon: const Icon(Icons.logout, size: 20),
                                   onPressed: () {
                                     if (FakeAccount.loggedInUser != null) {
                                       context.read<GroupsBloc>().add(
@@ -103,23 +160,17 @@ class LeftSide extends StatelessWidget {
                                     }
                                   },
                                 ),
-                                const Text("Leave"),
-                              ],
-                            ),
-                            Column(
-                              children: [
                                 IconButton(
-                                  icon: const Icon(Icons.delete),
+                                  icon: const Icon(Icons.delete, size: 20),
                                   onPressed: () {
                                     context.read<GroupsBloc>().add(
                                       DeleteGroup(group.id),
                                     );
                                   },
                                 ),
-                                const Text("Delete"),
                               ],
-                            ),
-                          ],
+                            ],
+                          ),
                         );
                       })
                       .toList(),
@@ -129,12 +180,22 @@ class LeftSide extends StatelessWidget {
           ),
           Align(
             alignment: Alignment.bottomRight,
-            child: FloatingActionButton.extended(
-              label: Text("Create Group"),
-              icon: Icon(Icons.add),
-              onPressed: () {
-                _displayTextInputDialog(context);
-              },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: PlatformUtils.isMobile
+                ? FloatingActionButton(
+                    onPressed: () {
+                      _displayTextInputDialog(context);
+                    },
+                    child: const Icon(Icons.add),
+                  )
+                : FloatingActionButton.extended(
+                    label: const Text("Create Group"),
+                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      _displayTextInputDialog(context);
+                    },
+                  ),
             ),
           ),
         ],
@@ -207,39 +268,58 @@ class RightSide extends StatelessWidget {
               Container(
                 color: backgroundStartColor,
                 child: ListView(
+                  padding: PlatformUtils.isMobile 
+                    ? const EdgeInsets.all(8.0)
+                    : EdgeInsets.zero,
                   children:
                       Group.getGroupMembers(
                         groupMemberIds,
                         groupState.users,
                       ).map((user) {
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: ListTile(
-                                title: Text(
-                                  "Name: ${user.firstName} ${user.lastName}",
+                        return Container(
+                          margin: PlatformUtils.isMobile 
+                            ? const EdgeInsets.symmetric(vertical: 4.0)
+                            : EdgeInsets.zero,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: PlatformUtils.isMobile ? 2 : 1,
+                                child: ListTile(
+                                  title: Text(
+                                    "Name: ${user.firstName} ${user.lastName}",
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                      fontSize: PlatformUtils.isMobile ? 12 : 14,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                            DropdownMenu<GroupRoles>(
-                              initialSelection: groupState
-                                  .chosenGroup
-                                  ?.groupMemberIds[user.id],
-                              dropdownMenuEntries: menuEntries,
-                              onSelected: (value) {
-                                if (value != null) {
-                                  context.read<GroupsBloc>().add(
-                                    ChangeGroupMemberRole(
-                                      group: groupState.chosenGroup!,
-                                      userId: user.id,
-                                      newRole: value,
-                                    ),
-                                  );
-                                }
-                              },
+                            Flexible(
+                              child: DropdownMenu<GroupRoles>(
+                                width: PlatformUtils.isMobile ? 100 : null,
+                                initialSelection: groupState
+                                    .chosenGroup
+                                    ?.groupMemberIds[user.id],
+                                dropdownMenuEntries: menuEntries,
+                                onSelected: (value) {
+                                  if (value != null) {
+                                    context.read<GroupsBloc>().add(
+                                      ChangeGroupMemberRole(
+                                        group: groupState.chosenGroup!,
+                                        userId: user.id,
+                                        newRole: value,
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
                             ),
                             IconButton(
-                              icon: Icon(Icons.person_remove),
+                              icon: Icon(
+                                Icons.person_remove,
+                                size: PlatformUtils.isMobile ? 20 : 24,
+                              ),
                               onPressed: () => {
                                 context.read<GroupsBloc>().add(
                                   RemoveMember(
@@ -250,18 +330,29 @@ class RightSide extends StatelessWidget {
                               },
                             ),
                           ],
-                        );
+                        ),
+                      );
                       }).toList(),
                 ),
               ),
               Align(
                 alignment: Alignment.bottomRight,
-                child: FloatingActionButton.extended(
-                  label: Text("Add User"),
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    _displayTextInputDialog(context);
-                  },
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: PlatformUtils.isMobile
+                    ? FloatingActionButton(
+                        onPressed: () {
+                          _displayTextInputDialog(context);
+                        },
+                        child: const Icon(Icons.person_add),
+                      )
+                    : FloatingActionButton.extended(
+                        label: const Text("Add User"),
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          _displayTextInputDialog(context);
+                        },
+                      ),
                 ),
               ),
             ],

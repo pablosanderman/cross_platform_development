@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../utc_timer/utc_timer.dart';
 import '../nav_item/nav_item.dart';
+import '../../shared/utils/platform_utils.dart';
+import 'mobile_navigation_bar.dart';
 import 'dart:io';
 
 class NavigationView extends StatelessWidget {
@@ -13,6 +15,12 @@ class NavigationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Return mobile navigation on mobile platforms
+    if (PlatformUtils.isMobile) {
+      return const MobileNavigationBar();
+    }
+    
+    // Return desktop navigation on desktop platforms (unchanged)
     return Container(
       color: Color.fromARGB(100, 120, 70, 1),
       child: WindowTitleBarBox(
