@@ -24,7 +24,7 @@ class _TimelineViewState extends State<TimelineView>
   int? _draggedRowIndex;
   int? _dragTargetIndex;
   AnimationController? _scrollAnimationController;
-  double _actualTimelineWidth = 0.0;
+  final double _actualTimelineWidth = 0.0;
   TimelineCubit? _timelineCubit;
 
   @override

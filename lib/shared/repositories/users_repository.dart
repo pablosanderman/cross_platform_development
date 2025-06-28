@@ -33,6 +33,6 @@ class UsersRepository {
   /// Load users for a specific group
   Future<List<User>> loadUsersForGroup(String groupId) async {
     final users = await loadUsers();
-    return users.where((user) => user.groups.contains(groupId)).toList();
+    return users.where((user) => user.groupIds.contains(groupId)).toList();
   }
 }

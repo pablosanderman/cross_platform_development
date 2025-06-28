@@ -1,22 +1,40 @@
 [
   {
     "id": "g_volcanologists",
-    "label": "Volcanologists",
-    "color": "#E4572E"
+    "name": "Volcanologists",
+    "ownerId": "u_andrew",
+    "groupMemberIds": {
+      "u_andrew": "owner",
+      "u_dr_rossi": "member",
+      "u_dr_bianchi": "member",
+      "u_prof_ferrari": "administrator"
+    }
   },
   {
-    "id": "g_seismologists", 
-    "label": "Seismologists",
-    "color": "#2E86AB"
+    "id": "g_seismologists",
+    "name": "Seismologists", 
+    "ownerId": "u_dr_bianchi",
+    "groupMemberIds": {
+      "u_dr_bianchi": "owner",
+      "u_dr_moretti": "member"
+    }
   },
   {
     "id": "g_field_researchers",
-    "label": "Field Researchers", 
-    "color": "#A23B72"
+    "name": "Field Researchers",
+    "ownerId": "u_dr_rossi", 
+    "groupMemberIds": {
+      "u_dr_rossi": "owner",
+      "u_dr_moretti": "member"
+    }
   },
   {
     "id": "g_administrators",
-    "label": "Administrators",
-    "color": "#F18F01"
+    "name": "Administrators",
+    "ownerId": "u_andrew",
+    "groupMemberIds": {
+      "u_andrew": "owner",
+      "u_prof_ferrari": "administrator"
+    }
   }
 ]

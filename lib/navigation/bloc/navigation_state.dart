@@ -16,6 +16,8 @@ class NavigationState {
   splitRatio; // 0.0 = full map, 1.0 = full timeline, 0.5 = equal split
   final double
   eventDetailsSplitRatio; // For event details overlay: 0.0 = minimal details, 1.0 = maximal details, 0.5 = equal split
+  final double?
+  mobileSplitRatio; // For mobile vertical split: 0.0 = full timeline, 1.0 = full map, 0.4 = default (40% map, 60% timeline)
 
   NavigationState({
     required this.showTimeline,
@@ -28,6 +30,7 @@ class NavigationState {
     this.splitRatio = 0.5, // Default to equal split
     this.eventDetailsSplitRatio =
         0.5, // Default to equal split for event details
+    this.mobileSplitRatio, // Default null, will use 0.4 if not set
   });
 
   /// Checks if event details panel should be shown
@@ -47,6 +50,7 @@ class NavigationState {
     bool clearEventDetails = false,
     double? splitRatio,
     double? eventDetailsSplitRatio,
+    double? mobileSplitRatio,
   }) {
     return NavigationState(
       showTimeline: showTimeline ?? this.showTimeline,
@@ -67,6 +71,7 @@ class NavigationState {
       splitRatio: splitRatio ?? this.splitRatio,
       eventDetailsSplitRatio:
           eventDetailsSplitRatio ?? this.eventDetailsSplitRatio,
+      mobileSplitRatio: mobileSplitRatio ?? this.mobileSplitRatio,
     );
   }
 }

@@ -5,6 +5,7 @@ import '../bloc/comparison_event.dart';
 import '../bloc/comparison_state.dart';
 import '../models/models.dart';
 import '../../shared/models/models.dart';
+import '../../shared/utils/platform_utils.dart';
 
 class FloatingComparisonList extends StatefulWidget {
   const FloatingComparisonList({super.key});
@@ -51,6 +52,11 @@ class _FloatingComparisonListState extends State<FloatingComparisonList>
 
   @override
   Widget build(BuildContext context) {
+    // Don't show on mobile platforms
+    if (PlatformUtils.isMobile) {
+      return const SizedBox.shrink();
+    }
+    
     return BlocBuilder<ComparisonBloc, ComparisonState>(
       builder: (context, state) {
         // Don't show if the list is empty and collapsed

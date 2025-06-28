@@ -9,6 +9,7 @@ import 'navigation/navigation.dart';
 import 'navigation/nav_item/nav_item.dart';
 import 'shared/shared.dart';
 import 'shared/discussion/cubit/discussion_cubit.dart';
+import 'shared/utils/platform_utils.dart';
 import 'app.dart';
 import 'map/map.dart';
 import 'comparison/comparison.dart';
@@ -63,12 +64,16 @@ void main() {
       child: const MyApp(),
     ),
   );
-  doWhenWindowReady(() {
-    final win = appWindow;
-    const initialSize = Size(1200, 800);
-    win.minSize = Size(900, 600);
-    win.size = initialSize;
-    win.title = "Volcano Monitoring Dashboard";
-    win.show();
-  });
+  
+  // Only setup window on desktop platforms
+  if (PlatformUtils.isDesktop) {
+    doWhenWindowReady(() {
+      final win = appWindow;
+      const initialSize = Size(1200, 800);
+      win.minSize = Size(900, 600);
+      win.size = initialSize;
+      win.title = "Volcano Monitoring Dashboard";
+      win.show();
+    });
+  }
 }

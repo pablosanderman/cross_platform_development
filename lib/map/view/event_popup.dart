@@ -24,18 +24,31 @@ class EventPopup extends StatelessWidget {
         final currentEvent = state.popupEvents[state.popupCurrentIndex];
         final hasMultipleEvents = state.popupEvents.length > 1;
 
+        // Responsive sizing based on screen width
+        final screenWidth = MediaQuery.of(context).size.width;
+        final isMobile = screenWidth < 600;
+        final isVeryNarrow = screenWidth < 400;
+
         return Stack(
           children: [
             // Bottom-centered popup with navigation controls above
             Positioned(
               left: 16,
               right: 16,
-              bottom: 80, // Space from bottom
+              bottom: 20, // Less space from bottom on mobile
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: 600, // Fixed max width for consistent sizing
-                    minWidth: 400, // Minimum width for readability
+                  constraints: BoxConstraints(
+                    maxWidth: isMobile
+                        ? screenWidth *
+                              0.9 // 90% of screen width on mobile
+                        : 600, // Fixed max width for desktop
+                    minWidth: isVeryNarrow
+                        ? screenWidth *
+                              0.85 // Very narrow screens
+                        : isMobile
+                        ? 280 // Smaller minimum for mobile
+                        : 400, // Desktop minimum
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -50,9 +63,9 @@ class EventPopup extends StatelessWidget {
                               elevation: 4,
                               borderRadius: BorderRadius.circular(8),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isMobile ? 8 : 12,
+                                  vertical: isMobile ? 4 : 8,
                                 ),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
@@ -68,17 +81,17 @@ class EventPopup extends StatelessWidget {
                                       icon: const Icon(Icons.chevron_left),
                                       padding: EdgeInsets.zero,
                                       constraints: const BoxConstraints(),
-                                      iconSize: 20,
+                                      iconSize: isMobile ? 16 : 20,
                                     ),
-                                    const SizedBox(width: 8),
+                                    SizedBox(width: isMobile ? 4 : 8),
                                     Text(
                                       '${state.popupCurrentIndex + 1} of ${state.popupEvents.length}',
-                                      style: const TextStyle(
-                                        fontSize: 14,
+                                      style: TextStyle(
+                                        fontSize: isMobile ? 12 : 14,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
+                                    SizedBox(width: isMobile ? 4 : 8),
                                     IconButton(
                                       onPressed: () => context
                                           .read<MapCubit>()
@@ -86,7 +99,7 @@ class EventPopup extends StatelessWidget {
                                       icon: const Icon(Icons.chevron_right),
                                       padding: EdgeInsets.zero,
                                       constraints: const BoxConstraints(),
-                                      iconSize: 20,
+                                      iconSize: isMobile ? 16 : 20,
                                     ),
                                   ],
                                 ),
@@ -107,17 +120,17 @@ class EventPopup extends StatelessWidget {
                                 onPressed: () =>
                                     context.read<MapCubit>().closePopup(),
                                 icon: const Icon(Icons.close),
-                                padding: const EdgeInsets.all(8),
+                                padding: EdgeInsets.all(isMobile ? 6 : 8),
                                 constraints: const BoxConstraints(),
-                                iconSize: 20,
+                                iconSize: isMobile ? 16 : 20,
                               ),
                             ),
                           ),
                         ],
                       ),
 
-                      const SizedBox(
-                        height: 8,
+                      SizedBox(
+                        height: isMobile ? 6 : 8,
                       ), // Space between controls and popup
                       // Main popup content
                       Material(
@@ -133,54 +146,165 @@ class EventPopup extends StatelessWidget {
                             children: [
                               // Main content
                               Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Clickable image placeholder
-                                    GestureDetector(
-                                      onTap: () {
-                                        // Hide popup without clearing selection and show event details
-                                        context.read<MapCubit>().closePopup();
-                                        context.read<NavigationBloc>().add(
-                                          ShowEventDetails(
-                                            currentEvent,
-                                            EventDetailsSource.map,
-                                          ),
-                                        );
-                                      },
-                                      child: Container(
-                                        width: 120,
-                                        height: 80,
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[200],
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey[300]!,
-                                          ),
-                                        ),
-                                        child: const Icon(
-                                          Icons.image,
-                                          size: 40,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-
-                                    const SizedBox(width: 16),
-
-                                    // Event details
-                                    Expanded(
-                                      child: Column(
+                                padding: EdgeInsets.all(isMobile ? 12 : 16),
+                                child: isMobile
+                                    ? Column(
+                                        // Mobile: vertical layout
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          // Clickable title
+                                          // Image at top for mobile
+                                          Center(
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                context
+                                                    .read<MapCubit>()
+                                                    .closePopup();
+                                                context
+                                                    .read<NavigationBloc>()
+                                                    .add(
+                                                      ShowEventDetails(
+                                                        currentEvent,
+                                                        EventDetailsSource.map,
+                                                      ),
+                                                    );
+                                              },
+                                              child: Container(
+                                                width: isVeryNarrow ? 60 : 80,
+                                                height: isVeryNarrow ? 40 : 50,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[200],
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                  border: Border.all(
+                                                    color: Colors.grey[300]!,
+                                                  ),
+                                                ),
+                                                child: Icon(
+                                                  Icons.image,
+                                                  size: isVeryNarrow ? 20 : 24,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(height: 8),
+                                          // Event details below image
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              // Clickable title
+                                              GestureDetector(
+                                                onTap: () {
+                                                  context
+                                                      .read<MapCubit>()
+                                                      .closePopup();
+                                                  context
+                                                      .read<NavigationBloc>()
+                                                      .add(
+                                                        ShowEventDetails(
+                                                          currentEvent,
+                                                          EventDetailsSource
+                                                              .map,
+                                                        ),
+                                                      );
+                                                },
+                                                child: Text(
+                                                  currentEvent.title,
+                                                  style: TextStyle(
+                                                    fontSize: isVeryNarrow
+                                                        ? 16
+                                                        : 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.blue,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 6),
+                                              // Date range
+                                              Text(
+                                                _formatDateRange(currentEvent),
+                                                style: TextStyle(
+                                                  fontSize: isVeryNarrow
+                                                      ? 12
+                                                      : 14,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                              SizedBox(height: 8),
+                                              // Description
+                                              Text(
+                                                currentEvent.displayDescription,
+                                                style: TextStyle(
+                                                  fontSize: isVeryNarrow
+                                                      ? 11
+                                                      : 12,
+                                                  height: 1.3,
+                                                ),
+                                                maxLines: isVeryNarrow ? 2 : 3,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              SizedBox(height: 8),
+                                              // View on Timeline button
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: ElevatedButton.icon(
+                                                  onPressed: () {
+                                                    context
+                                                        .read<MapCubit>()
+                                                        .navigateToTimeline(
+                                                          currentEvent,
+                                                        );
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.timeline,
+                                                    size: isVeryNarrow
+                                                        ? 12
+                                                        : 14,
+                                                  ),
+                                                  label: Text(
+                                                    'View on Timeline',
+                                                    style: TextStyle(
+                                                      fontSize: isVeryNarrow
+                                                          ? 11
+                                                          : 12,
+                                                    ),
+                                                  ),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                        backgroundColor:
+                                                            Colors.green,
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                        padding:
+                                                            EdgeInsets.symmetric(
+                                                              horizontal:
+                                                                  isVeryNarrow
+                                                                  ? 8
+                                                                  : 12,
+                                                              vertical:
+                                                                  isVeryNarrow
+                                                                  ? 4
+                                                                  : 6,
+                                                            ),
+                                                      ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      )
+                                    : Row(
+                                        // Desktop: horizontal layout
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Clickable image placeholder
                                           GestureDetector(
                                             onTap: () {
-                                              // Hide popup without clearing selection and show event details
                                               context
                                                   .read<MapCubit>()
                                                   .closePopup();
@@ -193,87 +317,126 @@ class EventPopup extends StatelessWidget {
                                                     ),
                                                   );
                                             },
-                                            child: Text(
-                                              currentEvent.title,
-                                              style: const TextStyle(
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.blue,
-                                                decoration:
-                                                    TextDecoration.underline,
+                                            child: Container(
+                                              width: 120,
+                                              height: 80,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: Colors.grey[300]!,
+                                                ),
+                                              ),
+                                              child: const Icon(
+                                                Icons.image,
+                                                size: 40,
+                                                color: Colors.grey,
                                               ),
                                             ),
                                           ),
-
-                                          const SizedBox(height: 8),
-
-                                          // Date range
-                                          Text(
-                                            _formatDateRange(currentEvent),
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              color: Colors.grey[600],
-                                            ),
-                                          ),
-
-                                          const SizedBox(height: 12),
-
-                                          // Description
-                                          Text(
-                                            currentEvent.displayDescription,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              height: 1.4,
-                                            ),
-                                          ),
-
-                                          const SizedBox(height: 16),
-
-                                          // Tags
-                                          Text(
-                                            _formatTags(currentEvent),
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey[600],
-                                            ),
-                                          ),
-
-                                          const SizedBox(height: 16),
-
-                                          // View on Timeline button
-                                          SizedBox(
-                                            width: double.infinity,
-                                            child: ElevatedButton.icon(
-                                              onPressed: () {
-                                                context
-                                                    .read<MapCubit>()
-                                                    .navigateToTimeline(
-                                                      currentEvent,
-                                                    );
-                                              },
-                                              icon: const Icon(
-                                                Icons.timeline,
-                                                size: 16,
-                                              ),
-                                              label: const Text(
-                                                'View on Timeline',
-                                              ),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.green,
-                                                foregroundColor: Colors.white,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 8,
+                                          const SizedBox(width: 16),
+                                          // Event details
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                // Clickable title
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    context
+                                                        .read<MapCubit>()
+                                                        .closePopup();
+                                                    context
+                                                        .read<NavigationBloc>()
+                                                        .add(
+                                                          ShowEventDetails(
+                                                            currentEvent,
+                                                            EventDetailsSource
+                                                                .map,
+                                                          ),
+                                                        );
+                                                  },
+                                                  child: Text(
+                                                    currentEvent.title,
+                                                    style: const TextStyle(
+                                                      fontSize: 24,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.blue,
+                                                      decoration: TextDecoration
+                                                          .underline,
                                                     ),
-                                              ),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                // Date range
+                                                Text(
+                                                  _formatDateRange(
+                                                    currentEvent,
+                                                  ),
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 12),
+                                                // Description
+                                                Text(
+                                                  currentEvent
+                                                      .displayDescription,
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    height: 1.4,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 16),
+                                                // Tags
+                                                Text(
+                                                  _formatTags(currentEvent),
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 16),
+                                                // View on Timeline button
+                                                SizedBox(
+                                                  width: double.infinity,
+                                                  child: ElevatedButton.icon(
+                                                    onPressed: () {
+                                                      context
+                                                          .read<MapCubit>()
+                                                          .navigateToTimeline(
+                                                            currentEvent,
+                                                          );
+                                                    },
+                                                    icon: const Icon(
+                                                      Icons.timeline,
+                                                      size: 16,
+                                                    ),
+                                                    label: const Text(
+                                                      'View on Timeline',
+                                                    ),
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor:
+                                                          Colors.green,
+                                                      foregroundColor:
+                                                          Colors.white,
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 16,
+                                                            vertical: 8,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                  ],
-                                ),
                               ),
                             ],
                           ),

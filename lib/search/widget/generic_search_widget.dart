@@ -5,6 +5,8 @@ import '../bloc/generic_search_bloc.dart';
 import '../bloc/generic_search_event.dart';
 import '../bloc/generic_search_state.dart';
 
+/// Simple search bar widget for desktop navbar usage
+/// Mobile uses showSearch() instead
 class GenericSearchBar<T> extends StatelessWidget {
   final List<T> Function() loadItems;
   final bool Function(T item, String query) filter;
@@ -47,25 +49,28 @@ class GenericSearchBar<T> extends StatelessWidget {
                 leading: leadingIcon,
               );
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-  final String input = controller.text;
-  
-  return Future.value(
-    loadItems()
-        .where((item) => filter(item, input.toLowerCase()))
-        .map<Widget>((item) => ListTile(
-              title: itemBuilder(item),
-              onTap: () {
-                controller.closeView(itemTitle(item));
-                searchbloc.read<GenericSearchBloc<T>>().add(
-                  SearchItemSelected<T>(item),
-                );
-                onItemSelected?.call(item);
-              },
-            ))
-        .toList(),
-  );
-},
+            suggestionsBuilder:
+                (BuildContext context, SearchController controller) {
+                  final String input = controller.text;
+
+                  return Future.value(
+                    loadItems()
+                        .where((item) => filter(item, input.toLowerCase()))
+                        .map<Widget>(
+                          (item) => ListTile(
+                            title: itemBuilder(item),
+                            onTap: () {
+                              controller.closeView(itemTitle(item));
+                              searchbloc.read<GenericSearchBloc<T>>().add(
+                                SearchItemSelected<T>(item),
+                              );
+                              onItemSelected?.call(item);
+                            },
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
           );
         },
       ),

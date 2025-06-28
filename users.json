@@ -1,26 +1,37 @@
 [
-    {
-        "id": "u_dr_rossi",
-        "displayName": "Dr. Elena Rossi",
-        "avatar": "/avatars/rossi.png",
-        "groups": ["g_volcanologists", "g_field_researchers"]
-    },
-    {
-        "id": "u_dr_bianchi",
-        "displayName": "Dr. Marco Bianchi",
-        "avatar": "/avatars/bianchi.png",
-        "groups": ["g_volcanologists", "g_seismologists"]
-    },
-    {
-        "id": "u_prof_ferrari",
-        "displayName": "Prof. Sofia Ferrari",
-        "avatar": "/avatars/ferrari.png",
-        "groups": ["g_volcanologists", "g_administrators"]
-    },
-    {
-        "id": "u_dr_moretti",
-        "displayName": "Dr. Giuseppe Moretti",
-        "avatar": "/avatars/moretti.png",
-        "groups": ["g_seismologists", "g_field_researchers"]
-    }
+  {
+    "id": "u_andrew",
+    "firstName": "Andrew",
+    "lastName": "Smith",
+    "role": "administrator",
+    "groupIds": ["g_volcanologists", "g_administrators"]
+  },
+  {
+    "id": "u_dr_rossi",
+    "firstName": "Elena",
+    "lastName": "Rossi",
+    "role": "member",
+    "groupIds": ["g_volcanologists", "g_field_researchers"]
+  },
+  {
+    "id": "u_dr_bianchi",
+    "firstName": "Marco",
+    "lastName": "Bianchi",
+    "role": "member",
+    "groupIds": ["g_volcanologists", "g_seismologists"]
+  },
+  {
+    "id": "u_prof_ferrari",
+    "firstName": "Sofia",
+    "lastName": "Ferrari",
+    "role": "administrator",
+    "groupIds": ["g_volcanologists", "g_administrators"]
+  },
+  {
+    "id": "u_dr_moretti",
+    "firstName": "Giuseppe",
+    "lastName": "Moretti",
+    "role": "member",
+    "groupIds": ["g_seismologists", "g_field_researchers"]
+  }
 ]

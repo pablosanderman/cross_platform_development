@@ -2,7 +2,6 @@
 import 'package:cross_platform_development/groups/groups.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 class GroupsPage extends StatelessWidget {
   const GroupsPage({super.key});
 

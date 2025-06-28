@@ -17,9 +17,10 @@ class GroupsState extends Equatable {
     Group? chosenGroup,
     List<Group>? groups,
     List<User>? users,
+    bool clearChosenGroup = false,
   }) {
     return GroupsState(
-      chosenGroup: chosenGroup ?? this.chosenGroup,
+      chosenGroup: clearChosenGroup ? null : (chosenGroup ?? this.chosenGroup),
       groups: groups ?? this.groups,
       users: users ?? this.users,
     );

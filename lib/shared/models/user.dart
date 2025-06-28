@@ -7,30 +7,38 @@ class User extends Equatable {
   /// {@macro user}
   const User({
     required this.id,
-    required this.displayName,
-    required this.avatar,
-    required this.groups,
+    required this.firstName,
+    required this.lastName,
+    required this.role,
+    required this.groupIds,
   });
 
   /// Unique identifier for the user
   final String id;
 
-  /// Display name for the user
-  final String displayName;
+  /// First name of the user
+  final String firstName;
 
-  /// Avatar/profile image path for the user
-  final String avatar;
+  /// Last name of the user
+  final String lastName;
+
+  /// Role of the user (administrator, member, etc.)
+  final String role;
 
   /// List of group IDs this user belongs to
-  final List<String> groups;
+  final List<String> groupIds;
+
+  /// Gets the display name by combining first and last name
+  String get displayName => '$firstName $lastName';
 
   /// Creates a User from JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] as String,
-      displayName: json['displayName'] as String,
-      avatar: json['avatar'] as String,
-      groups: (json['groups'] as List<dynamic>).cast<String>(),
+      id: json['id'] as String? ?? '',
+      firstName: json['firstName'] as String? ?? '',
+      lastName: json['lastName'] as String? ?? '',
+      role: json['role'] as String? ?? 'member',
+      groupIds: (json['groupIds'] as List<dynamic>?)?.cast<String>() ?? [],
     );
   }
 
@@ -38,27 +46,30 @@ class User extends Equatable {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'displayName': displayName,
-      'avatar': avatar,
-      'groups': groups,
+      'firstName': firstName,
+      'lastName': lastName,
+      'role': role,
+      'groupIds': groupIds,
     };
   }
 
   /// Creates a copy of this User with the given fields replaced
   User copyWith({
     String? id,
-    String? displayName,
-    String? avatar,
-    List<String>? groups,
+    String? firstName,
+    String? lastName,
+    String? role,
+    List<String>? groupIds,
   }) {
     return User(
       id: id ?? this.id,
-      displayName: displayName ?? this.displayName,
-      avatar: avatar ?? this.avatar,
-      groups: groups ?? this.groups,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      role: role ?? this.role,
+      groupIds: groupIds ?? this.groupIds,
     );
   }
 
   @override
-  List<Object> get props => [id, displayName, avatar, groups];
+  List<Object> get props => [id, firstName, lastName, role, groupIds];
 }

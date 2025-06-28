@@ -460,25 +460,54 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
           ),
           const SizedBox(height: 12),
         ],
-        // Attachments with action buttons aligned to bottom-right
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            if (_event!.attachments.isNotEmpty) ...[
-              Expanded(
-                child: Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: _event!.attachments.map((attachment) {
-                    return _buildAttachmentCard(attachment);
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(width: 16),
-            ],
-            // Action buttons aligned to bottom-right of attachments
-            _buildActionButtons(),
-          ],
+        // Check if we're on mobile to determine layout
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isMobile = constraints.maxWidth < 600; // Consider mobile if width < 600px
+            
+            if (isMobile) {
+              // Mobile: Stack attachments and buttons vertically
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Attachments take full width on mobile
+                  if (_event!.attachments.isNotEmpty) ...[
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: _event!.attachments.map((attachment) {
+                        return _buildAttachmentCard(attachment);
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  // Action buttons below attachments on mobile
+                  _buildActionButtons(),
+                ],
+              );
+            } else {
+              // Desktop: Keep the original horizontal layout
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (_event!.attachments.isNotEmpty) ...[
+                    Expanded(
+                      child: Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: _event!.attachments.map((attachment) {
+                          return _buildAttachmentCard(attachment);
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                  // Action buttons aligned to bottom-right of attachments
+                  _buildActionButtons(),
+                ],
+              );
+            }
+          },
         ),
       ],
     );
@@ -793,9 +822,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       (u) => u.id == message.author,
       orElse: () => User(
         id: message.author,
-        displayName: 'Unknown User',
-        avatar: '/avatars/default.png',
-        groups: [],
+        firstName: 'Unknown',
+        lastName: 'User',
+        role: 'member',
+        groupIds: [],
       ),
     );
 
@@ -882,9 +912,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                     (u) => u.id == message.author,
                     orElse: () => User(
                       id: message.author,
-                      displayName: 'Unknown User',
-                      avatar: '',
-                      groups: [],
+                      firstName: 'Unknown',
+                      lastName: 'User',
+                      role: 'member',
+                      groupIds: [],
                     ),
                   );
                   _replyControllers[message.id]!.text = '@${author.id} ';
@@ -922,9 +953,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       (u) => u.id == reply.author,
       orElse: () => User(
         id: reply.author,
-        displayName: 'Unknown User',
-        avatar: '/avatars/default.png',
-        groups: [],
+        firstName: 'Unknown',
+        lastName: 'User',
+        role: 'member',
+        groupIds: [],
       ),
     );
 
@@ -1006,9 +1038,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
                             (u) => u.id == reply.author,
                             orElse: () => User(
                               id: reply.author,
-                              displayName: 'Unknown User',
-                              avatar: '',
-                              groups: [],
+                              firstName: 'Unknown',
+                              lastName: 'User',
+                              role: 'member',
+                              groupIds: [],
                             ),
                           );
                           _replyControllers[parentId]!.text =
