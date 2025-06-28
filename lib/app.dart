@@ -160,26 +160,18 @@ class _MyAppState extends State<MyApp> {
           );
   }
 
-  /// Build vertical split layout for mobile (map top, timeline bottom)
+  /// Build vertical split layout for mobile (map top, timeline bottom) with resize handle
   Widget _buildMobileVerticalSplit() {
-    return Column(
-      children: [
-        // Map on top (40% of available height)
-        const Expanded(
-          flex: 4,
-          child: MapPage(),
-        ),
-        // Divider
-        Container(
-          height: 2,
-          color: Colors.grey.withValues(alpha: 0.3),
-        ),
-        // Timeline on bottom (60% of available height)
-        const Expanded(
-          flex: 6,
-          child: TimelinePage(),
-        ),
-      ],
+    return BlocBuilder<NavigationBloc, NavigationState>(
+      builder: (context, navState) {
+        return _VerticalResizableSplitView(
+          topChild: const MapPage(),
+          bottomChild: const TimelinePage(),
+          splitRatio: navState.mobileSplitRatio ?? 0.4, // Default 40% for map
+          minTopHeight: 200.0,
+          minBottomHeight: 250.0,
+        );
+      },
     );
   }
 
@@ -473,6 +465,181 @@ class _EventDetailsResizeDividerState
                     : Colors.grey.withValues(alpha: 0.3),
                 width: 1,
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Vertical resizable split view for mobile (top/bottom layout)
+class _VerticalResizableSplitView extends StatefulWidget {
+  final Widget topChild;
+  final Widget bottomChild;
+  final double splitRatio;
+  final double minTopHeight;
+  final double minBottomHeight;
+  static const double dividerHeight = 6.0;
+
+  const _VerticalResizableSplitView({
+    required this.topChild,
+    required this.bottomChild,
+    required this.splitRatio,
+    this.minTopHeight = 150.0,
+    this.minBottomHeight = 200.0,
+  });
+
+  @override
+  State<_VerticalResizableSplitView> createState() => _VerticalResizableSplitViewState();
+}
+
+class _VerticalResizableSplitViewState extends State<_VerticalResizableSplitView> {
+  double? _initialRatio;
+  double? _startY;
+  double? _availableHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableHeight = constraints.maxHeight;
+        _availableHeight = availableHeight;
+
+        // Calculate effective heights based on split ratio
+        final contentHeight = availableHeight - _VerticalResizableSplitView.dividerHeight;
+        final topHeight = contentHeight * widget.splitRatio;
+        final bottomHeight = contentHeight * (1.0 - widget.splitRatio);
+
+        return Stack(
+          children: [
+            // Top child
+            Positioned(
+              left: 0,
+              top: 0,
+              width: constraints.maxWidth,
+              height: topHeight,
+              child: ClipRect(child: widget.topChild),
+            ),
+            // Bottom child
+            Positioned(
+              left: 0,
+              top: topHeight + _VerticalResizableSplitView.dividerHeight,
+              width: constraints.maxWidth,
+              height: bottomHeight,
+              child: ClipRect(child: widget.bottomChild),
+            ),
+            // Divider (resize handle)
+            Positioned(
+              left: 0,
+              top: topHeight,
+              width: constraints.maxWidth,
+              height: _VerticalResizableSplitView.dividerHeight,
+              child: _VerticalResizeDivider(
+                onDragStarted: () {
+                  _initialRatio = widget.splitRatio;
+                },
+                onDragUpdate: (details) {
+                  if (_initialRatio != null && _availableHeight != null) {
+                    final deltaY = details.globalPosition.dy - (_startY ?? details.globalPosition.dy);
+                    if (_startY == null) {
+                      _startY = details.globalPosition.dy;
+                      return;
+                    }
+
+                    // Calculate new ratio based on drag delta
+                    final contentHeight = _availableHeight! - _VerticalResizableSplitView.dividerHeight;
+                    final deltaRatio = deltaY / contentHeight;
+                    final newRatio = _initialRatio! + deltaRatio;
+
+                    // Apply minimum height constraints
+                    final minTopRatio = widget.minTopHeight / contentHeight;
+                    final minBottomRatio = widget.minBottomHeight / contentHeight;
+                    final maxTopRatio = 1.0 - minBottomRatio;
+
+                    final constrainedRatio = newRatio.clamp(minTopRatio, maxTopRatio);
+
+                    // Update the mobile split ratio via NavigationBloc
+                    context.read<NavigationBloc>().add(
+                      UpdateMobileSplitRatio(constrainedRatio),
+                    );
+                  }
+                },
+                onDragEnded: () {
+                  _initialRatio = null;
+                  _startY = null;
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// The visual divider that handles vertical drag gestures for mobile resizing
+class _VerticalResizeDivider extends StatefulWidget {
+  final VoidCallback onDragStarted;
+  final Function(DragUpdateDetails) onDragUpdate;
+  final VoidCallback onDragEnded;
+
+  const _VerticalResizeDivider({
+    required this.onDragStarted,
+    required this.onDragUpdate,
+    required this.onDragEnded,
+  });
+
+  @override
+  State<_VerticalResizeDivider> createState() => _VerticalResizeDividerState();
+}
+
+class _VerticalResizeDividerState extends State<_VerticalResizeDivider> {
+  bool _isDragging = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onPanStart: (details) {
+        setState(() => _isDragging = true);
+        widget.onDragStarted();
+      },
+      onPanUpdate: widget.onDragUpdate,
+      onPanEnd: (details) {
+        setState(() => _isDragging = false);
+        widget.onDragEnded();
+      },
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: _isDragging
+              ? Colors.blue.withValues(alpha: 0.4)
+              : Colors.grey.withValues(alpha: 0.3),
+          border: Border(
+            top: BorderSide(
+              color: _isDragging
+                  ? Colors.blue.withValues(alpha: 0.8)
+                  : Colors.grey.withValues(alpha: 0.5),
+              width: 1,
+            ),
+            bottom: BorderSide(
+              color: _isDragging
+                  ? Colors.blue.withValues(alpha: 0.8)
+                  : Colors.grey.withValues(alpha: 0.5),
+              width: 1,
+            ),
+          ),
+        ),
+        child: Center(
+          child: Container(
+            width: 40,
+            height: 2,
+            decoration: BoxDecoration(
+              color: _isDragging
+                  ? Colors.blue
+                  : Colors.grey.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(1),
             ),
           ),
         ),
