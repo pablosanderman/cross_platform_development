@@ -1,4 +1,4 @@
-import 'package:cross_platform_development/shared/models/event_v2.dart';
+import 'package:cross_platform_development/shared/models/event.dart';
 import 'package:cross_platform_development/navigation/bloc/navigation_state.dart';
 
 abstract class NavigationEvent {

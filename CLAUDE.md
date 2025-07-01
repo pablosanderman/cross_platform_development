@@ -147,7 +147,6 @@ Events support both point events (earthquakes) and period events (eruptions):
 ```
 
 ### Assets
-- **data.json**: Legacy event data format
 - **events.json**: Current event data with v2 structure
 - **users.json**: User account information
 - **groups.json**: User group definitions
