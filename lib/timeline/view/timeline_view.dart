@@ -54,6 +54,13 @@ class _TimelineViewState extends State<TimelineView>
   }
 
   @override
+  void dispose() {
+    _scrollAnimationController?.dispose();
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
