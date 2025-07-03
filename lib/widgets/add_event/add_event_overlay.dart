@@ -79,7 +79,7 @@ class _AddEventOverlayState extends State<AddEventOverlay> {
         _longitude = selectedLocation.longitude;
       });
 
-      ScaffoldMessenger.of(this.context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Location picked: ($_latitude, $_longitude)')),
       );
     }

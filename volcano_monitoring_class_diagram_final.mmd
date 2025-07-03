@@ -1,0 +1,107 @@
+classDiagram
+    %% ====================================================================
+    %% PRESENTATION LAYER
+    %% ====================================================================
+    
+    class MyApp
+    class TimelinePage  
+    class MapPage
+    class EventDetailsPanel
+    class ComparisonPage
+    
+    %% ====================================================================
+    %% BUSINESS LOGIC LAYER
+    %% ====================================================================
+    
+    class NavigationBloc
+    class TimelineCubit
+    class MapCubit  
+    class ComparisonBloc
+    class EventVisibilityCubit
+    class GroupsBloc
+    
+    %% ====================================================================
+    %% DATA ACCESS LAYER
+    %% ====================================================================
+    
+    class EventsRepository
+    class UsersRepository
+    class GroupsRepository
+    class RecentlyViewedService
+    
+    %% ====================================================================
+    %% DOMAIN MODELS
+    %% ====================================================================
+    
+    class Event {
+        -String id
+        -String title
+        -EventType type
+        -EventLocation location
+        -EventDateRange dateRange
+    }
+    
+    class EventLocation {
+        -String name
+        -double lat
+        -double lng
+    }
+    
+    class EventDateRange {
+        -DateTime start
+        -DateTime end
+    }
+    
+    class EventType {
+        <<enumeration>>
+        POINT
+        PERIOD
+        GROUPED
+    }
+    
+    class User {
+        -String id
+        -String name
+        -String role
+        -List~String~ groupIds
+    }
+    
+    class Group {
+        -String id
+        -String label
+        -String color
+    }
+    
+    %% ====================================================================
+    %% CLEAR RELATIONSHIPS (NO CROSSING LINES)
+    %% ====================================================================
+    
+    %% UI to Business Logic (Simple uses)
+    MyApp --> NavigationBloc
+    TimelinePage --> TimelineCubit
+    MapPage --> MapCubit
+    ComparisonPage --> ComparisonBloc
+    EventDetailsPanel --> NavigationBloc
+    
+    %% Business Logic to Data Access
+    TimelineCubit --> EventsRepository
+    MapCubit --> EventsRepository
+    ComparisonBloc --> EventsRepository
+    ComparisonBloc --> RecentlyViewedService
+    EventVisibilityCubit --> EventsRepository
+    GroupsBloc --> GroupsRepository
+    GroupsBloc --> UsersRepository
+    
+    %% Data Access returns Domain Models
+    EventsRepository ..> Event
+    UsersRepository ..> User
+    GroupsRepository ..> Group
+    
+    %% Domain Model Compositions
+    Event *-- EventType
+    Event *-- EventLocation  
+    Event *-- EventDateRange
+    User --> Group
+    
+    %% Key Coordination (Minimal)
+    TimelineCubit <--> MapCubit

@@ -1,0 +1,182 @@
+classDiagram
+    %% ====================================================================
+    %% CORE DATA MODELS
+    %% ====================================================================
+    
+    class Event {
+        -String id
+        -String title
+        -EventType type
+        -EventLocation location
+        -EventDateRange dateRange
+        -List~EventAttachment~ attachments
+        -List~DiscussionMessage~ discussion
+        +bool hasCoordinates
+        +bool hasDuration
+    }
+    
+    class EventType {
+        <<enumeration>>
+        POINT
+        PERIOD
+        GROUPED
+    }
+    
+    class EventLocation {
+        -String name
+        -double lat
+        -double lng
+        +bool hasCoordinates
+    }
+    
+    class EventDateRange {
+        -DateTime start
+        -DateTime end
+        +bool hasDuration
+    }
+    
+    class EventAttachment {
+        -String id
+        -String file
+        -String mime
+        +bool isImage
+        +bool canPreview
+    }
+    
+    class DiscussionMessage {
+        -String id
+        -String author
+        -String body
+        -String replyTo
+        +bool isReply
+    }
+    
+    class User {
+        -String id
+        -String firstName
+        -String lastName
+        -String role
+        -List~String~ groupIds
+    }
+    
+    class Group {
+        -String id
+        -String label
+        -String color
+    }
+    
+    %% ====================================================================
+    %% STATE MANAGEMENT (SIMPLIFIED)
+    %% ====================================================================
+    
+    class NavigationBloc {
+        -NavigationState state
+        +toggleTimeline() void
+        +toggleMap() void
+        +showEventDetails() void
+    }
+    
+    class TimelineCubit {
+        -List~Event~ events
+        -List~TimelineRow~ rows
+        +loadTimeline() void
+        +selectEvent() void
+        +reorderRows() void
+    }
+    
+    class MapCubit {
+        -List~Event~ events
+        -Event selectedEvent
+        +loadMapEvents() void
+        +showEventPopup() void
+        +navigateToEvent() void
+    }
+    
+    class ComparisonBloc {
+        -List~Event~ comparisonList
+        +addEventToComparison() void
+        +compareEvents() void
+    }
+    
+    class EventVisibilityCubit {
+        -Set~EventType~ hiddenEventTypes
+        +toggleEventVisibility() void
+    }
+    
+    %% ====================================================================
+    %% REPOSITORY LAYER (SIMPLIFIED)
+    %% ====================================================================
+    
+    class EventsRepository {
+        +loadEvents() Future~List~Event~~
+        +loadEventsWithCoordinates() Future~List~Event~~
+    }
+    
+    class UsersRepository {
+        +loadUsers() Future~List~User~~
+    }
+    
+    class GroupsRepository {
+        +loadGroups() Future~List~Group~~
+    }
+    
+    %% ====================================================================
+    %% SERVICE LAYER
+    %% ====================================================================
+    
+    class RecentlyViewedService {
+        -List~Event~ recentEvents
+        +addEvent() void
+    }
+    
+    %% ====================================================================
+    %% UI COMPONENTS (HIGH-LEVEL)
+    %% ====================================================================
+    
+    class MyApp {
+        +Main application widget
+    }
+    
+    class TimelinePage {
+        +Timeline visualization
+    }
+    
+    class MapPage {
+        +Map visualization
+    }
+    
+    class EventDetailsPanel {
+        +Event details overlay
+    }
+    
+    class ComparisonPage {
+        +Event comparison interface
+    }
+    
+    %% ====================================================================
+    %% KEY RELATIONSHIPS ONLY
+    %% ====================================================================
+    
+    %% Core Compositions
+    Event *-- EventType
+    Event *-- EventLocation
+    Event *-- EventDateRange
+    Event *-- EventAttachment
+    Event *-- DiscussionMessage
+    
+    %% State Management
+    NavigationBloc --> TimelinePage
+    NavigationBloc --> MapPage
+    TimelineCubit --> EventsRepository
+    MapCubit --> EventsRepository
+    ComparisonBloc --> RecentlyViewedService
+    
+    %% Key Dependencies
+    TimelineCubit ..> MapCubit : coordinates_with
+    MapCubit ..> TimelineCubit : coordinates_with
+    
+    %% UI Structure
+    MyApp --> TimelinePage
+    MyApp --> MapPage
+    MyApp --> EventDetailsPanel
+    MyApp --> ComparisonPage
