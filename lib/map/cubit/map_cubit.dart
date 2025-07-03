@@ -125,6 +125,9 @@ class MapCubit extends Cubit<MapState> {
 
   /// Navigate to event on map (center map and show popup)
   void navigateToEvent(Event event) {
+    // Close event details panel
+    _navigationBloc?.add(CloseEventDetails());
+
     // Ensure map view is visible
     _navigationBloc?.add(ShowMap());
 
