@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../timeline/timeline.dart';
 import '../utils/event_search_utils.dart';

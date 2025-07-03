@@ -14,9 +14,7 @@ class EventSearchUtils {
 
   /// Format event time display
   static String formatEventTime(Event event) {
-    final start = event.startTime != null
-        ? DateFormat('HH:mm:ss').format(event.startTime!)
-        : "No Start";
+    final start = DateFormat('HH:mm:ss').format(event.startTime);
     final end = event.endTime != null
         ? DateFormat('HH:mm:ss').format(event.endTime!)
         : "No End";

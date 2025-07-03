@@ -32,19 +32,30 @@ class _AddEventOverlayState extends State<AddEventOverlay> {
     super.dispose();
   }
 
-  Future<void> _pickDateTime(BuildContext context, {required bool isStart}) async {
+  Future<void> _pickDateTime(
+    BuildContext context, {
+    required bool isStart,
+  }) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (picked != null) {
-      final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-      if (time != null) {
+    if (picked != null && mounted) {
+      final time = await showTimePicker(
+        context: this.context,
+        initialTime: TimeOfDay.now(),
+      );
+      if (time != null && mounted) {
         setState(() {
-          final pickedDateTime =
-              DateTime(picked.year, picked.month, picked.day, time.hour, time.minute);
+          final pickedDateTime = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            time.hour,
+            time.minute,
+          );
           if (isStart) {
             _startTime = pickedDateTime;
           } else {
@@ -62,13 +73,13 @@ class _AddEventOverlayState extends State<AddEventOverlay> {
       MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
     );
 
-    if (selectedLocation != null) {
+    if (selectedLocation != null && mounted) {
       setState(() {
         _latitude = selectedLocation.latitude;
         _longitude = selectedLocation.longitude;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(this.context).showSnackBar(
         SnackBar(content: Text('Location picked: ($_latitude, $_longitude)')),
       );
     }
@@ -97,23 +108,30 @@ class _AddEventOverlayState extends State<AddEventOverlay> {
                     TextFormField(
                       controller: _titleController,
                       decoration: InputDecoration(labelText: 'Event Title'),
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Title is required' : null,
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Title is required'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _descriptionController,
-                      decoration: InputDecoration(labelText: 'Event Description'),
+                      decoration: InputDecoration(
+                        labelText: 'Event Description',
+                      ),
                       maxLines: 3,
                     ),
                     const SizedBox(height: 16),
                     ListTile(
-                      title: Text('Start Time: ${_startTime?.toString() ?? 'Not set'}'),
+                      title: Text(
+                        'Start Time: ${_startTime?.toString() ?? 'Not set'}',
+                      ),
                       trailing: Icon(Icons.calendar_today),
                       onTap: () => _pickDateTime(context, isStart: true),
                     ),
                     ListTile(
-                      title: Text('End Time: ${_endTime?.toString() ?? 'Not set'}'),
+                      title: Text(
+                        'End Time: ${_endTime?.toString() ?? 'Not set'}',
+                      ),
                       trailing: Icon(Icons.calendar_today),
                       onTap: () => _pickDateTime(context, isStart: false),
                     ),
@@ -132,8 +150,8 @@ class _AddEventOverlayState extends State<AddEventOverlay> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          child: Text('CANCEL'),
                           onPressed: widget.onCancel,
+                          child: Text('CANCEL'),
                         ),
                         ElevatedButton(
                           child: Text('ADD EVENT'),
@@ -141,7 +159,8 @@ class _AddEventOverlayState extends State<AddEventOverlay> {
                             if (_formKey.currentState!.validate()) {
                               widget.onSubmitted({
                                 'title': _titleController.text,
-                                'description': _descriptionController.text.trim(),
+                                'description': _descriptionController.text
+                                    .trim(),
                                 'startTime': _startTime,
                                 'endTime': _endTime,
                                 'latitude': _latitude,
@@ -190,7 +209,8 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate:
+                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                 subdomains: ['a', 'b', 'c'],
               ),
               if (_selectedLocation != null)
@@ -215,7 +235,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
             child: ElevatedButton(
               onPressed: () {
                 if (_selectedLocation != null) {
-                  Navigator.pop(context, _selectedLocation); // Pass location back
+                  Navigator.pop(
+                    context,
+                    _selectedLocation,
+                  ); // Pass location back
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please select a location')),

@@ -205,7 +205,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -371,9 +371,9 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         _event!.type.name.toUpperCase(),
@@ -463,8 +463,9 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
         // Check if we're on mobile to determine layout
         LayoutBuilder(
           builder: (context, constraints) {
-            final isMobile = constraints.maxWidth < 600; // Consider mobile if width < 600px
-            
+            final isMobile =
+                constraints.maxWidth < 600; // Consider mobile if width < 600px
+
             if (isMobile) {
               // Mobile: Stack attachments and buttons vertically
               return Column(

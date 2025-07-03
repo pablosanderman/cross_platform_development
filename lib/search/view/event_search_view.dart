@@ -1,5 +1,4 @@
-﻿import 'package:cross_platform_development/navigation/navigation.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../timeline/timeline.dart';
