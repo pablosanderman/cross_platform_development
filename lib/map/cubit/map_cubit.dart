@@ -104,9 +104,6 @@ class MapCubit extends Cubit<MapState> {
 
   /// Close popup
   void closePopup() {
-    // Clear selection using shared selection state
-    _timelineCubit?.clearSelection();
-
     emit(
       state.copyWith(
         showPopup: false,
