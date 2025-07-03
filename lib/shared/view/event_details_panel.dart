@@ -675,9 +675,10 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
       final message = topLevelMessages[i];
       widgets.add(_buildMessageCard(message));
 
-      // Add replies section if there are replies
+      // Add replies section if there are replies OR if reply field is active
       final replies = _event!.getRepliesTo(message.id);
-      if (replies.isNotEmpty) {
+      final showReplyField = _showReplyField[message.id] ?? false;
+      if (replies.isNotEmpty || showReplyField) {
         widgets.add(_buildRepliesSection(message.id, replies));
       }
 
@@ -960,6 +961,7 @@ class _EventDetailsPanelState extends State<EventDetailsPanel> {
         groupIds: [],
       ),
     );
+
 
     return Container(
       margin: const EdgeInsets.only(left: 24, bottom: 8),
